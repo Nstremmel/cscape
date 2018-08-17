@@ -1,7 +1,7 @@
 import discord
 import asyncio
 import random
-import time as t
+import time
 import datetime
 import os
 import psycopg2
@@ -13,10 +13,8 @@ c=conn.cursor()
 # c.execute("DROP TABLE rsmoney")
 # c.execute("""CREATE TABLE rsmoney (
 # 				id bigint,
-# 				credit bigint,
-# 				credittotal bigint,
-#				daily text,
-#				donations bigint
+# 				tokens bigint,
+# 				tokenstotal bigint
 # 				)""")
 # conn.commit()
 
@@ -24,28 +22,25 @@ client = discord.Client()
 
 
 
-def add_member(userid,credit,credittotal):
-	c.execute("INSERT INTO rsmoney VALUES (%s, %s, %s, %s, %s)", (userid,credit,credittotal,"0",0))
+def add_member(userid,tokens,tokenstotal):
+	c.execute("INSERT INTO rsmoney VALUES (%s, %s, %s)", (userid,tokens,tokenstotal))
 	conn.commit()
 
 def getvalue(userid, column):
 	try:
-		c.execute("SELECT credit FROM rsmoney WHERE id={}".format(userid))
+		c.execute("SELECT tokens FROM rsmoney WHERE id={}".format(userid))
 		tester=int(str(c.fetchone())[1:-2])
 	except:
 		add_member(int(userid),0,0)
 		return 0
 	c.execute("SELECT {} FROM rsmoney WHERE id={}".format(str(column),userid))
-	if str(column)=="daily":
-		return str(c.fetchone())[1:-2]
-	else:
-		returned=int(c.fetchone()[0])
-		return returned
+	returned=int(c.fetchone()[0])
+	return returned
 
 #amount should be in K not M
 def update_money(userid,amount):
-	credit=getvalue(int(userid), "credit")
-	c.execute("UPDATE rsmoney SET credit={} WHERE id={}".format(credit+amount, userid))
+	tokens=getvalue(int(userid), "tokens")
+	c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(tokens+amount, userid))
 	conn.commit()
 
 def reset():
@@ -72,6 +67,31 @@ def formatok(amount):
 		return int(float(str(amount[:-1]))*1000000000)
 	else:
 		return int(amount)
+
+def hpupdate(players, url):
+	#player=[member object, hp, sharks, dds specs, poisoned, turns since poisoned, poison damage, turns since speced]
+
+	embed = discord.Embed(color=16766463)
+	embed.set_author(name="Fight to the Death!", icon_url=url)
+	for i in players:
+		hp=int(i[1])
+		if hp in range(76,100):
+			hp = get(client.get_all_emojis(), name='hpbar100')
+		elif hp in range(51, 76):
+			hp = get(client.get_all_emojis(), name='hpbar75')
+		elif hp in range(26, 51):
+			hp = get(client.get_all_emojis(), name='hpbar50')
+		elif hp in range(1,26):
+			hp = get(client.get_all_emojis(), name='hpbar25')
+		elif hp<1:
+			hp = get(client.get_all_emojis(), name='hpbar0')
+
+		embed.add_field(name=str(i[0])[:-5], value="Poisoned: "+str(i[4]) +
+													"\nSharks Left: "+str(i[2]) +
+													"\nSpecial Attack Bar: "+str(i[3]*25)+"%" +
+													"\nHP Left: "+str(i[1])+" "+str(hp), inline=True)
+	return embed
+
 ######################################################################################
 
 #Predefined Variables
@@ -84,56 +104,11 @@ answer="placeholderplaceholderplaceholderplaceholder"
 word1="placeholderplaceholderplaceholderplaceholder"
 blank=[]
 
-#giveaway lists and dictionaries
-giveaways={}
-participants=[]
-winners=[]
-rewards=[]
-times=[]
-
 async def my_background_task():
-	global giveaways,times,participants,winners,rewards
 	await client.wait_until_ready()
 	while not client.is_closed:
-		if len(giveaways)!=0: #checks if any giveaways are going on
-			delete=False
-			for i in giveaways:
-				index=giveaways[i]
-				times[index]=times[index]-10 #decreases the amount of time by 10 seconds
-				if times[index]<=0: #checks if time is below 0
-					if len(participants[index])==0: #runs if nobody enters
-						embed=discord.Embed(description="Nobody has entered this giveaway. Giveaway ended with no winner.")
-						embed.set_author(name="Prize: "+str(rewards[index]), icon_url="https://cdn.discordapp.com/attachments/457004723158122498/466268822735683584/00c208fecf617c79a3f719f1a9d9c9e8.png")
-						embed.set_footer(text="Ended on: "+str(datetime.datetime.now())[:-7])
-					else:
-						chosenones=""
-						for x in range(winners[index]): #picks winners
-							if len(participants[index])==0:
-								break
-							chosenone=random.choice(participants[index])
-							chosenones+=("<@"+chosenone+">\n")
-							participants[index].remove(chosenone)
-
-						embed=discord.Embed(description="The winner(s) of the giveaway is/are:\n"+chosenones)
-						embed.set_author(name="Prize: "+str(rewards[index]), icon_url="https://cdn.discordapp.com/attachments/457004723158122498/466268822735683584/00c208fecf617c79a3f719f1a9d9c9e8.png")
-						embed.set_footer(text="Winner Chosen on: "+str(datetime.datetime.now())[:-7])
-					delete=True
-				else:
-					embed=discord.Embed(description="React with :tada: to enter the giveaway!\n\nLength of giveaway: **"+str(times[index])+" seconds**\n"+
-																						"Number of winners: **"+str(winners[index])+"**", color=15152185)
-					embed.set_author(name="Prize: "+str(rewards[index]), icon_url="https://cdn.discordapp.com/attachments/457004723158122498/466268822735683584/00c208fecf617c79a3f719f1a9d9c9e8.png")
-				await client.edit_message(i, embed=embed)
-			if delete==True:
-				del participants[index]
-				del winners[index]
-				del rewards[index]
-				del times[index]
-				del giveaways[i]
-		else:
-			None
-		await asyncio.sleep(10)
-
-
+		None
+		await asyncio.sleep(600)
 
 
 @client.event
@@ -141,37 +116,13 @@ async def on_ready():
 	print("Bot Logged In!");
 
 @client.event
-async def on_reaction_add(reaction, user):
-	global giveaways,participants
-	if len(giveaways)!=0:
-		for i in giveaways:
-			if i.id==reaction.message.id:
-				if reaction.emoji=="🎉":
-					index=giveaways[i]
-					if user.id not in participants[index]:
-						if str(user.id)!="466066936443174932":
-							participants[index].append(str(user.id))
-
-@client.event
-async def on_reaction_remove(reaction, user):
-	global giveaways,participants
-	if len(giveaways)!=0:
-		for i in giveaways:
-			if i.id==reaction.message.id:
-				if reaction.emoji=="🎉":
-					index=giveaways[i]
-					if user.id in participants[index]:
-						participants[index].remove(str(user.id))
-
-@client.event
 async def on_message_delete(message):
 	None
 
 @client.event
 async def on_message(message):
-	global objects,poet,word,answer,word1,guesses,solved,blank,wrong,giveaways,participants,winners,rewards
+	global objects,poet,word,answer,word1,guesses,solved,blank,wrong
 	
-	#import noncredit
 	message.content=message.content.lower()
 
 	#############################################
@@ -196,16 +147,13 @@ async def on_message(message):
 	################################################
 
 	elif message.content.startswith('!colorpicker') or message.content.startswith('!colourpicker'):
-		if message.channel==message.server.get_channel("471191867896102923"):
-			color=('')
-			for i in range(6):
-				color+=random.choice(colors)
-			if message.content.startswith("!colorpicker"):
-				await client.send_message(message.channel, "Your random color is https://www.colorhexa.com/"+color)
-			elif message.content.startswith("!colourpicker"):
-				await client.send_message(message.channel, "Your random colour is https://www.colorhexa.com/"+color)
-		else:
-			await client.send_message(message.channel, "Please go to <#471191867896102923> to use this command.")
+		color=('')
+		for i in range(6):
+			color+=random.choice(colors)
+		if message.content.startswith("!colorpicker"):
+			await client.send_message(message.channel, "Your random color is https://www.colorhexa.com/"+color)
+		elif message.content.startswith("!colourpicker"):
+			await client.send_message(message.channel, "Your random colour is https://www.colorhexa.com/"+color)
 
     #########################################
 	elif message.content.startswith("!throw"):
@@ -222,97 +170,35 @@ async def on_message(message):
 	elif message.content.startswith("!clearthevoid"):
 		objects=[]
 		await client.send_message(message.channel, "The void is now lonely.")
-	########################################
-
-	elif message.content.startswith('!random'):
-		if message.channel==message.server.get_channel("471446461565894677"):
-			if answer!="placeholderplaceholderplaceholderplaceholder":
-				await client.send_message(message.channel, "A random game is currently going on right now. Please finish that one before starting a new one. Or ask an Owner, Admin, or Programmer to skip the game.")
-			else:
-				try:
-					size=int((message.content).split(" ")[2])
-				except:
-					size=10
-
-				answer=random.randint(1, size)
-				await client.send_message(message.channel, 'Guess a number between __**1**__ and __**'+str(size)+'**__')
-
-				if ((message.content).split(" ")[1]).lower()=="singleplayer":
-
-					def guess_check(m):
-						return m.content.isdigit()
-
-					guess = await client.wait_for_message(timeout=10.0, author=message.author, check=guess_check)
-					correct = random.randint(1, size)
-					if guess is None:
-						fmt = '**Sorry**, you took too long :cry:. It was __**{}**__.'
-						await client.send_message(message.channel, fmt.format(correct))
-						return
-					if int(guess.content) == correct:
-						await client.send_message(message.channel, 'You are **correct**! It was indeed __**{}**__!'.format(correct))
-					else:
-						await client.send_message(message.channel, '**Sorry**, it was actually __**{}**__.'.format(correct))
-					answer="placeholderplaceholderplaceholderplaceholder"
-		else:
-			await client.send_message(message.channel, "Please go to <#471446461565894677> to use this command.")	
-
-
-	elif message.content==str(answer):
-		if message.channel==message.server.get_channel("471446461565894677"):
-			await client.send_message(message.channel, '<@'+str(message.author.id)+'> is correct! It was indeed __**{}**__!'.format(answer))
-			answer="placeholderplaceholderplaceholderplaceholder"
-		else:
-			await client.send_message(message.channel, "Please go to <#471446461565894677> to use this command.")
-
-
-	elif message.content.startswith("!skip random"):
-		if isstaff(message.author.id)=="verified":
-			if answer!="placeholderplaceholderplaceholderplaceholder":
-				await client.send_message(message.channel, "Too difficult for you? The number was `"+str(answer)+"`.")
-				answer="placeholderplaceholderplaceholderplaceholder"
-			else:
-				await client.send_message(message.channel, "There is no word right now. Use `!random (size)` to play.")
-		else:
-			await client.send_message(message.channel, "Sorry, but only ranks can skip games. This is to prevent trolls from skipping games during giveaways.")
-
 	#########################################
 
 	elif message.content.startswith("!start unscramble"):
-		if message.channel==message.server.get_channel("471192062868586516"):
-			if word!="placeholderplaceholderplaceholderplaceholder":
-				await client.send_message(message.channel, "A random game is currently going on right now. Please finish that one before starting a new one. Or ask an Owner, Admin, or Programmer to skip the game.")
-			else:
-				await client.send_message(message.channel, "The first person to type the unscrambled version of this word wins!")
-				word=str(open("words.txt").readlines()[random.randint(0,164)].splitlines()[0])
-				characters=[]
-				characters+=word
-				scrambled=("")
-				for i in range(len(characters)):
-					letter=random.randint(0, (len(characters)-1))
-					scrambled+=str(characters[letter])
-					characters.remove(str(characters[letter]))
-				await client.send_message(message.channel, "The word is:   "+str(scrambled))
+		if word!="placeholderplaceholderplaceholderplaceholder":
+			await client.send_message(message.channel, "A random game is currently going on right now. Please finish that one before starting a new one. Or ask an Owner, Admin, or Programmer to skip the game.")
 		else:
-			await client.send_message(message.channel, "Please go to <#471192062868586516> to use this command.")	
+			await client.send_message(message.channel, "The first person to type the unscrambled version of this word wins!")
+			word=str(open("words.txt").readlines()[random.randint(0,164)].splitlines()[0])
+			characters=[]
+			characters+=word
+			scrambled=("")
+			for i in range(len(characters)):
+				letter=random.randint(0, (len(characters)-1))
+				scrambled+=str(characters[letter])
+				characters.remove(str(characters[letter]))
+			await client.send_message(message.channel, "The word is:   "+str(scrambled))
 
 
 	elif message.content==str(word):
-		if message.channel==message.server.get_channel("471192062868586516"):
-			word="placeholderplaceholderplaceholderplaceholder"
-			await client.send_message(message.channel, "<@"+str(message.author.id)+"> has successfully unscrambled the word!")
-		else:
-			await client.send_message(message.channel, "Please go to <#471192062868586516> to use this command.")
+		word="placeholderplaceholderplaceholderplaceholder"
+		await client.send_message(message.channel, "<@"+str(message.author.id)+"> has successfully unscrambled the word!")
 
 
 	elif message.content.startswith("!skip unscramble"):
-		if isstaff(message.author.id)=="verified":
-			if word!="placeholderplaceholderplaceholderplaceholder":
-				await client.send_message(message.channel, "Too difficult for you? The word was `"+str(word)+"`.")
-				word="placeholderplaceholderplaceholderplaceholder"
-			else:
-				await client.send_message(message.channel, "There is no word right now. Use `!start unscramble` to play.")
+		if word!="placeholderplaceholderplaceholderplaceholder":
+			await client.send_message(message.channel, "Too difficult for you? The word was `"+str(word)+"`.")
+			word="placeholderplaceholderplaceholderplaceholder"
 		else:
-			await client.send_message(message.channel, "Sorry, but only ranks can skip games. This is to prevent trolls from skipping games during giveaways.")
+			await client.send_message(message.channel, "There is no word right now. Use `!start unscramble` to play.")
 	
 	#########################################
 
@@ -320,20 +206,17 @@ async def on_message(message):
 		if word1!="placeholderplaceholderplaceholderplaceholder":
 			await client.send_message(message.channel, "A hangman game is currently going on right now. Please finish that one before starting a new one.")
 		else:
-			if message.channel==message.server.get_channel("471182732269977601"):	
-				reset()
-				word1=str(open("words.txt").readlines()[random.randint(0,164)].splitlines()[0])
-				solved+=word1
-				for i in range(len(solved)):
-					blank+="-"
-					#blank+=r"\_"
-					blank+=" "
-				embed = discord.Embed(description="Use `!guess (letter or word here)` to guess a letter, or the whole word.\nThe first person to guess the word correctly wins!\n\n"+(''.join(blank)), color=6944699)
-				embed.set_author(name="Hangman Game", icon_url="https://cdn.discordapp.com/attachments/457004723158122498/466268822735683584/00c208fecf617c79a3f719f1a9d9c9e8.png")
-				embed.set_footer(text="Started on: "+str(datetime.datetime.now())[:-7])
-				await client.send_message(message.channel, embed=embed)
-			else:
-				await client.send_message(message.channel, "Please go to <#471182732269977601> to use this command.")
+			reset()
+			word1=str(open("words.txt").readlines()[random.randint(0,164)].splitlines()[0])
+			solved+=word1
+			for i in range(len(solved)):
+				blank+="-"
+				blank+=" "
+			embed = discord.Embed(description="Use `!guess (letter or word here)` to guess a letter, or the whole word.\nThe first person to guess the word correctly wins!\n\n"+(''.join(blank)), color=6944699)
+			embed.set_author(name="Hangman Game", icon_url=str(message.server.icon_url))
+			embed.set_footer(text="Started on: "+str(datetime.datetime.now())[:-7])
+			await client.send_message(message.channel, embed=embed)
+
 
 	elif message.content.startswith("!guess"):
 		if len(blank)==0:
@@ -351,7 +234,7 @@ async def on_message(message):
 					reset()
 				else:
 					embed = discord.Embed(description="Use `!guess (letter or word here)` to guess a letter, or the whole word.\nThe first person to guess the word correctly wins!\n\n"+(''.join(blank)), color=6944699)
-					embed.set_author(name="Hangman Game", icon_url="https://cdn.discordapp.com/attachments/457004723158122498/466268822735683584/00c208fecf617c79a3f719f1a9d9c9e8.png")
+					embed.set_author(name="Hangman Game", icon_url=str(message.server.icon_url))
 					embed.add_field(name="Incorrect Guesses Left ", value=str(guesses), inline=True)
 					embed.add_field(name="Previous Incorrect Guesses", value=", ".join(wrong), inline=True)
 					embed.set_footer(text="Guessed on: "+str(datetime.datetime.now())[:-7])
@@ -359,10 +242,9 @@ async def on_message(message):
 			else:
 				for counter, i in enumerate(solved):
 					if i.lower() == guess:
-						#del blank[(counter*3)-1]
 						blank[counter*2]=guess
 				embed = discord.Embed(description="Use `!guess (letter or word here)` to guess a letter, or the whole word.\nThe first person to guess the word correctly wins!\n\n"+(''.join(blank)), color=6944699)
-				embed.set_author(name="Hangman Game", icon_url="https://cdn.discordapp.com/attachments/457004723158122498/466268822735683584/00c208fecf617c79a3f719f1a9d9c9e8.png")
+				embed.set_author(name="Hangman Game", icon_url=str(message.server.icon_url))
 				embed.add_field(name="Incorrect Guesses Left ", value=str(guesses), inline=True)
 				embed.add_field(name="Previous Incorrect Guesses", value=", ".join(wrong), inline=True)
 				embed.set_footer(text="Guessed on: "+str(datetime.datetime.now())[:-7])
@@ -438,26 +320,26 @@ async def on_message(message):
 
 
 	###################################################
-	elif (message.content)==("!wallet") or (message.content)==("!w") or message.content=="!$" or (message.content)=="!credits":
-		credit=getvalue(int(message.author.id), "credit")
-		if credit>=1000000:
+	elif (message.content)==("!wallet") or (message.content)==("!w") or message.content=="!$" or (message.content)=="!tokens":
+		tokens=getvalue(int(message.author.id), "tokens")
+		if tokens>=1000000:
 			sidecolor=2693614
-		elif credit>=100000:
+		elif tokens>=100000:
 			sidecolor=2490163
 		else:
 			sidecolor=12249599
 
-		credit="{:,}".format(credit)
+		tokens="{:,}".format(tokens)
 
 		embed = discord.Embed(color=sidecolor)
 		embed.set_author(name=(str(message.author))[:-5]+"'s Wallet", icon_url=str(message.author.avatar_url))
-		embed.add_field(name="Credits", value=credit, inline=True)
+		embed.add_field(name="tokens", value=tokens, inline=True)
 		embed.set_footer(text="Wallet checked on: "+str(datetime.datetime.now())[:-7])
 		await client.send_message(message.channel, embed=embed)
 
 
 
-	elif  (message.content).startswith("!wallet <@") or (message.content).startswith("!w <@") or message.content.startswith("!$ <@") or message.content.startswith("!credits <@"):
+	elif  (message.content).startswith("!wallet <@") or (message.content).startswith("!w <@") or message.content.startswith("!$ <@") or message.content.startswith("!tokens <@"):
 		if message.content.startswith("!wallet <@"):
 			try:
 				int(str(message.content[10:11]))
@@ -471,20 +353,20 @@ async def on_message(message):
 			except:
 				member=message.server.get_member(message.content[6:24])
 		
-		credit=getvalue(int(member.id), "credit")
+		tokens=getvalue(int(member.id), "tokens")
 
-		if credit>=1000000:
+		if tokens>=1000000:
 			sidecolor=2693614
-		elif credit>=100000:
+		elif tokens>=100000:
 			sidecolor=2490163
 		else:
 			sidecolor=12249599
 
-		credit="{:,}".format(credit)
+		tokens="{:,}".format(tokens)
 
 		embed = discord.Embed(color=sidecolor)
 		embed.set_author(name=(str(member))[:-5]+"'s Wallet", icon_url=str(member.avatar_url))
-		embed.add_field(name="Credits", value=credit, inline=True)
+		embed.add_field(name="tokens", value=tokens, inline=True)
 		embed.set_footer(text="Wallet checked on: "+str(datetime.datetime.now())[:-7])
 		await client.send_message(message.channel, embed=embed)
 	##########################################
@@ -497,10 +379,10 @@ async def on_message(message):
 				except:
 					member=message.server.get_member(str(message.content).split(" ")[1][3:-1])
 
-				c.execute("UPDATE rsmoney SET credit={} WHERE id={}".format(0, int(member.id)))
+				c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(0, int(member.id)))
 				conn.commit()
 
-				await client.send_message(message.channel, str(member)+"'s credits have been reset to 0. RIP")
+				await client.send_message(message.channel, str(member)+"'s tokens have been reset to 0. RIP")
 			else:
 				await client.send_message(message.channel, "DON'T TOUCHA MY SPAGHET!")
 		except:
@@ -519,7 +401,7 @@ async def on_message(message):
 
 				update_money(int(member.id), amount)
 				member=message.server.get_member(str(member.id))
-				await client.send_message(message.channel, str(member)+"'s credits have been updated.")
+				await client.send_message(message.channel, str(member)+"'s tokens have been updated.")
 
 			else:
 				await client.send_message(message.channel, "DON'T TOUCHA MY SPAGHET!")
@@ -533,16 +415,16 @@ async def on_message(message):
 											"\n `!start hangman` - Starts a game of hangman\n" +
 											"\n `!random (singleplayer or multiplayer) (SIZE)` - Starts a game where you guess a number between 1 and the given size\n" +
 											"\n `!poll (QUESTION)` - Starts a Yes/No poll with the given question\n" +
-											"\n `!w`, `!wallet`, `!$`, or `!credits` - Checks your own credits\n" +
-											"\n `!w (@USER)`, `!wallet (@USER)`, `!$ (@USER)`, or `!credits (@USER)` - Checks that user's credits\n" +
-											"\n `!daily` - Gives 800 credits each day\n" +
+											"\n `!w`, `!wallet`, `!$`, or `!tokens` - Checks your own tokens\n" +
+											"\n `!w (@USER)`, `!wallet (@USER)`, `!$ (@USER)`, or `!tokens (@USER)` - Checks that user's tokens\n" +
+											"\n `!daily` - Gives 800 tokens each day\n" +
 											# "\n `!swap (rs3 or 07) (AMOUNT)` - Swaps that amount of gold to the other game" +
 											# "\n `!rates` - Shows the swapping rates between currencies" +
 											"\n `!flower (AMOUNT) (hot, cold, red, orange, yellow, green, blue, or purple)` - Hot or cold gives x2 minus commission, specific color gives x6 minus commission\n" +
 											#"\n `!cashin (rs3 or 07) (AMOUNT)` - Notifies a cashier that you want to cash in that amount\n" +
 											#"\n `!cashout (rs3 or 07) (AMOUNT)` - Notifies a cashier that you want to cash out that amount\n" +
-											"\n `!wager`, `!total bet`, or `!tb` - Shows the total amount of credits you've bet\n" +
-											"\n `!transfer (@USER) (AMOUNT)` - Transfers that amount of credits from your wallet to the user's wallet\n", color=2513759)
+											"\n `!wager`, `!total bet`, or `!tb` - Shows the total amount of tokens you've bet\n" +
+											"\n `!transfer (@USER) (AMOUNT)` - Transfers that amount of tokens from your wallet to the user's wallet\n", color=2513759)
 
 		embed.set_author(name="RS Giveaway Bot Commands", icon_url="https://cdn.discordapp.com/attachments/457004723158122498/466268822735683584/00c208fecf617c79a3f719f1a9d9c9e8.png")
 		await client.send_message(message.author, embed=embed)
@@ -574,10 +456,10 @@ async def on_message(message):
 			enough=True
 
 			if transfered<1:
-				await client.send_message(message.channel, "You must transfer at least **1** credit.")
+				await client.send_message(message.channel, "You must transfer at least **1** tokens.")
 				enough=False
 
-			current=getvalue(int(message.author.id), "credit")
+			current=getvalue(int(message.author.id), "tokens")
 
 			if enough==True:
 				if current>=transfered:
@@ -587,345 +469,218 @@ async def on_message(message):
 					except:
 						member=message.server.get_member(str(message.content).split(" ")[1][3:-1])
 
-					taker=getvalue(int(member.id), "credit")
+					taker=getvalue(int(member.id), "tokens")
 
-					c.execute("UPDATE rsmoney SET credit={} WHERE id={}".format(current-transfered, message.author.id))
-					c.execute("UPDATE rsmoney SET credit={} WHERE id={}".format(taker+transfered, member.id))
+					c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(current-transfered, message.author.id))
+					c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(taker+transfered, member.id))
 					conn.commit()
 
-					await client.send_message(message.channel, "<@"+str(message.author.id)+"> has transfered "+"{:,}".format(transfered)+" credits to <@"+str(member.id)+">'s wallet.")
+					await client.send_message(message.channel, "<@"+str(message.author.id)+"> has transfered "+"{:,}".format(transfered)+" tokens to <@"+str(member.id)+">'s wallet.")
 				else:
-					await client.send_message(message.channel, "<@"+str(message.author.id)+">, You don't have enough credits to transfer that amount!")
+					await client.send_message(message.channel, "<@"+str(message.author.id)+">, You don't have enough tokens to transfer that amount!")
 			else:
 				None
 		except:
 			await client.send_message(message.channel, "An **error** has occurred. Make sure you use `!transfer (@user) (Amount you want to give)`.")
 	#######################################
 	elif message.content.startswith("!total wallet"):
-		c.execute("SELECT SUM(credit) FROM rsmoney")
-		credit="{:,}".format(int(float(str(c.fetchall())[11:-5])))
+		c.execute("SELECT SUM(tokens) FROM rsmoney")
+		tokens="{:,}".format(int(float(str(c.fetchall())[11:-5])))
 		embed = discord.Embed(color=16766463)
 		embed.set_author(name="Everyone's Wallet", icon_url="https://images.ecosia.org/xSQHmzfpe-a49ZZX3B8q8kX9ycs=/0x390/smart/https%3A%2F%2Fjustmeint.files.wordpress.com%2F2012%2F08%2Fearth-small.jpg")
-		embed.add_field(name="Credits", value=credit, inline=True)
+		embed.add_field(name="tokens", value=tokens, inline=True)
 		embed.set_footer(text="Total Wallet checked on: "+str(datetime.datetime.now())[:-7])
 		await client.send_message(message.channel, embed=embed)
 	################################
 	elif message.content.startswith("!flower"):
-		if message.channel==message.server.get_channel("472452893459611649"):
-			try:
-				enough=True
-				bet=formatok((message.content).split(" ")[1])
-				current=getvalue(int(message.author.id), "credit")
-				totalcredits=getvalue(int(message.author.id), "credit")
-				index=random.randint(0,6)
-				flower=flowers[index]
-				sidecolor=sidecolors[index]
+		try:
+			enough=True
+			bet=formatok((message.content).split(" ")[1])
+			current=getvalue(int(message.author.id), "tokens")
+			totaltokens=getvalue(int(message.author.id), "tokens")
+			index=random.randint(0,6)
+			flower=flowers[index]
+			sidecolor=sidecolors[index]
 
-				if bet<100:
-					await client.send_message(message.channel, "The minimum amount you can bet is **100** credits.")
-					enough=False
+			if bet<100:
+				await client.send_message(message.channel, "The minimum amount you can bet is **100** tokens.")
+				enough=False
 
-				if enough==True:	
-					if current>=bet:
-						win=False
-						if (message.content).split(" ")[2]=="hot":
-							if flower=="Red" or flower=="Orange" or flower=="Yellow":
-								multiplier=2
-								win=True
-							else:
-								multiplier=0
-						elif (message.content).split(" ")[2]=="cold":
-							if flower=="Blue" or flower=="Green" or flower=="Purple":
-								multiplier=2
-								win=True
-							else:
-								multiplier=0
-						elif ((message.content).split(" ")[2]).title() in flowers:
-							if flower==((message.content).split(" ")[2]).title():
-								multiplier=6
-								win=True
-							else:
-								multiplier=0
-						if flower=="White":
-							multiplier=0
-							win=False
-
-						winnings=(bet*multiplier)
-						if isinstance(winnings, float):
-							if (winnings).is_integer():
-								winnings=int(winnings)
-
-						if win==True:
-							words=("Congratulations! The color of the flower was `"+flower+"`. "+str(message.author)+" won `"+"{:,}".format(winnings)+"` credits.")
-							if multiplier==2:
-								update_money(int(message.author.id), bet)
-							else:
-								update_money(int(message.author.id), (bet*multiplier))
+			if enough==True:	
+				if current>=bet:
+					win=False
+					if (message.content).split(" ")[2]=="hot":
+						if flower=="Red" or flower=="Orange" or flower=="Yellow":
+							multiplier=2
+							win=True
 						else:
-							words=("Sorry, the color the flower was `"+flower+"`. "+str(message.author)+" lost `"+"{:,}".format(bet)+"` credits.")
-							update_money(int(message.author.id), bet*-1)
+							multiplier=0
+					elif (message.content).split(" ")[2]=="cold":
+						if flower=="Blue" or flower=="Green" or flower=="Purple":
+							multiplier=2
+							win=True
+						else:
+							multiplier=0
+					elif ((message.content).split(" ")[2]).title() in flowers:
+						if flower==((message.content).split(" ")[2]).title():
+							multiplier=6
+							win=True
+						else:
+							multiplier=0
+					if flower=="White":
+						multiplier=0
+						win=False
 
-						c.execute("UPDATE rsmoney SET credittotal={} WHERE id={}".format(totalcredits+bet, message.author.id))
-						conn.commit()
+					winnings=(bet*multiplier)
+					if isinstance(winnings, float):
+						if (winnings).is_integer():
+							winnings=int(winnings)
 
-						embed = discord.Embed(description=words, color=sidecolor)
-						embed.set_author(name=(str(message.author))[:-5]+"'s Gamble", icon_url=str(message.author.avatar_url))
-						embed.set_footer(text="Gambled on: "+str(datetime.datetime.now())[:-7])
-						await client.send_message(message.channel, embed=embed)	
+					if win==True:
+						words=("Congratulations! The color of the flower was `"+flower+"`. "+str(message.author)+" won `"+"{:,}".format(winnings)+"` tokens.")
+						if multiplier==2:
+							update_money(int(message.author.id), bet)
+						else:
+							update_money(int(message.author.id), (bet*multiplier))
 					else:
-						await client.send_message(message.channel, "<@"+str(message.author.id)+">, You don't have that many credits!")
+						words=("Sorry, the color the flower was `"+flower+"`. "+str(message.author)+" lost `"+"{:,}".format(bet)+"` tokens.")
+						update_money(int(message.author.id), bet*-1)
+
+					c.execute("UPDATE rsmoney SET tokenstotal={} WHERE id={}".format(totaltokens+bet, message.author.id))
+					conn.commit()
+
+					embed = discord.Embed(description=words, color=sidecolor)
+					embed.set_author(name=(str(message.author))[:-5]+"'s Gamble", icon_url=str(message.author.avatar_url))
+					embed.set_footer(text="Gambled on: "+str(datetime.datetime.now())[:-7])
+					await client.send_message(message.channel, embed=embed)	
 				else:
-					None
-			except:
-				await client.send_message(message.channel, "An **error** has occurred. Make sure you use `!flower (Amount) (hot, cold, red, orange, yellow, green, blue, or purple)`.")
-		else:
-			await client.send_message(message.channel, "Please go to <#472452893459611649> to use this command.")
-	##########################################
-	elif message.content.startswith("!exchange"):
-
-		credit=getvalue(int(message.author.id), "credit")
-		exchange=int(round((credit/800),5)*100000)
-
-		embed = discord.Embed(description="For every `800` credits, you will receive `100k` RS3.\n\n"+
-										"If you exchange all "+"{:,}".format(credit)+" of your credits, you will get `"+"{:,}".format(exchange)+"` gp RS3.", color=16771099)
-		embed.set_author(name=(str(message.author))[:-5]+"'s Conversion Rate", icon_url="http://1.bp.blogspot.com/-fd2pBVYKvDY/T5ps8QJnLpI/AAAAAAAABo8/xgnSgBIFiQI/s1600/gold_dollar.jpg")
-		embed.set_footer(text="Checked on: "+str(datetime.datetime.now())[:-7])
-		await client.send_message(message.channel, embed=embed)
-	######################################
-
-	elif message.content.startswith("!gstart"):
-		try:
-			satisfied=True
-			index=len(rewards)
-			reward=' '.join((message.content).split(" ")[3:]).title()
-
-			if ((message.content).split(" ")[1][-1:]).lower()=="s":
-				if int((message.content).split(" ")[1][:-1])<10:
-					await client.send_message(message.channel, "The giveaway must last for at least 10 seconds.")
-					satisfied=False
-				else:
-					time=int(message.content).split(" ")[1][:-1]
-			elif ((message.content).split(" ")[1][-1:]).lower()=="m":
-				time=int((message.content).split(" ")[1][:-1])*60
-			elif ((message.content).split(" ")[1][-1:]).lower()=="h":
-				time=int((message.content).split(" ")[1][:-1])*3600
-			elif ((message.content).split(" ")[1][-1:]).lower()=="d":
-				time=int((message.content).split(" ")[1][:-1])*86400
-			else:
-				if int((message.content).split(" ")[1])<10:
-					await client.send_message(message.channel, "The giveaway must last for at least 10 seconds.")
-					satisfied=False
-				else:
-					time=int((message.content).split(" ")[1])
-			
-			if ((message.content).split(" ")[2][-1:]).lower()=="w":
-				winner=int((message.content).split(" ")[2][:-1])
-			else:
-				winner=int((message.content).split(" ")[2])
-
-			if satisfied==True:
-				embed=discord.Embed(description="React with :tada: to enter the giveaway!\n\nLength of giveaway: **"+(message.content).split(" ")[1]+"**\n"+
-																							"Number of winners: **"+str(winner)+"**", color=15152185)
-				embed.set_author(name="Prize: "+str(reward), icon_url="https://cdn.discordapp.com/attachments/457004723158122498/466268822735683584/00c208fecf617c79a3f719f1a9d9c9e8.png")
-				embed.set_footer(text="Started on: "+str(datetime.datetime.now())[:-7])
-				message=await client.send_message(message.channel, embed=embed)
-				await client.add_reaction(message,"🎉")
-
-				giveaways[message]=index
-				winners.append(winner)
-				rewards.append(reward)
-				times.append(time)
-				participants.append([])
-		except:
-			await client.send_message(message.channel, "An **error** has occurred. Make sure you use `!gstart (Time) (Amount of Winners) (Item)`.")
-	####################################
-	elif message.content.startswith("!gend"):
-		for i in giveaways:
-			if str(i.id)==(message.content).split(" ")[1]:
-				index=giveaways[i]
-				times[index]=0
-				await my_background_task()
-	######################################
-	elif ((message.content).lower()).startswith("!wager") or ((message.content).lower()).startswith("!total bet") or ((message.content).lower()).startswith("!tb"):
-		credit=getvalue(int(message.author.id), "credittotal")
-		credit="{:,}".format(credit)
-		embed = discord.Embed(color=16766463)
-		embed.set_author(name=(str(message.author))[:-5]+"'s Total Bets", icon_url=str(message.author.avatar_url))
-		embed.add_field(name="Total Credits Bet", value=credit, inline=True)
-		embed.set_footer(text="Total Bets checked on: "+str(datetime.datetime.now())[:-7])
-		await client.send_message(message.channel, embed=embed)
-	########################################
-	# elif message.content.startswith("!duel"):
-	# 	if message.channel==message.server.get_channel("473434589558472704"):
-	# 		try:
-	# 			enough=True
-	# 			current=getvalue(int(message.author.id), "credit")
-	# 			bet=formatok((message.content).split(" ")[1])
-
-	# 			if bet<100:
-	# 				await client.send_message(message.channel, "The minimum amount you can bet is **100** credits.")
-	# 				enough=False
-
-	# 			if enough==True:
-
-	# 				await client.send_message(message.channel, "Use `!call` to call the duel.")
-	# 				while True:
-	# 					guess = await client.wait_for_message(timeout=300, content="!call")
-	# 					caller=guess.author
-	# 					if getvalue(int(caller.id), "credit")<bet:
-	# 						await client.send_message(message.channel, "You don't have enough to call that duel.")
-	# 						continue
-	# 					else:
-	# 						break
-
-	# 				gamblerhp=100
-	# 				callerhp=100
-	# 				while True:
-	# 					embed = discord.Embed(color=16766463)
-	# 					embed.set_author(name="BRAWL", icon_url="https://cdn.discordapp.com/attachments/457004723158122498/466268822735683584/00c208fecf617c79a3f719f1a9d9c9e8.png")
-	# 					embed.add_field(name=str(message.author), value=hearts, inline=True)
-	# 					embed.add_field(name=str(caller), value=hearts, inline=True)
-	# 					embed.set_footer(text="Duel Started On: "+str(datetime.datetime.now())[:-7])
-	# 					await client.send_message(message.channel, embed=embed)
-
-	# 				c.execute("UPDATE rsmoney SET credit={} WHERE id={}".format(current-transfered, message.author.id))
-	# 				c.execute("UPDATE rsmoney SET credit={} WHERE id={}".format(taker+transfered, member.id))
-	# 				conn.commit()
-	# 		except:
-	# 	else:
-	# 		await client.send_message(message.channel, "Please go to <#473434589558472704> to use this command.")
-	#################################
-	elif message.content.startswith("!daily"):
-		try:
-			day=86400
-			then=float(str(getvalue(message.author.id, "daily"))[1:-1])
-			now=float(t.time())
-			if (now-then) >= day:
-				c.execute("UPDATE rsmoney SET daily={} WHERE id={}".format(str(t.time()), message.author.id))
-				update_money(message.author.id, 800)
-				await client.send_message(message.channel, "You have claimed your 800 daily credits! Come back again tomorrow!")
-			else:
-				left=str(datetime.timedelta(seconds=(86400-(now-then))))
-				await client.send_message(message.channel, "You can claim your daily credits again in **"+left.split(":")[0]+"** hours, **"+left.split(":")[1]+"** minutes, and **"+str(int(round(float(left.split(":")[2]),0)))+"** seconds.")
-		except:
-			c.execute("UPDATE rsmoney SET daily={} WHERE id={}".format(str(t.time()), message.author.id))
-	#############################
-	elif message.content.startswith("!dreset"):
-		if isstaff(message.author.id)=="verified":
-			try:
-				int(str(message.content).split(" ")[1][2:3])
-				member=message.server.get_member(str(message.content).split(" ")[1][2:-1])
-			except:
-				member=message.server.get_member(str(message.content).split(" ")[1][3:-1])
-			c.execute("UPDATE rsmoney SET daily={} WHERE id={}".format("0", member.id))
-			conn.commit()
-			await client.send_message(message.channel, str(member)+"'s daily credits have been reset.")
-		else:
-			await client.send_message(message.channel, "DON'T TOUCHA MY SPAGHET!")
-	##############################
-	elif message.content.startswith("!donate"):
-		try:
-			amount=(message.content).split(" ")[1]
-			if (amount[-1:]).lower()=="m":
-				donation=int(float(str(amount[:-1]))*1000)
-			elif (amount[-1:]).lower()=="k":
-				donation=int(str(amount[:-1]))
-			else:
-				donation=int(float(amount)*1000)
-
-			await client.send_message(message.server.get_channel("478634423718248449"), "<@"+str(message.author.id)+"> Has made a donation request of "+amount+".")
-			await client.send_message(message.channel, "<@"+str(message.author.id)+">, You have made a donation request of "+amount+". A rank will message you soon to collect your donation.")
-		except:
-			await client.send_message(message.channel, "An **error** has occured. Make sure you use `!donate (AMOUNT OF RS3 GP)` - No parenthesis")
-	#############################
-	elif message.content.startswith("!donations <@"):
-		try:
-			int(str(message.content).split(" ")[1][2:3])
-			member=message.server.get_member(str(message.content).split(" ")[1][2:-1])
-		except:
-			member=message.server.get_member(str(message.content).split(" ")[1][3:-1])
-
-		donations=getvalue(int(member.id), "donations")
-		if donations>=10000:
-			if len(str(donations))==5:
-				donations='{0:.4g}'.format(donations*0.001)+"M"
-			elif len(str(donations))==6:
-				donations='{0:.5g}'.format(donations*0.001)+"M"
-		else:
-			donations=str(donations)+"k"
-
-		embed = discord.Embed(color=16771250)
-		embed.set_author(name=(str(member))[:-5]+"'s Total Donations", icon_url=str(member.avatar_url))
-		embed.add_field(name="Donations", value=donations, inline=True)
-		embed.set_footer(text="Donations checked on: "+str(datetime.datetime.now())[:-7])
-		await client.send_message(message.channel, embed=embed)
-	##########################
-	elif (message.content)==("!donations"):
-		donations=getvalue(int(message.author.id), "donations")
-		if donations>=10000:
-			if len(str(donations))==5:
-				donations='{0:.4g}'.format(donations*0.001)+"M"
-			elif len(str(donations))==6:
-				donations='{0:.5g}'.format(donations*0.001)+"M"
-		else:
-			donations=str(donations)+"k"
-
-		embed = discord.Embed(color=16771250)
-		embed.set_author(name=(str(message.author))[:-5]+"'s Total Donations", icon_url=str(message.author.avatar_url))
-		embed.add_field(name="Donations", value=donations, inline=True)
-		embed.set_footer(text="Donations checked on: "+str(datetime.datetime.now())[:-7])
-		await client.send_message(message.channel, embed=embed)
-	############################
-	elif message.content.startswith("!top donations"):
-		c.execute("SELECT * From rsmoney ORDER BY donations DESC LIMIT 10")
-		donors=c.fetchall()
-		words=""
-		for counter, i in enumerate(donors):
-			userid=i[0]
-			donation=i[4]
-
-			if donation>=10000:
-				if len(str(donation))==5:
-					donation='{0:.4g}'.format(donation*0.001)+"M"
-				elif len(str(donation))==6:
-					donation='{0:.5g}'.format(donation*0.001)+"M"
-			else:
-				donation=str(donation)+"k"
-
-			words+=(str(counter+1)+". "+str(message.server.get_member(str(userid)))+" - "+donation+"\n\n")
-
-		embed = discord.Embed(color=16771250, description=words)
-		embed.set_author(name="RSGiveaways Top Donations", icon_url=str(message.author.avatar_url))
-		embed.set_footer(text="Donations checked on: "+str(datetime.datetime.now())[:-7])
-		await client.send_message(message.channel, embed=embed)
-	#########################
-	elif message.content.startswith("!dupdate"):
-		try:
-			if (message.channel.id)=="478634423718248449":
-				amount=str(message.content).split(" ")[2]
-
-				if (amount[-1:]).lower()=="m":
-					donation=int(float(str(amount[:-1]))*1000)
-				elif (amount[-1:]).lower()=="k":
-					donation=int(str(amount[:-1]))
-				else:
-					donation=int(float(amount)*1000)
-
-				try:
-					int(str(message.content).split(" ")[1][2:3])
-					member=message.server.get_member(str(message.content).split(" ")[1][2:-1])
-				except:
-					member=message.server.get_member(str(message.content).split(" ")[1][3:-1])
-
-				donations=getvalue(int(member.id), "donations")
-				c.execute("UPDATE rsmoney SET donations={} WHERE id={}".format(donations+donation, member.id))
-				conn.commit()
-				member=message.server.get_member(str(member.id))
-				await client.send_message(message.channel, str(member)+"'s donations have been updated.")
+					await client.send_message(message.channel, "<@"+str(message.author.id)+">, You don't have that many tokens!")
 			else:
 				None
 		except:
-			await client.send_message(message.channel, "An **error** has occurred. Make sure you use `!dupdate (@user) (amount)`.")
+			await client.send_message(message.channel, "An **error** has occurred. Make sure you use `!flower (Amount) (hot, cold, red, orange, yellow, green, blue, or purple)`.")
+	##########################################
+	elif ((message.content).lower()).startswith("!wager") or ((message.content).lower()).startswith("!total bet") or ((message.content).lower()).startswith("!tb"):
+		tokens=getvalue(int(message.author.id), "tokenstotal")
+		tokens="{:,}".format(tokens)
+		embed = discord.Embed(color=16766463)
+		embed.set_author(name=(str(message.author))[:-5]+"'s Total Bets", icon_url=str(message.author.avatar_url))
+		embed.add_field(name="Total Tokens Bet", value=tokens, inline=True)
+		embed.set_footer(text="Total Bets checked on: "+str(datetime.datetime.now())[:-7])
+		await client.send_message(message.channel, embed=embed)
+	########################################
+	elif message.content.startswith("!duel"):
+		#try:
+		enough=True
+		current=getvalue(int(message.author.id), "tokens")
+		bet=formatok((message.content).split(" ")[1])
+
+		if bet<100:
+			await client.send_message(message.channel, "The minimum amount you can bet is **100** tokens.")
+			enough=False
+
+		if enough==True:
+			await client.send_message(message.channel, "<@"+str(message.author.id)+"> wants to duel for "+'{:,}'.format(bet)+" tokens. Use `!call` to accept the duel.")
+			while True:
+				call = await client.wait_for_message(timeout=60, channel=message.channel, content="!call")
+				if call is None:
+					await client.send_message(message.channel, "<@"+str(message.author.id)+">'s duel request has timed out.")
+					break
+				caller=call.author
+				if str(caller.id)==str(message.author.id):
+					await client.send_message(message.channel, "As exciting as it may sound, you cannot duel yourself ._.")
+					continue
+				callertokens=getvalue(int(caller.id), "tokens")
+				if callertokens<bet:
+					await client.send_message(message.channel, "You don't have enough tokens to call that duel.")
+					continue
+				else:
+					break
+
+			embed = discord.Embed(color=16766463)
+			embed.set_author(name="Fight to the Death!", icon_url=url)
+			hp = get(client.get_all_emojis(), name='hpbar100')
+			embed.add_field(name=str(i[0])[:-5], value="Poisoned: False\nSharks Left: 10\nSpecial Attack Bar: 100%\nHP Left: 99"+str(hp), inline=True)
+			embed.set_footer(text="Fight Started On: "+str(datetime.datetime.now())[:-7])
+			sent = await client.send_message(embed, embed=embed)
+
+			#player=[member object, hp, sharks, dds specs, poisoned, turns since poisoned, poison damage, turns since speced]
+			gambler=[(message.author), 99, 10, 4, False, 0, 4, 0]
+			caller=[caller, 99, 10, 4, False, 0, 4, 0]
+			players=[gambler,caller]
+			winner=None
+			while True:
+				if winner!=None:
+					break
+				else:
+					for i in players:
+						opponent=players[int(players.index(i))-1]
+						if i[7]%4==0:
+							if i[3]<4:
+								i[3]+=1
+								await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
+						if i[4]==True:
+							i[5]+=1
+							if i[5]%4==0:
+								i[1]-=i[6]
+								await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
+								await client.send_message(message.channel, str(i[0])+" took "+str(i[6])+" damage from poison.")
+
+						await client.send_message(message.channel, str(i[0])+", it is your turn. Use `!shark`, `!dds` or `!whip`.")
+						while True:
+							move = await client.wait_for_message(timeout=10, channel=message.channel, author=i[0])
+							if str(move.content).lower()=="!shark":
+								if i[2]<1:
+									await client.send_message("You are out of sharks. Please use `!dds` or `!whip`.")
+									continue
+								else:
+									i[2]-=1
+									i[1]+=20
+									if i[1]>99:
+										i[1]=99
+									await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
+									await client.send_message(message.channel, str(i[0])+" eats a shark and heals 20 hp.")
+									break
+
+							elif str(move.content).lower()=="!dds":
+								if i[3]<1:
+									await client.send_message("You are out of dragon dagger specs. Please use `!shark` or `!whip`.")
+									continue
+								else:
+									i[3]-=1
+									hit=random.randint(0,20)+random.randint(0,20)
+									opponent[1]-=hit
+									await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
+									await client.send_message(message.channel, str(i[0])+" has used a dragon dagger spec on "+str(opponent[0])+" and dealt "+str(hit)+" damage.")
+									if opponent[1]<1:
+										winner=i
+									else:
+										if random.randint(1,4)==4:
+											opponent[4]=True
+											await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
+											await client.send_message(message.channel, str(opponent[0])+" has been poisoned by the dragon dagger!")
+									break
+
+							elif str(move.content).lower()=="!whip":
+								hit=random.randint(0,27)
+								opponent[1]-=hit
+								await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
+								await client.send_message(message.channel, str(i[0])+" has hit"+str(opponent[0])+" with his whip and dealt "+str(hit)+" damage.")
+								if opponent[1]<1:
+									winner=i
+								break
+							else:
+								await client.send_message(message.channel, "An **error** has occured. Make sure to use `!shark` `!dds` or `!whip`.")
+								continue
+
+			c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(current+bet, message.author.id))
+			c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(callertokens-bet, caller.id))
+			conn.commit()
+			await client.send_message(message.channel, "<@"+str(winner[0].id)+"> Has won the duel and gained "+'{:,}'.format(bet*2)+" tokens!")
+
+		else:
+			None			
+		#except:
 
 
 		
