@@ -578,7 +578,7 @@ async def on_message(message):
 			embed.add_field(name=str(message.author)[:-5], value="Poisoned: False\nSharks Left: 10\nSpecial Attack Bar: 100%\nHP Left: 99"+str(hp), inline=True)
 			embed.add_field(name=str(caller)[:-5], value="Poisoned: False\nSharks Left: 10\nSpecial Attack Bar: 100%\nHP Left: 99"+str(hp), inline=True)
 			embed.set_footer(text="Fight Started On: "+str(datetime.datetime.now())[:-7])
-			sent = await client.send_message(embed, embed=embed)
+			sent = await client.send_message(message.channel, embed=embed)
 
 			#player=[member object, hp, sharks, dds specs, poisoned, turns since poisoned, poison damage, turns since speced]
 			gambler=[(message.author), 99, 10, 4, False, 0, 4, 0]
