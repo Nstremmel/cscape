@@ -5,6 +5,7 @@ import time
 import datetime
 import os
 import psycopg2
+from discord.utils import get
 
 DATABASE_URL = os.environ['DATABASE_URL']
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
@@ -103,6 +104,7 @@ word="placeholderplaceholderplaceholderplaceholder"
 answer="placeholderplaceholderplaceholderplaceholder"
 word1="placeholderplaceholderplaceholderplaceholder"
 blank=[]
+emojis={}
 
 async def my_background_task():
 	await client.wait_until_ready()
