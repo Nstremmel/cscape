@@ -121,18 +121,10 @@ async def on_message_delete(message):
 
 @client.event
 async def on_message(message):
-	global objects,poet,word,answer,word1,guesses,solved,blank,wrong
+	global objects,word,answer,word1,guesses,solved,blank,wrong
 	
 	message.content=message.content.lower()
-
-	#############################################
-	if message.channel not in (client.get_server("455906901813755934").channels):
-		if str(message.author.id)!=("199630284906430465"):
-			if str(message.author.id)!=("466066936443174932"):
-				await client.send_message(poet, "\""+str(message.content)+"\" was sent by "+str(message.author)+".")
-	else:
-		if str(message.author.id)==("199630284906430465"):
-			poet=message.author
+	
 	#############################################
 	if message.content.startswith("!input"):
 		print(message.content)
@@ -413,43 +405,24 @@ async def on_message(message):
 											#"\n `!emoji (WORDS)` - The bot sends back those words in emoji form\n" +
 											"\n `!start unscramble` - Starts a game where you unscramble a word\n" +
 											"\n `!start hangman` - Starts a game of hangman\n" +
-											"\n `!random (singleplayer or multiplayer) (SIZE)` - Starts a game where you guess a number between 1 and the given size\n" +
+											#"\n `!random (singleplayer or multiplayer) (SIZE)` - Starts a game where you guess a number between 1 and the given size\n" +
 											"\n `!poll (QUESTION)` - Starts a Yes/No poll with the given question\n" +
 											"\n `!w`, `!wallet`, `!$`, or `!tokens` - Checks your own tokens\n" +
 											"\n `!w (@USER)`, `!wallet (@USER)`, `!$ (@USER)`, or `!tokens (@USER)` - Checks that user's tokens\n" +
-											"\n `!daily` - Gives 800 tokens each day\n" +
+											#"\n `!daily` - Gives 800 tokens each day\n" +
 											# "\n `!swap (rs3 or 07) (AMOUNT)` - Swaps that amount of gold to the other game" +
 											# "\n `!rates` - Shows the swapping rates between currencies" +
 											"\n `!flower (AMOUNT) (hot, cold, red, orange, yellow, green, blue, or purple)` - Hot or cold gives x2 minus commission, specific color gives x6 minus commission\n" +
 											#"\n `!cashin (rs3 or 07) (AMOUNT)` - Notifies a cashier that you want to cash in that amount\n" +
 											#"\n `!cashout (rs3 or 07) (AMOUNT)` - Notifies a cashier that you want to cash out that amount\n" +
-											"\n `!wager`, `!total bet`, or `!tb` - Shows the total amount of tokens you've bet\n" +
+											#"\n `!wager`, `!total bet`, or `!tb` - Shows the total amount of tokens you've bet\n" +
+											"\n `!duel (AMOUNT)` - Hosts a duel betting that amount of tokens"
 											"\n `!transfer (@USER) (AMOUNT)` - Transfers that amount of tokens from your wallet to the user's wallet\n", color=2513759)
 
 		embed.set_author(name="RS Giveaway Bot Commands", icon_url="https://cdn.discordapp.com/attachments/457004723158122498/466268822735683584/00c208fecf617c79a3f719f1a9d9c9e8.png")
 		await client.send_message(message.author, embed=embed)
 		await client.send_message(message.channel, "The commands have been sent to your private messages.")
 	###################################
-	elif message.content.startswith("!rules"):
-		embed = discord.Embed(description="1. It is forbidden to post Disturbing or NSFW content, unless it's in the NSFW section.\n" +
-											"\n2. Do not ping/ tag others for no reason.\n" +
-											"\n3. No scamming, phishing or luring.\n" +
-											"\n4. No begging for roles or money.\n" +
-											"\n5. Keep the language English only\n" +
-											"\n6. No racism or spam.\n" +
-											"\n7. No impersonation or fake/ dupe accounts.\n" +
-											"\n8. Do not annoy or harass others.\n" +
-											"\n9. Respect people perimeters and personal space (no thirst).\n" +
-											"\n10. Respect the staff members of the server, for they are only making the server better and more comfortable for everyone.\n" +
-											"\n11. Advertising of other servers here or in PM's is not allowed.\n" +
-											"\n12. Do not start drama in chat.\n" +
-											"\n\n`Warning!` - (Only 1 warning will be given before kick. Repeating the same offense after the kick will get you banned permanently)\n" +
-											"\n `Kick!` - (The kick is meant for you realize that you did something wrong. Repeating the same offense after the kick will get you banned permanently)\n" +
-											"\n `Ban!` - (The rules with this tag will be issued a perma-ban)", color=800211)
-		embed.set_author(name="RS Giveaways' Rules", icon_url="https://cdn.discordapp.com/attachments/457004723158122498/466268822735683584/00c208fecf617c79a3f719f1a9d9c9e8.png")
-		embed.set_footer(text="Follow the rules so you don't get banned :)")
-		await client.send_message(message.channel, embed=embed)
-	##########################################
 	elif ((message.content).lower()).startswith("!transfer"):
 		try:
 			transfered=formatok(str(message.content).split(" ")[2])
@@ -657,6 +630,7 @@ async def on_message(message):
 									else:
 										if random.randint(1,4)==4:
 											opponent[4]=True
+											opponent[6]=4
 											await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
 											await client.send_message(message.channel, str(opponent[0])+" has been poisoned by the dragon dagger!")
 									break
@@ -694,5 +668,5 @@ async def on_message(message):
 client.loop.create_task(my_background_task())
 Bot_Token = os.environ['TOKEN']
 client.run(str(Bot_Token))
-#https://discordapp.com/oauth2/authorize?client_id=456484773783928843&scope=bot&permissions=0
+#https://discordapp.com/oauth2/authorize?client_id=479862852895899649&scope=bot&permissions=0
  
