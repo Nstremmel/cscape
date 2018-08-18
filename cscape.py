@@ -604,7 +604,10 @@ async def on_message(message):
 
 						await client.send_message(message.channel, str(i[0])+", it is your turn. Use `!shark`, `!dds` or `!whip`.")
 						while True:
-							move = await client.wait_for_message(timeout=10, channel=message.channel, author=i[0])
+							move = await client.wait_for_message(timeout=20, channel=message.channel, author=i[0])
+							if call is None:
+								await client.send_message(message.channel, "Took too long. Turn moved to opponent.")
+								break
 							if str(move.content).lower()=="!shark":
 								if i[2]<1:
 									await client.send_message("You are out of sharks. Please use `!dds` or `!whip`.")
