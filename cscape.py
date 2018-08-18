@@ -11,12 +11,12 @@ conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 c=conn.cursor()
 
 # c.execute("DROP TABLE rsmoney")
-c.execute("""CREATE TABLE rsmoney (
-				id bigint,
-				tokens bigint,
-				tokenstotal bigint
-				)""")
-conn.commit()
+# c.execute("""CREATE TABLE rsmoney (
+# 				id bigint,
+# 				tokens bigint,
+# 				tokenstotal bigint
+# 				)""")
+# conn.commit()
 
 client = discord.Client()
 
@@ -124,7 +124,7 @@ async def on_message(message):
 	global objects,word,answer,word1,guesses,solved,blank,wrong
 	
 	message.content=message.content.lower()
-	
+
 	#############################################
 	if message.content.startswith("!input"):
 		print(message.content)
@@ -325,7 +325,7 @@ async def on_message(message):
 
 		embed = discord.Embed(color=sidecolor)
 		embed.set_author(name=(str(message.author))[:-5]+"'s Wallet", icon_url=str(message.author.avatar_url))
-		embed.add_field(name="tokens", value=tokens, inline=True)
+		embed.add_field(name="Tokens", value=tokens, inline=True)
 		embed.set_footer(text="Wallet checked on: "+str(datetime.datetime.now())[:-7])
 		await client.send_message(message.channel, embed=embed)
 
@@ -358,7 +358,7 @@ async def on_message(message):
 
 		embed = discord.Embed(color=sidecolor)
 		embed.set_author(name=(str(member))[:-5]+"'s Wallet", icon_url=str(member.avatar_url))
-		embed.add_field(name="tokens", value=tokens, inline=True)
+		embed.add_field(name="Tokens", value=tokens, inline=True)
 		embed.set_footer(text="Wallet checked on: "+str(datetime.datetime.now())[:-7])
 		await client.send_message(message.channel, embed=embed)
 	##########################################
@@ -571,9 +571,10 @@ async def on_message(message):
 					break
 
 			embed = discord.Embed(color=16766463)
-			embed.set_author(name="Fight to the Death!", icon_url=url)
+			embed.set_author(name="Fight to the Death!", icon_url=str(message.server.icon_url))
 			hp = get(client.get_all_emojis(), name='hpbar100')
-			embed.add_field(name=str(i[0])[:-5], value="Poisoned: False\nSharks Left: 10\nSpecial Attack Bar: 100%\nHP Left: 99"+str(hp), inline=True)
+			embed.add_field(name=str(message.author)[:-5], value="Poisoned: False\nSharks Left: 10\nSpecial Attack Bar: 100%\nHP Left: 99"+str(hp), inline=True)
+			embed.add_field(name=str(caller)[:-5], value="Poisoned: False\nSharks Left: 10\nSpecial Attack Bar: 100%\nHP Left: 99"+str(hp), inline=True)
 			embed.set_footer(text="Fight Started On: "+str(datetime.datetime.now())[:-7])
 			sent = await client.send_message(embed, embed=embed)
 
