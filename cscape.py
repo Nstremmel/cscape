@@ -89,7 +89,7 @@ def hpupdate(players, url):
 
 		embed.add_field(name=str(i[0])[:-5], value="Poisoned: "+str(i[4]) +
 													"\nSharks Left: "+str(i[2]) +
-													"\nSpecial Attack Bar: "+str(i[3]*25)+"%" +
+													"\nSpecial Attack: "+str(i[3]*25)+"%" +
 													"\nHP Left: "+str(i[1])+" "+str(hp), inline=True)
 	return embed
 
@@ -104,7 +104,9 @@ word="placeholderplaceholderplaceholderplaceholder"
 answer="placeholderplaceholderplaceholderplaceholder"
 word1="placeholderplaceholderplaceholderplaceholder"
 blank=[]
-emojis={}
+whip=str(get(client.get_all_emojis(), name='whip'))
+shark=str(get(client.get_all_emojis(), name='shark'))
+dds=str(get(client.get_all_emojis(), name='dds'))
 
 async def my_background_task():
 	await client.wait_until_ready()
@@ -546,6 +548,8 @@ async def on_message(message):
 	########################################
 	elif message.content.startswith("!duel"):
 		#try:
+
+		duel=False
 		enough=True
 		current=getvalue(int(message.author.id), "tokens")
 		bet=formatok((message.content).split(" ")[1])
@@ -564,6 +568,7 @@ async def on_message(message):
 				caller=call.author
 				if str(caller.id)==str(message.author.id):
 					await client.send_message(message.channel, "As exciting as it may sound, you cannot duel yourself ._.")
+
 					continue
 				callertokens=getvalue(int(caller.id), "tokens")
 				if callertokens<bet:
@@ -572,13 +577,6 @@ async def on_message(message):
 				else:
 					break
 
-			embed = discord.Embed(color=16766463)
-			embed.set_author(name="Fight to the Death!", icon_url=str(message.server.icon_url))
-			hp = get(client.get_all_emojis(), name='hpbar100')
-			embed.add_field(name=str(message.author)[:-5], value="Poisoned: False\nSharks Left: 10\nSpecial Attack Bar: 100%\nHP Left: 99"+str(hp), inline=True)
-			embed.add_field(name=str(caller)[:-5], value="Poisoned: False\nSharks Left: 10\nSpecial Attack Bar: 100%\nHP Left: 99"+str(hp), inline=True)
-			embed.set_footer(text="Fight Started On: "+str(datetime.datetime.now())[:-7])
-			sent = await client.send_message(message.channel, embed=embed)
 
 			#player=[member object, hp, sharks, dds specs, poisoned, turns since poisoned, poison damage, turns since speced]
 			gambler=[(message.author), 99, 10, 4, False, 0, 4, 0]
@@ -586,13 +584,21 @@ async def on_message(message):
 			players=[gambler,caller]
 			winner=None
 			while True:
+				embed = discord.Embed(color=16766463)
+				embed.set_author(name="Fight to the Death!", icon_url=str(message.server.icon_url))
+				hp = get(client.get_all_emojis(), name='hpbar100')
+				embed.add_field(name=str(message.author)[:-5], value="Poisoned: False\n"+shark+": 10\nSpecial Attack: 100%\nHP Left: 99"+str(hp), inline=True)
+				embed.add_field(name=str(caller)[:-5], value="Poisoned: False\n"+shark+": 10\nSpecial Attack: 100%\nHP Left: 99"+str(hp), inline=True)
+				embed.set_footer(text="Fight Started On: "+str(datetime.datetime.now())[:-7])
+				sent = await client.send_message(message.channel, embed=embed)
 				if winner!=None:
 					break
 				else:
 					for i in players:
 						opponent=players[int(players.index(i))-1]
-						if i[7]%4==0:
-							if i[3]<4:
+						if i[3]<4:
+							i[7]+=1
+							if i[7]%4==0:
 								i[3]+=1
 								await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
 						if i[4]==True:
@@ -605,12 +611,12 @@ async def on_message(message):
 						await client.send_message(message.channel, str(i[0])+", it is your turn. Use `!shark`, `!dds` or `!whip`.")
 						while True:
 							move = await client.wait_for_message(timeout=20, channel=message.channel, author=i[0])
-							if call is None:
-								await client.send_message(message.channel, "Took too long. Turn moved to opponent.")
-								break
+							if move is None:
+								await client.send_message(message.channel, "Took too long. Automatically used "+whip+".")
+								move.content="!whip"
 							if str(move.content).lower()=="!shark":
 								if i[2]<1:
-									await client.send_message("You are out of sharks. Please use `!dds` or `!whip`.")
+									await client.send_message("You are out of "+shark+". Please use `!dds` or `!whip`.")
 									continue
 								else:
 									i[2]-=1
@@ -618,19 +624,19 @@ async def on_message(message):
 									if i[1]>99:
 										i[1]=99
 									await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
-									await client.send_message(message.channel, str(i[0])+" eats a shark and heals 20 hp.")
+									await client.send_message(message.channel, str(i[0])+" eats a "+shark+" and heals 20 hp.")
 									break
 
 							elif str(move.content).lower()=="!dds":
 								if i[3]<1:
-									await client.send_message("You are out of dragon dagger specs. Please use `!shark` or `!whip`.")
+									await client.send_message("You are out of "+dds+" specs. Please use `!shark` or `!whip`.")
 									continue
 								else:
 									i[3]-=1
 									hit=random.randint(0,20)+random.randint(0,20)
 									opponent[1]-=hit
 									await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
-									await client.send_message(message.channel, str(i[0])+" has used a dragon dagger spec on "+str(opponent[0])+" and dealt "+str(hit)+" damage.")
+									await client.send_message(message.channel, str(i[0])+" has used a "+dds+" on "+str(opponent[0])+" and dealt "+str(hit)+" damage.")
 									if opponent[1]<1:
 										winner=i
 									else:
@@ -638,14 +644,14 @@ async def on_message(message):
 											opponent[4]=True
 											opponent[6]=4
 											await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
-											await client.send_message(message.channel, str(opponent[0])+" has been poisoned by the dragon dagger!")
+											await client.send_message(message.channel, str(opponent[0])+" has been poisoned by the "+dds+"!")
 									break
 
 							elif str(move.content).lower()=="!whip":
 								hit=random.randint(0,27)
 								opponent[1]-=hit
 								await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
-								await client.send_message(message.channel, str(i[0])+" has hit"+str(opponent[0])+" with his whip and dealt "+str(hit)+" damage.")
+								await client.send_message(message.channel, str(i[0])+" has hit "+str(opponent[0])+" with their "+whip+" and dealt "+str(hit)+" damage.")
 								if opponent[1]<1:
 									winner=i
 								break
