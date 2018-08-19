@@ -22,7 +22,6 @@ c=conn.cursor()
 client = discord.Client()
 
 
-
 def add_member(userid,tokens,tokenstotal):
 	c.execute("INSERT INTO rsmoney VALUES (%s, %s, %s)", (userid,tokens,tokenstotal))
 	conn.commit()
@@ -104,6 +103,9 @@ word="placeholderplaceholderplaceholderplaceholder"
 answer="placeholderplaceholderplaceholderplaceholder"
 word1="placeholderplaceholderplaceholderplaceholder"
 blank=[]
+whip=str(get(client.get_all_emojis(), name='whip'))
+shark=str(get(client.get_all_emojis(), name='shark-1'))
+dds=str(get(client.get_all_emojis(), name='dds'))
 
 async def my_background_task():
 	await client.wait_until_ready()
@@ -545,9 +547,6 @@ async def on_message(message):
 	########################################
 	elif message.content.startswith("!duel"):
 		#try:
-		whip=str(get(client.get_all_emojis(), name='whip'))
-		shark=str(get(client.get_all_emojis(), name='shark-1'))
-		dds=str(get(client.get_all_emojis(), name='dds'))
 		duel=False
 		enough=True
 		current=getvalue(int(message.author.id), "tokens")
