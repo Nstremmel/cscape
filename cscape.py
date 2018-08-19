@@ -20,9 +20,7 @@ c=conn.cursor()
 # conn.commit()
 
 client = discord.Client()
-whip=str(get(client.get_all_emojis(), name='whip'))
-shark=str(get(client.get_all_emojis(), name='shark-1'))
-dds=str(get(client.get_all_emojis(), name='dds'))
+
 
 
 def add_member(userid,tokens,tokenstotal):
@@ -547,7 +545,9 @@ async def on_message(message):
 	########################################
 	elif message.content.startswith("!duel"):
 		#try:
-
+		whip=str(get(client.get_all_emojis(), name='whip'))
+		shark=str(get(client.get_all_emojis(), name='shark-1'))
+		dds=str(get(client.get_all_emojis(), name='dds'))
 		duel=False
 		enough=True
 		current=getvalue(int(message.author.id), "tokens")
@@ -587,7 +587,7 @@ async def on_message(message):
 				embed.set_author(name="Fight to the Death!", icon_url=str(message.server.icon_url))
 				hp = get(client.get_all_emojis(), name='hpbar100')
 				embed.add_field(name=str(message.author)[:-5], value="Poisoned: False\n"+shark+": 10\nSpecial Attack: 100%\nHP Left: 99"+str(hp), inline=True)
-				embed.add_field(name=str(caller)[:-5], value="Poisoned: False\n"+shark+": 10\nSpecial Attack: 100%\nHP Left: 99"+str(hp), inline=True)
+				embed.add_field(name=str(caller[0])[:-5], value="Poisoned: False\n"+shark+": 10\nSpecial Attack: 100%\nHP Left: 99"+str(hp), inline=True)
 				embed.set_footer(text="Fight Started On: "+str(datetime.datetime.now())[:-7])
 				sent = await client.send_message(message.channel, embed=embed)
 				if winner!=None:
@@ -614,6 +614,8 @@ async def on_message(message):
 								await client.send_message(message.channel, "Took too long. Automatically used "+whip+".")
 								hit=random.randint(0,27)
 								opponent[1]-=hit
+								if opponent[1]<0:
+									opponent[1]=0
 								await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
 								await client.send_message(message.channel, str(i[0])+" has hit "+str(opponent[0])+" with their "+whip+" and dealt "+str(hit)+" damage.")
 								if opponent[1]<1:
@@ -640,6 +642,8 @@ async def on_message(message):
 									i[3]-=1
 									hit=random.randint(0,20)+random.randint(0,20)
 									opponent[1]-=hit
+									if opponent[1]<0:
+										opponent[1]=0
 									await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
 									await client.send_message(message.channel, str(i[0])+" has used a "+dds+" on "+str(opponent[0])+" and dealt "+str(hit)+" damage.")
 									if opponent[1]<1:
