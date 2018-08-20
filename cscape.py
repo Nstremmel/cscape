@@ -103,9 +103,11 @@ word="placeholderplaceholderplaceholderplaceholder"
 answer="placeholderplaceholderplaceholderplaceholder"
 word1="placeholderplaceholderplaceholderplaceholder"
 blank=[]
+print(get(client.get_all_emojis(), name='dds'))
 whip=str(get(client.get_all_emojis(), name='whip'))
 shark=str(get(client.get_all_emojis(), name='shark-1'))
 dds=str(get(client.get_all_emojis(), name='dds'))
+print(dds)
 
 async def my_background_task():
 	await client.wait_until_ready()
@@ -575,6 +577,8 @@ async def on_message(message):
 				else:
 					break
 
+			c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(current-bet, message.author.id))
+			c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(callertokens-bet, caller.id))
 
 			#player=[member object, hp, sharks, dds specs, poisoned, turns since poisoned, poison damage, turns since speced]
 			gambler=[(message.author), 99, 10, 4, False, 0, 4, 0]
@@ -582,13 +586,7 @@ async def on_message(message):
 			players=[gambler,caller]
 			winner=None
 			while True:
-				embed = discord.Embed(color=16766463)
-				embed.set_author(name="Fight to the Death!", icon_url=str(message.server.icon_url))
-				hp = get(client.get_all_emojis(), name='hpbar100')
-				embed.add_field(name=str(message.author)[:-5], value="Poisoned: False\n"+shark+": 10\nSpecial Attack: 100%\nHP Left: 99"+str(hp), inline=True)
-				embed.add_field(name=str(caller[0])[:-5], value="Poisoned: False\n"+shark+": 10\nSpecial Attack: 100%\nHP Left: 99"+str(hp), inline=True)
-				embed.set_footer(text="Fight Started On: "+str(datetime.datetime.now())[:-7])
-				sent = await client.send_message(message.channel, embed=embed)
+				sent = await client.send_message(message.channel, embed=hpupdate(players, str(message.server.icon_url)))
 				if winner!=None:
 					break
 				else:
@@ -667,8 +665,8 @@ async def on_message(message):
 								await client.send_message(message.channel, "An **error** has occured. Make sure to use `!shark` `!dds` or `!whip`.")
 								continue
 
-			c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(current+bet, message.author.id))
-			c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(callertokens-bet, caller.id))
+			winnert=getvalue(int(winner.id), "tokens")
+			c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(winnert+bet+bet, winner.id))
 			conn.commit()
 			await client.send_message(message.channel, "<@"+str(winner[0].id)+"> Has won the duel and gained "+'{:,}'.format(bet*2)+" tokens!")
 
