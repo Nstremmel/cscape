@@ -97,8 +97,8 @@ def hpupdate(players, url):
 #Predefined Variables
 colors=["A","B","C","D","E","F","0","1","2","3","4","5","6","7","8","9"]
 objects=[]
-flowers=["Red","Orange","Yellow","Green","Blue","Purple", "White"]
-sidecolors=[16711680, 16743712, 16776960, 1305146, 1275391, 16730111, 15922943]
+flowers=["Red","Orange","Yellow","Green","Blue","Purple"]
+sidecolors=[16711680, 16743712, 16776960, 1305146, 1275391, 16730111]
 word="placeholderplaceholderplaceholderplaceholder"
 answer="placeholderplaceholderplaceholderplaceholder"
 word1="placeholderplaceholderplaceholderplaceholder"
@@ -106,6 +106,8 @@ blank=[]
 whip = get(client.get_all_emojis(), name='whip')
 shark = get(client.get_all_emojis(), name='shark~1')
 dds = get(client.get_all_emojis(), name='dds')
+test = get(client.get_all_emojis(), name='hpbar0')
+await client.send_message(message.channel, str(test)+str(dds))
 
 async def my_background_task():
 	await client.wait_until_ready()
@@ -474,9 +476,10 @@ async def on_message(message):
 			bet=formatok((message.content).split(" ")[1])
 			current=getvalue(int(message.author.id), "tokens")
 			totaltokens=getvalue(int(message.author.id), "tokens")
-			index=random.randint(0,6)
+			index=random.randint(0,5)
 			flower=flowers[index]
 			sidecolor=sidecolors[index]
+			commission=0.05
 
 			if bet<100:
 				await client.send_message(message.channel, "The minimum amount you can bet is **100** tokens.")
@@ -503,11 +506,8 @@ async def on_message(message):
 							win=True
 						else:
 							multiplier=0
-					if flower=="White":
-						multiplier=0
-						win=False
 
-					winnings=(bet*multiplier)
+					winnings=(bet*multiplier)-(commission*bet*multiplier)
 					if isinstance(winnings, float):
 						if (winnings).is_integer():
 							winnings=int(winnings)
@@ -515,9 +515,9 @@ async def on_message(message):
 					if win==True:
 						words=("Congratulations! The color of the flower was `"+flower+"`. "+str(message.author)+" won `"+"{:,}".format(winnings)+"` tokens.")
 						if multiplier==2:
-							update_money(int(message.author.id), bet)
+							update_money(int(message.author.id), (bet)-(bet*commission*multiplier))
 						else:
-							update_money(int(message.author.id), (bet*multiplier))
+							update_money(int(message.author.id), (bet*multiplier)-(bet*commission*multiplier))
 					else:
 						words=("Sorry, the color the flower was `"+flower+"`. "+str(message.author)+" lost `"+"{:,}".format(bet)+"` tokens.")
 						update_money(int(message.author.id), bet*-1)
@@ -547,129 +547,134 @@ async def on_message(message):
 	########################################
 	elif message.content.startswith("!duel"):
 		#try:
-		duel=False
-		enough=True
-		current=getvalue(int(message.author.id), "tokens")
-		bet=formatok((message.content).split(" ")[1])
-
-		if bet<100:
-			await client.send_message(message.channel, "The minimum amount you can bet is **100** tokens.")
-			enough=False
-
-		if enough==True:
-			await client.send_message(message.channel, "<@"+str(message.author.id)+"> wants to duel for "+'{:,}'.format(bet)+" tokens. Use `!call` to accept the duel.")
-			while True:
-				call = await client.wait_for_message(timeout=60, channel=message.channel, content="!call")
-				if call is None:
-					await client.send_message(message.channel, "<@"+str(message.author.id)+">'s duel request has timed out.")
-					break
-				caller=call.author
-				if str(caller.id)==str(message.author.id):
-					await client.send_message(message.channel, "As exciting as it may sound, you cannot duel yourself ._.")
-
-					continue
-				callertokens=getvalue(int(caller.id), "tokens")
-				if callertokens<bet:
-					await client.send_message(message.channel, "You don't have enough tokens to call that duel.")
-					continue
-				else:
-					break
-
-			c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(current-bet, message.author.id))
-			c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(callertokens-bet, caller.id))
-
-			#player=[member object, hp, sharks, dds specs, poisoned, turns since poisoned, poison damage, turns since speced]
-			gambler=[(message.author), 99, 10, 4, False, 0, 4, 0]
-			caller=[caller, 99, 10, 4, False, 0, 4, 0]
-			players=[gambler,caller]
-			winner=None
-			while True:
-				sent = await client.send_message(message.channel, embed=hpupdate(players, str(message.server.icon_url)))
-				if winner!=None:
-					break
-				else:
-					for i in players:
-						opponent=players[int(players.index(i))-1]
-						if i[3]<4:
-							i[7]+=1
-							if i[7]%4==0:
-								i[3]+=1
-								await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
-						if i[4]==True:
-							i[5]+=1
-							if i[5]%4==0:
-								i[1]-=i[6]
-								await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
-								await client.send_message(message.channel, str(i[0])+" took "+str(i[6])+" damage from poison.")
-
-						await client.send_message(message.channel, str(i[0])+", it is your turn. Use `!shark`, `!dds` or `!whip`.")
-						while True:
-							move = await client.wait_for_message(timeout=20, channel=message.channel, author=i[0])
-							if move is None:
-								await client.send_message(message.channel, "Took too long. Automatically used "+str(whip)+".")
-								hit=random.randint(0,27)
-								opponent[1]-=hit
-								if opponent[1]<0:
-									opponent[1]=0
-								await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
-								await client.send_message(message.channel, str(i[0])+" has hit "+str(opponent[0])+" with their "+str(whip)+" and dealt "+str(hit)+" damage.")
-								if opponent[1]<1:
-									winner=i
-								break
-							if str(move.content).lower()=="!shark":
-								if i[2]<1:
-									await client.send_message("You are out of "+str(shark)+". Please use `!dds` or `!whip`.")
-									continue
-								else:
-									i[2]-=1
-									i[1]+=20
-									if i[1]>99:
-										i[1]=99
-									await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
-									await client.send_message(message.channel, str(i[0])+" eats a "+str(shark)+" and heals 20 hp.")
-									break
-
-							elif str(move.content).lower()=="!dds":
-								if i[3]<1:
-									await client.send_message("You are out of "+str(dds)+" specs. Please use `!shark` or `!whip`.")
-									continue
-								else:
-									i[3]-=1
-									hit=random.randint(0,20)+random.randint(0,20)
-									opponent[1]-=hit
-									if opponent[1]<0:
-										opponent[1]=0
-									await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
-									await client.send_message(message.channel, str(i[0])+" has used a "+str(dds)+" on "+str(opponent[0])+" and dealt "+str(hit)+" damage.")
-									if opponent[1]<1:
-										winner=i
-									else:
-										if random.randint(1,4)==4:
-											opponent[4]=True
-											opponent[6]=4
-											await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
-											await client.send_message(message.channel, str(opponent[0])+" has been poisoned by the "+str(dds)+"!")
-									break
-
-							elif str(move.content).lower()=="!whip":
-								hit=random.randint(0,27)
-								opponent[1]-=hit
-								await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
-								await client.send_message(message.channel, str(i[0])+" has hit "+str(opponent[0])+" with their "+str(whip)+" and dealt "+str(hit)+" damage.")
-								if opponent[1]<1:
-									winner=i
-								break
-							else:
-								await client.send_message(message.channel, "An **error** has occured. Make sure to use `!shark` `!dds` or `!whip`.")
-								continue
-
-			winnert=getvalue(int(winner.id), "tokens")
-			c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(winnert+bet+bet, winner.id))
-			conn.commit()
-			await client.send_message(message.channel, "<@"+str(winner[0].id)+"> Has won the duel and gained "+'{:,}'.format(bet*2)+" tokens!")
-
+		if duel==True:
+			await client.send_message(message.channel, "There is a dice duel already going on. Please wait until that one finishes.")
 		else:
-			None			
+			enough=True
+			current=getvalue(int(message.author.id), "tokens")
+			bet=formatok((message.content).split(" ")[1])
+
+			if bet<100:
+				await client.send_message(message.channel, "The minimum amount you can bet is **100** tokens.")
+				enough=False
+
+			if enough:
+				await client.send_message(message.channel, "<@"+str(message.author.id)+"> wants to duel for "+'{:,}'.format(bet)+" tokens. Use `!call` to accept the duel.")
+				while True:
+					call = await client.wait_for_message(timeout=60, channel=message.channel, content="!call")
+					if call is None:
+						await client.send_message(message.channel, "<@"+str(message.author.id)+">'s duel request has timed out.")
+						break
+					caller=call.author
+					if str(caller.id)==str(message.author.id):
+						await client.send_message(message.channel, "As exciting as it may sound, you cannot duel yourself ._.")
+
+						continue
+					callertokens=getvalue(int(caller.id), "tokens")
+					if callertokens<bet:
+						await client.send_message(message.channel, "You don't have enough tokens to call that duel.")
+						continue
+					else:
+						duel=True
+						break
+
+				if duel:
+					c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(current-bet, message.author.id))
+					c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(callertokens-bet, caller.id))
+
+					#player=[member object, hp, sharks, dds specs, poisoned, turns since poisoned, poison damage, turns since speced]
+					gambler=[(message.author), 99, 10, 4, False, 0, 4, 0]
+					caller=[caller, 99, 10, 4, False, 0, 4, 0]
+					players=[gambler,caller]
+					winner=None
+					while True:
+						sent = await client.send_message(message.channel, embed=hpupdate(players, str(message.server.icon_url)))
+						if winner!=None:
+							break
+						else:
+							for i in players:
+								opponent=players[int(players.index(i))-1]
+								if i[3]<4:
+									i[7]+=1
+									if i[7]%4==0:
+										i[3]+=1
+										await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
+								if i[4]==True:
+									i[5]+=1
+									if i[5]%4==0:
+										i[1]-=i[6]
+										await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
+										await client.send_message(message.channel, str(i[0])+" took "+str(i[6])+" damage from poison.")
+
+								await client.send_message(message.channel, str(i[0])+", it is your turn. Use `!shark`, `!dds` or `!whip`.")
+								while True:
+									move = await client.wait_for_message(timeout=20, channel=message.channel, author=i[0])
+									if move is None:
+										await client.send_message(message.channel, "Took too long. Automatically used "+str(whip)+".")
+										hit=random.randint(0,27)
+										opponent[1]-=hit
+										if opponent[1]<0:
+											opponent[1]=0
+										await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
+										await client.send_message(message.channel, str(i[0])+" has hit "+str(opponent[0])+" with their "+str(whip)+" and dealt "+str(hit)+" damage.")
+										if opponent[1]<1:
+											winner=i
+										break
+									if str(move.content).lower()=="!shark":
+										if i[2]<1:
+											await client.send_message("You are out of "+str(shark)+". Please use `!dds` or `!whip`.")
+											continue
+										else:
+											i[2]-=1
+											i[1]+=20
+											if i[1]>99:
+												i[1]=99
+											await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
+											await client.send_message(message.channel, str(i[0])+" eats a "+str(shark)+" and heals 20 hp.")
+											break
+
+									elif str(move.content).lower()=="!dds":
+										if i[3]<1:
+											await client.send_message(message.channel, "You are out of "+str(dds)+" specs. Please use `!shark` or `!whip`.")
+											continue
+										else:
+											i[3]-=1
+											hit=random.randint(0,20)+random.randint(0,20)
+											opponent[1]-=hit
+											if opponent[1]<0:
+												opponent[1]=0
+											await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
+											await client.send_message(message.channel, str(i[0])+" has used a "+str(dds)+" on "+str(opponent[0])+" and dealt "+str(hit)+" damage.")
+											if opponent[1]<1:
+												winner=i
+											else:
+												if random.randint(1,4)==4:
+													opponent[4]=True
+													opponent[6]=4
+													await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
+													await client.send_message(message.channel, str(opponent[0])+" has been poisoned by the "+str(dds)+"!")
+											break
+
+									elif str(move.content).lower()=="!whip":
+										hit=random.randint(0,27)
+										opponent[1]-=hit
+										await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
+										await client.send_message(message.channel, str(i[0])+" has hit "+str(opponent[0])+" with their "+str(whip)+" and dealt "+str(hit)+" damage.")
+										if opponent[1]<1:
+											winner=i
+										break
+									else:
+										await client.send_message(message.channel, "An **error** has occured. Make sure to use `!shark` `!dds` or `!whip`.")
+										continue
+
+					winnert=getvalue(int(winner.id), "tokens")
+					c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(winnert+bet+bet, winner.id))
+					conn.commit()
+					await client.send_message(message.channel, "<@"+str(winner[0].id)+"> Has won the duel and gained "+'{:,}'.format(bet*2)+" tokens!")
+				else:
+					None
+			else:
+				None			
 		#except:
 
 
