@@ -106,8 +106,6 @@ blank=[]
 whip = get(client.get_all_emojis(), name='whip')
 shark = get(client.get_all_emojis(), name='shark~1')
 dds = get(client.get_all_emojis(), name='dds')
-test = get(client.get_all_emojis(), name='hpbar0')
-
 
 async def my_background_task():
 	await client.wait_until_ready()
@@ -678,7 +676,10 @@ async def on_message(message):
 		#except:
 	####################
 	elif message.content=="!testing":
-		await client.send_message(message.channel, str(test)+str(dds))
+		whip = get(client.get_all_emojis(), name='whip')
+		shark = get(client.get_all_emojis(), name='shark~1')
+		dds = get(client.get_all_emojis(), name='dds')
+		await client.send_message(message.channel, str(dds)+str(whip))
 		
 
 #website info
