@@ -86,6 +86,7 @@ def hpupdate(players, url):
 		elif hp<1:
 			hp = get(client.get_all_emojis(), name='hpbar0')
 
+		shark = get(client.get_all_emojis(), name='shark~1')
 		embed.add_field(name=str(i[0])[:-5], value="Poisoned: "+str(i[4]) +
 													"\n"+str(shark)+": "+str(i[2]) +
 													"\nSpecial Attack: "+str(i[3]*25)+"%" +
@@ -103,9 +104,6 @@ word="placeholderplaceholderplaceholderplaceholder"
 answer="placeholderplaceholderplaceholderplaceholder"
 word1="placeholderplaceholderplaceholderplaceholder"
 blank=[]
-whip = get(client.get_all_emojis(), name='whip')
-shark = get(client.get_all_emojis(), name='shark~1')
-dds = get(client.get_all_emojis(), name='dds')
 
 async def my_background_task():
 	await client.wait_until_ready()
@@ -608,18 +606,21 @@ async def on_message(message):
 								while True:
 									move = await client.wait_for_message(timeout=20, channel=message.channel, author=i[0])
 									if move is None:
+										whip = get(client.get_all_emojis(), name='whip')
 										await client.send_message(message.channel, "Took too long. Automatically used "+str(whip)+".")
 										hit=random.randint(0,27)
 										opponent[1]-=hit
 										if opponent[1]<0:
 											opponent[1]=0
 										await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
+										whip = get(client.get_all_emojis(), name='whip')
 										await client.send_message(message.channel, str(i[0])+" has hit "+str(opponent[0])+" with their "+str(whip)+" and dealt "+str(hit)+" damage.")
 										if opponent[1]<1:
 											winner=i
 										break
 									if str(move.content).lower()=="!shark":
 										if i[2]<1:
+											shark = get(client.get_all_emojis(), name='shark~1')
 											await client.send_message("You are out of "+str(shark)+". Please use `!dds` or `!whip`.")
 											continue
 										else:
@@ -628,11 +629,13 @@ async def on_message(message):
 											if i[1]>99:
 												i[1]=99
 											await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
+											shark = get(client.get_all_emojis(), name='shark~1')
 											await client.send_message(message.channel, str(i[0])+" eats a "+str(shark)+" and heals 20 hp.")
 											break
 
 									elif str(move.content).lower()=="!dds":
 										if i[3]<1:
+											dds = get(client.get_all_emojis(), name='dds')
 											await client.send_message(message.channel, "You are out of "+str(dds)+" specs. Please use `!shark` or `!whip`.")
 											continue
 										else:
@@ -642,6 +645,7 @@ async def on_message(message):
 											if opponent[1]<0:
 												opponent[1]=0
 											await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
+											dds = get(client.get_all_emojis(), name='dds')
 											await client.send_message(message.channel, str(i[0])+" has used a "+str(dds)+" on "+str(opponent[0])+" and dealt "+str(hit)+" damage.")
 											if opponent[1]<1:
 												winner=i
@@ -650,6 +654,7 @@ async def on_message(message):
 													opponent[4]=True
 													opponent[6]=4
 													await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
+													dds = get(client.get_all_emojis(), name='dds')
 													await client.send_message(message.channel, str(opponent[0])+" has been poisoned by the "+str(dds)+"!")
 											break
 
@@ -657,6 +662,7 @@ async def on_message(message):
 										hit=random.randint(0,27)
 										opponent[1]-=hit
 										await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
+										whip = get(client.get_all_emojis(), name='whip')
 										await client.send_message(message.channel, str(i[0])+" has hit "+str(opponent[0])+" with their "+str(whip)+" and dealt "+str(hit)+" damage.")
 										if opponent[1]<1:
 											winner=i
@@ -675,12 +681,7 @@ async def on_message(message):
 				None			
 		#except:
 	####################
-	elif message.content=="!testing":
-		whip = get(client.get_all_emojis(), name='whip')
-		shark = get(client.get_all_emojis(), name='shark~1')
-		dds = get(client.get_all_emojis(), name='dds')
-		await client.send_message(message.channel, str(dds)+str(whip))
-		
+
 
 #website info
 #total wallet
