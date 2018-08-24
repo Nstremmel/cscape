@@ -104,6 +104,7 @@ word="placeholderplaceholderplaceholderplaceholder"
 answer="placeholderplaceholderplaceholderplaceholder"
 word1="placeholderplaceholderplaceholderplaceholder"
 blank=[]
+duel=False
 
 async def my_background_task():
 	await client.wait_until_ready()
@@ -675,6 +676,7 @@ async def on_message(message):
 					c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(winnert+bet+bet, winner.id))
 					conn.commit()
 					await client.send_message(message.channel, "<@"+str(winner[0].id)+"> Has won the duel and gained "+'{:,}'.format(bet*2)+" tokens!")
+					duel=False
 				else:
 					None
 			else:
