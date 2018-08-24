@@ -123,7 +123,7 @@ async def on_message_delete(message):
 
 @client.event
 async def on_message(message):
-	global objects,word,answer,word1,guesses,solved,blank,wrong
+	global objects,word,answer,word1,guesses,solved,blank,wrong,duel
 	
 	message.content=message.content.lower()
 
