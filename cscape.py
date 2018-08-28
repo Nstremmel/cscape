@@ -580,8 +580,8 @@ async def on_message(message):
 
 				if duel:
 					#player=[member object, hp, sharks, dds specs, poisoned, turns since poisoned, poison damage, turns since speced]
-					gambler=[(message.author), 99, 10, 4, False, 0, 4, 0]
-					caller=[caller, 99, 10, 4, False, 0, 4, 0]
+					gambler=[(message.author), 99, 5, 4, False, 0, 4, 0]
+					caller=[caller, 99, 5, 4, False, 0, 4, 0]
 					players=[gambler,caller]
 					winner=None
 					while True:
@@ -629,7 +629,7 @@ async def on_message(message):
 										if str(move.content).lower()=="!shark":
 											if i[2]<1:
 												shark = get(client.get_all_emojis(), name='07shark')
-												await client.send_message("You are out of "+str(shark)+". Please use `!dds` or `!whip`.")
+												await client.send_message(message.channel, "You are out of "+str(shark)+". Please use `!dds` or `!whip`.")
 												continue
 											else:
 												i[2]-=1
