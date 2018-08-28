@@ -86,7 +86,7 @@ def hpupdate(players, url):
 		elif hp<1:
 			hp = get(client.get_all_emojis(), name='hpbar0')
 
-		shark = get(client.get_all_emojis(), name='shark~1')
+		shark = get(client.get_all_emojis(), name='07shark')
 		embed.add_field(name=str(i[0])[:-5], value="Poisoned: "+str(i[4]) +
 													"\n"+str(shark)+": "+str(i[2]) +
 													"\nSpecial Attack: "+str(i[3]*25)+"%" +
@@ -556,11 +556,13 @@ async def on_message(message):
 				enough=False
 
 			if enough:
+				c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(current-bet, message.author.id))
 				await client.send_message(message.channel, "<@"+str(message.author.id)+"> wants to duel for "+'{:,}'.format(bet)+" tokens. Use `!call` to accept the duel.")
 				while True:
 					call = await client.wait_for_message(timeout=60, channel=message.channel, content="!call")
 					if call is None:
 						await client.send_message(message.channel, "<@"+str(message.author.id)+">'s duel request has timed out.")
+						c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(current, message.author.id))
 						break
 					caller=call.author
 					if str(caller.id)==str(message.author.id):
@@ -572,13 +574,11 @@ async def on_message(message):
 						await client.send_message(message.channel, "You don't have enough tokens to call that duel.")
 						continue
 					else:
+						c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(callertokens-bet, caller.id))
 						duel=True
 						break
 
 				if duel:
-					c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(current-bet, message.author.id))
-					c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(callertokens-bet, caller.id))
-
 					#player=[member object, hp, sharks, dds specs, poisoned, turns since poisoned, poison damage, turns since speced]
 					gambler=[(message.author), 99, 10, 4, False, 0, 4, 0]
 					caller=[caller, 99, 10, 4, False, 0, 4, 0]
@@ -587,96 +587,97 @@ async def on_message(message):
 					while True:
 						sent = await client.send_message(message.channel, embed=hpupdate(players, str(message.server.icon_url)))
 						if winner!=None:
-							break
+							winnert=getvalue(int(winner[0].id), "tokens")
+							c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(winnert+bet+bet, winner[0].id))
+							conn.commit()
+							await client.send_message(message.channel, "<@"+str(winner[0].id)+"> Has won the duel and gained "+'{:,}'.format(bet*2)+" tokens!")
+							duel=False
 						else:
 							for i in players:
-								opponent=players[int(players.index(i))-1]
-								if i[3]<4:
-									i[7]+=1
-									if i[7]%4==0:
-										i[3]+=1
-										await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
-								if i[4]==True:
-									i[5]+=1
-									if i[5]%4==0:
-										i[1]-=i[6]
-										await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
-										await client.send_message(message.channel, str(i[0])+" took "+str(i[6])+" damage from poison.")
-
-								await client.send_message(message.channel, str(i[0])+", it is your turn. Use `!shark`, `!dds` or `!whip`.")
-								while True:
-									move = await client.wait_for_message(timeout=20, channel=message.channel, author=i[0])
-									if move is None:
-										whip = get(client.get_all_emojis(), name='whip')
-										await client.send_message(message.channel, "Took too long. Automatically used "+str(whip)+".")
-										hit=random.randint(0,27)
-										opponent[1]-=hit
-										if opponent[1]<0:
-											opponent[1]=0
-										await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
-										whip = get(client.get_all_emojis(), name='whip')
-										await client.send_message(message.channel, str(i[0])+" has hit "+str(opponent[0])+" with their "+str(whip)+" and dealt "+str(hit)+" damage.")
-										if opponent[1]<1:
-											winner=i
-										break
-									if str(move.content).lower()=="!shark":
-										if i[2]<1:
-											shark = get(client.get_all_emojis(), name='shark~1')
-											await client.send_message("You are out of "+str(shark)+". Please use `!dds` or `!whip`.")
-											continue
-										else:
-											i[2]-=1
-											i[1]+=20
-											if i[1]>99:
-												i[1]=99
+								if winner!=None:
+									break
+								else:
+									opponent=players[int(players.index(i))-1]
+									if i[3]<4:
+										i[7]+=1
+										if i[7]%4==0:
+											i[3]+=1
 											await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
-											shark = get(client.get_all_emojis(), name='shark~1')
-											await client.send_message(message.channel, str(i[0])+" eats a "+str(shark)+" and heals 20 hp.")
-											break
+									if i[4]==True:
+										i[5]+=1
+										if i[5]%4==0:
+											i[1]-=i[6]
+											await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
+											await client.send_message(message.channel, str(i[0])+" took "+str(i[6])+" damage from poison.")
 
-									elif str(move.content).lower()=="!dds":
-										if i[3]<1:
-											dds = get(client.get_all_emojis(), name='dds')
-											await client.send_message(message.channel, "You are out of "+str(dds)+" specs. Please use `!shark` or `!whip`.")
-											continue
-										else:
-											i[3]-=1
-											hit=random.randint(0,20)+random.randint(0,20)
+									await client.send_message(message.channel, str(i[0])+", it is your turn. Use `!shark`, `!dds` or `!whip`.")
+									while True:
+										move = await client.wait_for_message(timeout=20, channel=message.channel, author=i[0])
+										if move is None:
+											whip = get(client.get_all_emojis(), name='whip')
+											await client.send_message(message.channel, "Took too long. Automatically used "+str(whip)+".")
+											hit=random.randint(0,27)
 											opponent[1]-=hit
 											if opponent[1]<0:
 												opponent[1]=0
 											await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
-											dds = get(client.get_all_emojis(), name='dds')
-											await client.send_message(message.channel, str(i[0])+" has used a "+str(dds)+" on "+str(opponent[0])+" and dealt "+str(hit)+" damage.")
+											whip = get(client.get_all_emojis(), name='whip')
+											await client.send_message(message.channel, str(i[0])+" has hit "+str(opponent[0])+" with their "+str(whip)+" and dealt "+str(hit)+" damage.")
 											if opponent[1]<1:
 												winner=i
-											else:
-												if random.randint(1,4)==4:
-													opponent[4]=True
-													opponent[6]=4
-													await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
-													dds = get(client.get_all_emojis(), name='dds')
-													await client.send_message(message.channel, str(opponent[0])+" has been poisoned by the "+str(dds)+"!")
 											break
+										if str(move.content).lower()=="!shark":
+											if i[2]<1:
+												shark = get(client.get_all_emojis(), name='07shark')
+												await client.send_message("You are out of "+str(shark)+". Please use `!dds` or `!whip`.")
+												continue
+											else:
+												i[2]-=1
+												i[1]+=20
+												if i[1]>99:
+													i[1]=99
+												await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
+												shark = get(client.get_all_emojis(), name='07shark')
+												await client.send_message(message.channel, str(i[0])+" eats a "+str(shark)+" and heals 20 hp.")
+												break
 
-									elif str(move.content).lower()=="!whip":
-										hit=random.randint(0,27)
-										opponent[1]-=hit
-										await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
-										whip = get(client.get_all_emojis(), name='whip')
-										await client.send_message(message.channel, str(i[0])+" has hit "+str(opponent[0])+" with their "+str(whip)+" and dealt "+str(hit)+" damage.")
-										if opponent[1]<1:
-											winner=i
-										break
-									else:
-										await client.send_message(message.channel, "An **error** has occured. Make sure to use `!shark` `!dds` or `!whip`.")
-										continue
+										elif str(move.content).lower()=="!dds":
+											if i[3]<1:
+												dds = get(client.get_all_emojis(), name='dds')
+												await client.send_message(message.channel, "You are out of "+str(dds)+" specs. Please use `!shark` or `!whip`.")
+												continue
+											else:
+												i[3]-=1
+												hit=random.randint(0,20)+random.randint(0,20)
+												opponent[1]-=hit
+												if opponent[1]<0:
+													opponent[1]=0
+												await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
+												dds = get(client.get_all_emojis(), name='dds')
+												await client.send_message(message.channel, str(i[0])+" has used a "+str(dds)+" on "+str(opponent[0])+" and dealt "+str(hit)+" damage.")
+												if opponent[1]<1:
+													winner=i
+												else:
+													if random.randint(1,4)==4:
+														opponent[4]=True
+														opponent[6]=4
+														await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
+														dds = get(client.get_all_emojis(), name='dds')
+														await client.send_message(message.channel, str(opponent[0])+" has been poisoned by the "+str(dds)+"!")
+												break
 
-					winnert=getvalue(int(winner.id), "tokens")
-					c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(winnert+bet+bet, winner.id))
-					conn.commit()
-					await client.send_message(message.channel, "<@"+str(winner[0].id)+"> Has won the duel and gained "+'{:,}'.format(bet*2)+" tokens!")
-					duel=False
+										elif str(move.content).lower()=="!whip":
+											hit=random.randint(0,27)
+											opponent[1]-=hit
+											await client.edit_message(sent, embed=hpupdate(players, str(message.server.icon_url)))
+											whip = get(client.get_all_emojis(), name='whip')
+											await client.send_message(message.channel, str(i[0])+" has hit "+str(opponent[0])+" with their "+str(whip)+" and dealt "+str(hit)+" damage.")
+											if opponent[1]<1:
+												winner=i
+											break
+										else:
+											await client.send_message(message.channel, "An **error** has occured. Make sure to use `!shark` `!dds` or `!whip`.")
+											continue
 				else:
 					None
 			else:
