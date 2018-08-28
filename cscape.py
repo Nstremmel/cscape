@@ -592,6 +592,7 @@ async def on_message(message):
 							conn.commit()
 							await client.send_message(message.channel, "<@"+str(winner[0].id)+"> Has won the duel and gained "+'{:,}'.format(bet*2)+" tokens!")
 							duel=False
+							winner=None
 						else:
 							for i in players:
 								if winner!=None:
