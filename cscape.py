@@ -593,15 +593,6 @@ async def on_message(message):
 					while True:
 						if melewinner==None:
 							melesent = await client.send_message(message.channel, embed=hpupdate(meleplayers, str(message.server.icon_url), "mele"))
-						else:
-							winnert=getvalue(int(winner[0].id), "tokens")
-							c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(winnert+melebet+melebet, winner[0].id))
-							conn.commit()
-							await client.send_message(message.channel, "<@"+str(melewinner[0].id)+"> Has won the duel and gained "+'{:,}'.format(melebet*2)+" tokens!")
-							meleduel=False
-							melewinner=None
-							break
-						else:
 							for i in meleplayers:
 								if melewinner!=None:
 									break
@@ -687,6 +678,14 @@ async def on_message(message):
 										else:
 											await client.send_message(message.channel, "An **error** has occured. Make sure to use `!shark` `!dds` or `!whip`.")
 											continue
+						else:
+							winnert=getvalue(int(winner[0].id), "tokens")
+							c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(winnert+melebet+melebet, winner[0].id))
+							conn.commit()
+							await client.send_message(message.channel, "<@"+str(melewinner[0].id)+"> Has won the duel and gained "+'{:,}'.format(melebet*2)+" tokens!")
+							meleduel=False
+							melewinner=None
+							break
 				else:
 					None
 			else:
@@ -738,15 +737,6 @@ async def on_message(message):
 					while True:
 						if magicwinner==None:
 							magicsent = await client.send_message(message.channel, embed=hpupdate(players, str(message.server.icon_url), "magic"))
-						else:
-							winnert=getvalue(int(winner[0].id), "tokens")
-							c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(winnert+magicbet+magicbet, winner[0].id))
-							conn.commit()
-							await client.send_message(message.channel, "<@"+str(magicwinner[0].id)+"> Has won the duel and gained "+'{:,}'.format(magicbet*2)+" tokens!")
-							magicduel=False
-							magicwinner=None
-							break
-						else:
 							for i in magicplayers:
 								if magicwinner!=None:
 									break
@@ -816,6 +806,14 @@ async def on_message(message):
 										else:
 											await client.send_message(message.channel, "An **error** has occured. Make sure to use `!shark` `!blood` or `!ice`.")
 											continue
+						else:
+							winnert=getvalue(int(winner[0].id), "tokens")
+							c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(winnert+magicbet+magicbet, winner[0].id))
+							conn.commit()
+							await client.send_message(message.channel, "<@"+str(magicwinner[0].id)+"> Has won the duel and gained "+'{:,}'.format(magicbet*2)+" tokens!")
+							magicduel=False
+							magicwinner=None
+							break
 				else:
 					None
 			else:
