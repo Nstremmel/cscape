@@ -731,7 +731,7 @@ async def on_message(message):
 				if magicduel:
 					#player=[member object, hp, sharks, frozen]
 					magicgambler=[(message.author), 99, 5, False]
-					magiccaller=[melecaller, 99, 5, False]
+					magiccaller=[magiccaller, 99, 5, False]
 					magicplayers=[magicgambler,magiccaller]
 					magicwinner=None
 					while True:
@@ -807,8 +807,8 @@ async def on_message(message):
 											await client.send_message(message.channel, "An **error** has occured. Make sure to use `!shark` `!blood` or `!ice`.")
 											continue
 						else:
-							winnert=getvalue(int(winner[0].id), "tokens")
-							c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(winnert+magicbet+magicbet, winner[0].id))
+							winnert=getvalue(int(magicwinner[0].id), "tokens")
+							c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(winnert+magicbet+magicbet, magicwinner[0].id))
 							conn.commit()
 							await client.send_message(message.channel, "<@"+str(magicwinner[0].id)+"> Has won the duel and gained "+'{:,}'.format(magicbet*2)+" tokens!")
 							magicduel=False
