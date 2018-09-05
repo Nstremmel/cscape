@@ -548,7 +548,7 @@ async def on_message(message):
 		embed.set_footer(text="Total Bets checked on: "+str(datetime.datetime.now())[:-7])
 		await client.send_message(message.channel, embed=embed)
 	########################################
-	elif message.content.startswith("!meleduel"):
+	elif message.content.startswith("!ddsstake"):
 		#try:
 		if meleduel==True:
 			await client.send_message(message.channel, "There is a mele duel already going on. Please wait until that one finishes.")
@@ -692,7 +692,7 @@ async def on_message(message):
 				None			
 		#except:
 	####################
-	elif message.content.startswith("!magicduel"):
+	elif message.content.startswith("!magebox"):
 		#try:
 		if magicduel:
 			await client.send_message(message.channel, "There is a magic duel already going on. Please wait until that one finishes.")
