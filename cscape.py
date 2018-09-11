@@ -736,7 +736,7 @@ async def on_message(message):
 					magicwinner=None
 					while True:
 						if magicwinner==None:
-							magicsent = await client.send_message(message.channel, embed=hpupdate(players, str(message.server.icon_url), "magic"))
+							magicsent = await client.send_message(message.channel, embed=hpupdate(magicplayers, str(message.server.icon_url), "magic"))
 							for i in magicplayers:
 								if magicwinner!=None:
 									break
