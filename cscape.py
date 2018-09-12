@@ -562,6 +562,7 @@ async def on_message(message):
 				enough=False
 
 			if enough:
+				meleduel=True
 				c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(melecurrent-melebet, message.author.id))
 				await client.send_message(message.channel, "<@"+str(message.author.id)+"> wants to duel for "+'{:,}'.format(melebet)+" tokens. Use `!call` to accept the duel.")
 				while True:
@@ -581,7 +582,6 @@ async def on_message(message):
 						continue
 					else:
 						c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(melecallertokens-melebet, melecaller.id))
-						meleduel=True
 						break
 
 				if meleduel:
@@ -636,7 +636,7 @@ async def on_message(message):
 												i[1]+=20
 												if i[1]>99:
 													i[1]=99
-												await client.edit_message(sent, embed=hpupdate(meleplayers, str(message.server.icon_url), "mele"))
+												await client.edit_message(melesent, embed=hpupdate(meleplayers, str(message.server.icon_url), "mele"))
 												shark = get(client.get_all_emojis(), name='07shark')
 												await client.send_message(message.channel, str(i[0])+" eats a "+str(shark)+" and heals 20 hp.")
 												break
@@ -706,6 +706,7 @@ async def on_message(message):
 				enough=False
 
 			if enough:
+				magicduel=True
 				c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(magiccurrent-magicbet, message.author.id))
 				await client.send_message(message.channel, "<@"+str(message.author.id)+"> wants to duel for "+'{:,}'.format(magicbet)+" tokens. Use `!call` to accept the duel.")
 				while True:
@@ -725,7 +726,6 @@ async def on_message(message):
 						continue
 					else:
 						c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(magiccallertokens-magicbet, magiccaller.id))
-						magicduel=True
 						break
 
 				if magicduel:
@@ -756,25 +756,30 @@ async def on_message(message):
 											magicopponent[1]-=hit
 											if magicopponent[1]<0:
 												magicopponent[1]=0
+											healed=int(hit*0.25)
+											i[1]+=healed
+											if i[1]>99:
+												i[1]=99
 											await client.edit_message(magicsent, embed=hpupdate(magicplayers, str(message.server.icon_url), "magic"))
 											blood = get(client.get_all_emojis(), name='blood')
-											await client.send_message(message.channel, str(i[0])+" has used "+str(blood)+" on "+str(magicopponent[0])+" and dealt "+str(hit)+" damage.")
+											await client.send_message(message.channel, str(i[0])+" has used "+str(blood)+" on "+str(magicopponent[0])+", dealt "+str(hit)+" damage, and was healed for "+str(healed)+" HP.")
 											if magicopponent[1]<1:
 												magicwinner=i
 											break
-										if str(move.content).lower()=="!shark":
+										if str(move.content).lower()=="!rocktail":
 											if i[2]<1:
 												shark = get(client.get_all_emojis(), name='07shark')
 												await client.send_message(message.channel, "You are out of "+str(shark)+". Please use `!blood` or `!ice`.")
 												continue
 											else:
+												healing=random.randint(22,29)
 												i[2]-=1
-												i[1]+=20
+												i[1]+=healing
 												if i[1]>99:
 													i[1]=99
 												await client.edit_message(magicsent, embed=hpupdate(magicplayers, str(message.server.icon_url), "magic"))
 												shark = get(client.get_all_emojis(), name='07shark')
-												await client.send_message(message.channel, str(i[0])+" eats a "+str(shark)+" and heals 20 hp.")
+												await client.send_message(message.channel, str(i[0])+" eats a "+str(shark)+" and heals "+str(healing)+" hp.")
 												break
 
 										elif str(move.content).lower()=="!ice":
@@ -789,7 +794,7 @@ async def on_message(message):
 												magicwinner=i
 											else:
 												if random.randint(1,5)==5:
-													i[3]=True
+													magicopponent[3]=True
 													ice = get(client.get_all_emojis(), name='ice')
 													await client.send_message(message.channel, str(magicopponent[0])+" has been frozen from "+str(ice)+".")
 											break
@@ -797,9 +802,15 @@ async def on_message(message):
 										elif str(move.content).lower()=="!blood":
 											hit=random.randint(0,29)
 											magicopponent[1]-=hit
+											if magicopponent[1]<0:
+												magicopponent[1]=0
+											healed=int(hit*0.25)
+											i[1]+=healed
+											if i[1]>99:
+												i[1]=99
 											await client.edit_message(magicsent, embed=hpupdate(magicplayers, str(message.server.icon_url), "magic"))
 											blood = get(client.get_all_emojis(), name='blood')
-											await client.send_message(message.channel, str(i[0])+" has used "+str(blood)+" on "+str(magicopponent[0])+" and dealt "+str(hit)+" damage.")
+											await client.send_message(message.channel, str(i[0])+" has used "+str(blood)+" on "+str(magicopponent[0])+", dealt "+str(hit)+" damage, and was healed for "+str(healed)+" HP.")
 											if magicopponent[1]<1:
 												magicwinner=i
 											break
