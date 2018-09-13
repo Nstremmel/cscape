@@ -747,7 +747,7 @@ async def on_message(message):
 										i[3]=False
 										continue
 									magicopponent=magicplayers[int(magicplayers.index(i))-1]
-									await client.send_message(message.channel, str(i[0])+", it is your turn. Use `!shark`, `!blood` or `!ice`.")
+									await client.send_message(message.channel, str(i[0])+", it is your turn. Use `!rocktail`, `!blood` or `!ice`.")
 									while True:
 										move = await client.wait_for_message(timeout=20, channel=message.channel, author=i[0])
 										if move is None:
@@ -769,7 +769,7 @@ async def on_message(message):
 											break
 										if str(move.content).lower()=="!rocktail":
 											if i[2]<1:
-												shark = get(client.get_all_emojis(), name='07shark')
+												shark = get(client.get_all_emojis(), name='rocktail')
 												await client.send_message(message.channel, "You are out of "+str(shark)+". Please use `!blood` or `!ice`.")
 												continue
 											else:
@@ -816,7 +816,7 @@ async def on_message(message):
 												magicwinner=i
 											break
 										else:
-											await client.send_message(message.channel, "An **error** has occured. Make sure to use `!shark` `!blood` or `!ice`.")
+											await client.send_message(message.channel, "An **error** has occured. Make sure to use `!rocktail` `!blood` or `!ice`.")
 											continue
 						else:
 							winnert=getvalue(int(magicwinner[0].id), "tokens")
