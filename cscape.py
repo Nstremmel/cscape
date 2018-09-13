@@ -84,15 +84,14 @@ def hpupdate(players, url, dueltype):
 			hp = get(client.get_all_emojis(), name='hpbar25')
 		elif hp<1:
 			hp = get(client.get_all_emojis(), name='hpbar0')
+		rocktail = get(client.get_all_emojis(), name='rocktail')
 
 		if dueltype=="mele":
-			shark = get(client.get_all_emojis(), name='07shark')
 			embed.add_field(name=str(i[0])[:-5], value="Poisoned: "+str(i[4]) +
-														"\n"+str(shark)+": "+str(i[2]) +
+														"\n"+str(rocktail)+": "+str(i[2]) +
 														"\nSpecial Attack: "+str(i[3]*25)+"%" +
 														"\nHP Left: "+str(i[1])+" "+str(hp), inline=True)
 		elif dueltype=="magic":
-			rocktail = get(client.get_all_emojis(), name='rocktail')
 			embed.add_field(name=str(i[0])[:-5], value= "\n"+str(rocktail)+": "+str(i[2]) +
 														"\nFrozen: "+str(i[3]) +
 														"\nHP Left: "+str(i[1])+" "+str(hp), inline=True)
@@ -612,7 +611,7 @@ async def on_message(message):
 											await client.edit_message(melesent, embed=hpupdate(meleplayers, str(message.server.icon_url), "mele"))
 											await client.send_message(message.channel, str(i[0])+" took "+str(i[6])+" damage from poison.")
 
-									await client.send_message(message.channel, str(i[0])+", it is your turn. Use `!shark`, `!dds` or `!whip`.")
+									await client.send_message(message.channel, str(i[0])+", it is your turn. Use `!rocktail`, `!dds` or `!whip`.")
 									while True:
 										move = await client.wait_for_message(timeout=20, channel=message.channel, author=i[0])
 										if move is None:
@@ -628,25 +627,26 @@ async def on_message(message):
 											if meleopponent[1]<1:
 												melewinner=i
 											break
-										if str(move.content).lower()=="!shark":
+										if str(move.content).lower()=="!rocktail":
 											if i[2]<1:
-												shark = get(client.get_all_emojis(), name='07shark')
-												await client.send_message(message.channel, "You are out of "+str(shark)+". Please use `!dds` or `!whip`.")
+												rocktail = get(client.get_all_emojis(), name='rocktail')
+												await client.send_message(message.channel, "You are out of "+str(rocktail)+". Please use `!dds` or `!whip`.")
 												continue
 											else:
+												healing=random.randint(22,29)
 												i[2]-=1
-												i[1]+=20
+												i[1]+=healing
 												if i[1]>99:
 													i[1]=99
 												await client.edit_message(melesent, embed=hpupdate(meleplayers, str(message.server.icon_url), "mele"))
-												shark = get(client.get_all_emojis(), name='07shark')
-												await client.send_message(message.channel, str(i[0])+" eats a "+str(shark)+" and heals 20 hp.")
+												rocktail = get(client.get_all_emojis(), name='rocktail')
+												await client.send_message(message.channel, str(i[0])+" eats a "+str(shark)+" and heals "+str(healing)+" hp.")
 												break
 
 										elif str(move.content).lower()=="!dds":
 											if i[3]<1:
 												dds = get(client.get_all_emojis(), name='dds')
-												await client.send_message(message.channel, "You are out of "+str(dds)+" specs. Please use `!shark` or `!whip`.")
+												await client.send_message(message.channel, "You are out of "+str(dds)+" specs. Please use `!rocktail` or `!whip`.")
 												continue
 											else:
 												i[3]-=1
@@ -678,7 +678,7 @@ async def on_message(message):
 												melewinner=i
 											break
 										else:
-											await client.send_message(message.channel, "An **error** has occured. Make sure to use `!shark` `!dds` or `!whip`.")
+											await client.send_message(message.channel, "An **error** has occured. Make sure to use `!rocktail` `!dds` or `!whip`.")
 											continue
 						else:
 							winnert=getvalue(int(winner[0].id), "tokens")
