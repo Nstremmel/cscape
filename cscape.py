@@ -570,6 +570,7 @@ async def on_message(message):
 					if call is None:
 						await client.send_message(message.channel, "<@"+str(message.author.id)+">'s duel request has timed out.")
 						c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(melecurrent, message.author.id))
+						meleduel=False
 						break
 					melecaller=call.author
 					if str(melecaller.id)==str(message.author.id):
@@ -714,11 +715,11 @@ async def on_message(message):
 					if call is None:
 						await client.send_message(message.channel, "<@"+str(message.author.id)+">'s duel request has timed out.")
 						c.execute("UPDATE rsmoney SET tokens={} WHERE id={}".format(magiccurrent, message.author.id))
+						magicduel=False
 						break
 					magiccaller=call.author
 					if str(magiccaller.id)==str(message.author.id):
 						await client.send_message(message.channel, "As exciting as it may sound, you cannot duel yourself ._.")
-
 						continue
 					magiccallertokens=getvalue(int(magiccaller.id), "tokens")
 					if magiccallertokens<magicbet:
