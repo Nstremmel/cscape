@@ -85,14 +85,15 @@ def hpupdate(players, url, dueltype):
 		elif hp<1:
 			hp = get(client.get_all_emojis(), name='hpbar0')
 
-		shark = get(client.get_all_emojis(), name='07shark')
 		if dueltype=="mele":
+			shark = get(client.get_all_emojis(), name='07shark')
 			embed.add_field(name=str(i[0])[:-5], value="Poisoned: "+str(i[4]) +
 														"\n"+str(shark)+": "+str(i[2]) +
 														"\nSpecial Attack: "+str(i[3]*25)+"%" +
 														"\nHP Left: "+str(i[1])+" "+str(hp), inline=True)
 		elif dueltype=="magic":
-			embed.add_field(name=str(i[0])[:-5], value= "\n"+str(shark)+": "+str(i[2]) +
+			rocktail = get(client.get_all_emojis(), name='rocktail')
+			embed.add_field(name=str(i[0])[:-5], value= "\n"+str(rocktail)+": "+str(i[2]) +
 														"\nFrozen: "+str(i[3]) +
 														"\nHP Left: "+str(i[1])+" "+str(hp), inline=True)
 	return embed
@@ -423,8 +424,8 @@ async def on_message(message):
 											#"\n `!cashin (rs3 or 07) (AMOUNT)` - Notifies a cashier that you want to cash in that amount\n" +
 											#"\n `!cashout (rs3 or 07) (AMOUNT)` - Notifies a cashier that you want to cash out that amount\n" +
 											#"\n `!wager`, `!total bet`, or `!tb` - Shows the total amount of tokens you've bet\n" +
-											"\n `!meleduel (AMOUNT)` - Hosts a mele duel betting that amount of tokens\n" +
-											"\n `!magicduel (AMOUNT)` - Hosts a magic duel betting that amount of tokens\n" +
+											"\n `!ddsstake (AMOUNT)` - Hosts a mele duel betting that amount of tokens\n" +
+											"\n `!magebox (AMOUNT)` - Hosts a magic duel betting that amount of tokens\n" +
 											"\n `!transfer (@USER) (AMOUNT)` - Transfers that amount of tokens from your wallet to the user's wallet\n", color=2513759)
 
 		embed.set_author(name="CryptoScape Bot Commands", icon_url=str(message.server.icon_url))
@@ -779,7 +780,7 @@ async def on_message(message):
 												if i[1]>99:
 													i[1]=99
 												await client.edit_message(magicsent, embed=hpupdate(magicplayers, str(message.server.icon_url), "magic"))
-												shark = get(client.get_all_emojis(), name='07shark')
+												shark = get(client.get_all_emojis(), name='rocktail')
 												await client.send_message(message.channel, str(i[0])+" eats a "+str(shark)+" and heals "+str(healing)+" hp.")
 												break
 
