@@ -143,112 +143,6 @@ async def on_message(message):
 	#########################################
 	elif message.content.startswith("!say"):
 		await client.send_message(message.channel, str(message.content[5:]))
-	################################################
-
-	elif message.content.startswith('!colorpicker') or message.content.startswith('!colourpicker'):
-		color=('')
-		for i in range(6):
-			color+=random.choice(colors)
-		if message.content.startswith("!colorpicker"):
-			await client.send_message(message.channel, "Your random color is https://www.colorhexa.com/"+color)
-		elif message.content.startswith("!colourpicker"):
-			await client.send_message(message.channel, "Your random colour is https://www.colorhexa.com/"+color)
-
-    #########################################
-	elif message.content.startswith("!throw"):
-		await client.send_message(message.channel,"You throw "+str(message.content[7:])+" into the deep, dark, empty void.")
-		objects.append(str(message.content[7:]))
-	#########################################
-	elif message.content.startswith("!catch"):
-		if len(objects)==0:
-			caught="nothing"
-		else:
-			caught=str(random.choice(objects))
-		await client.send_message(message.channel, "You catch a(n) "+caught+" out of the void that someone threw earlier!")
-	#########################################
-	elif message.content.startswith("!clearthevoid"):
-		objects=[]
-		await client.send_message(message.channel, "The void is now lonely.")
-	#########################################
-
-	elif message.content.startswith("!start unscramble"):
-		if word!="placeholderplaceholderplaceholderplaceholder":
-			await client.send_message(message.channel, "A random game is currently going on right now. Please finish that one before starting a new one. Or ask an Owner, Admin, or Programmer to skip the game.")
-		else:
-			await client.send_message(message.channel, "The first person to type the unscrambled version of this word wins!")
-			word=str(open("words.txt").readlines()[random.randint(0,164)].splitlines()[0])
-			characters=[]
-			characters+=word
-			scrambled=("")
-			for i in range(len(characters)):
-				letter=random.randint(0, (len(characters)-1))
-				scrambled+=str(characters[letter])
-				characters.remove(str(characters[letter]))
-			await client.send_message(message.channel, "The word is:   "+str(scrambled))
-
-
-	elif message.content==str(word):
-		word="placeholderplaceholderplaceholderplaceholder"
-		await client.send_message(message.channel, "<@"+str(message.author.id)+"> has successfully unscrambled the word!")
-
-
-	elif message.content.startswith("!skip unscramble"):
-		if word!="placeholderplaceholderplaceholderplaceholder":
-			await client.send_message(message.channel, "Too difficult for you? The word was `"+str(word)+"`.")
-			word="placeholderplaceholderplaceholderplaceholder"
-		else:
-			await client.send_message(message.channel, "There is no word right now. Use `!start unscramble` to play.")
-	
-	#########################################
-
-	elif message.content.startswith("!start hangman"):
-		if word1!="placeholderplaceholderplaceholderplaceholder":
-			await client.send_message(message.channel, "A hangman game is currently going on right now. Please finish that one before starting a new one.")
-		else:
-			reset()
-			word1=str(open("words.txt").readlines()[random.randint(0,164)].splitlines()[0])
-			solved+=word1
-			for i in range(len(solved)):
-				blank+="-"
-				blank+=" "
-			embed = discord.Embed(description="Use `!guess (letter or word here)` to guess a letter, or the whole word.\nThe first person to guess the word correctly wins!\n\n"+(''.join(blank)), color=6944699)
-			embed.set_author(name="Hangman Game", icon_url=str(message.server.icon_url))
-			embed.set_footer(text="Started on: "+str(datetime.datetime.now())[:-7])
-			await client.send_message(message.channel, embed=embed)
-
-
-	elif message.content.startswith("!guess"):
-		if len(blank)==0:
-			await client.send_message(message.channel, "There is not a game of hangman going on right now. Use `!start hangman` to start a game.")
-		else:
-			guess=(message.content[7:]).lower()
-			if guess == word1.lower():
-				reset()
-				await client.send_message(message.channel, "<@"+str(message.author.id)+"> has solved the puzzle!")
-			elif guess not in solved:
-				wrong.append(message.content[7:])
-				guesses-=1
-				if guesses<1:
-					await client.send_message(message.channel, "GAME OVER! You guessed wrong letters/words 6 times. The word was \""+str(word1)+"\".")
-					reset()
-				else:
-					embed = discord.Embed(description="Use `!guess (letter or word here)` to guess a letter, or the whole word.\nThe first person to guess the word correctly wins!\n\n"+(''.join(blank)), color=6944699)
-					embed.set_author(name="Hangman Game", icon_url=str(message.server.icon_url))
-					embed.add_field(name="Incorrect Guesses Left ", value=str(guesses), inline=True)
-					embed.add_field(name="Previous Incorrect Guesses", value=", ".join(wrong), inline=True)
-					embed.set_footer(text="Guessed on: "+str(datetime.datetime.now())[:-7])
-					await client.send_message(message.channel, embed=embed)
-			else:
-				for counter, i in enumerate(solved):
-					if i.lower() == guess:
-						blank[counter*2]=guess
-				embed = discord.Embed(description="Use `!guess (letter or word here)` to guess a letter, or the whole word.\nThe first person to guess the word correctly wins!\n\n"+(''.join(blank)), color=6944699)
-				embed.set_author(name="Hangman Game", icon_url=str(message.server.icon_url))
-				embed.add_field(name="Incorrect Guesses Left ", value=str(guesses), inline=True)
-				embed.add_field(name="Previous Incorrect Guesses", value=", ".join(wrong), inline=True)
-				embed.set_footer(text="Guessed on: "+str(datetime.datetime.now())[:-7])
-				await client.send_message(message.channel, embed=embed)
-
 	####################################################
 	elif message.content.startswith("!emoji"):
 		if isstaff(message.author.id)=="verified":
@@ -408,12 +302,12 @@ async def on_message(message):
 			await client.send_message(message.channel, "An **error** has occurred. Make sure you use `!update (@user) (amount)`.")
 	#############################################
 	elif message.content.startswith("!help") or message.content.startswith("!commands"):
-		embed = discord.Embed(description=  "\n `!colorpicker` - Shows a random color\n" +
+		embed = discord.Embed(description=  #"\n `!colorpicker` - Shows a random color\n" +
 											#"\n `!emoji (WORDS)` - The bot sends back those words in emoji form\n" +
-											"\n `!start unscramble` - Starts a game where you unscramble a word\n" +
-											"\n `!start hangman` - Starts a game of hangman\n" +
+											#"\n `!start unscramble` - Starts a game where you unscramble a word\n" +
+											#"\n `!start hangman` - Starts a game of hangman\n" +
 											#"\n `!random (singleplayer or multiplayer) (SIZE)` - Starts a game where you guess a number between 1 and the given size\n" +
-											"\n `!poll (QUESTION)` - Starts a Yes/No poll with the given question\n" +
+											#"\n `!poll (QUESTION)` - Starts a Yes/No poll with the given question\n" +
 											"\n `!w`, `!wallet`, `!$`, or `!tokens` - Checks your own tokens\n" +
 											"\n `!w (@USER)`, `!wallet (@USER)`, `!$ (@USER)`, or `!tokens (@USER)` - Checks that user's tokens\n" +
 											#"\n `!daily` - Gives 800 tokens each day\n" +
@@ -424,8 +318,8 @@ async def on_message(message):
 											#"\n `!cashout (rs3 or 07) (AMOUNT)` - Notifies a cashier that you want to cash out that amount\n" +
 											#"\n `!wager`, `!total bet`, or `!tb` - Shows the total amount of tokens you've bet\n" +
 											"\n `!ddsstake (AMOUNT)` - Hosts a mele duel betting that amount of tokens\n" +
-											"\n `!magebox (AMOUNT)` - Hosts a magic duel betting that amount of tokens\n" +
-											"\n `!transfer (@USER) (AMOUNT)` - Transfers that amount of tokens from your wallet to the user's wallet\n", color=2513759)
+											"\n `!magebox (AMOUNT)` - Hosts a magic duel betting that amount of tokens\n", color=2513759)
+											#"\n `!transfer (@USER) (AMOUNT)` - Transfers that amount of tokens from your wallet to the user's wallet\n"
 
 		embed.set_author(name="CryptoScape Bot Commands", icon_url=str(message.server.icon_url))
 		await client.send_message(message.author, embed=embed)
@@ -640,7 +534,7 @@ async def on_message(message):
 													i[1]=99
 												await client.edit_message(melesent, embed=hpupdate(meleplayers, str(message.server.icon_url), "mele"))
 												rocktail = get(client.get_all_emojis(), name='rocktail')
-												await client.send_message(message.channel, str(i[0])+" eats a "+str(shark)+" and heals "+str(healing)+" hp.")
+												await client.send_message(message.channel, str(i[0])+" eats a "+str(rocktail)+" and heals "+str(healing)+" hp.")
 												break
 
 										elif str(move.content).lower()=="!dds":
@@ -770,8 +664,8 @@ async def on_message(message):
 											break
 										if str(move.content).lower()=="!rocktail":
 											if i[2]<1:
-												shark = get(client.get_all_emojis(), name='rocktail')
-												await client.send_message(message.channel, "You are out of "+str(shark)+". Please use `!blood` or `!ice`.")
+												rocktail = get(client.get_all_emojis(), name='rocktail')
+												await client.send_message(message.channel, "You are out of "+str(rocktail)+". Please use `!blood` or `!ice`.")
 												continue
 											else:
 												healing=random.randint(22,29)
@@ -780,8 +674,8 @@ async def on_message(message):
 												if i[1]>99:
 													i[1]=99
 												await client.edit_message(magicsent, embed=hpupdate(magicplayers, str(message.server.icon_url), "magic"))
-												shark = get(client.get_all_emojis(), name='rocktail')
-												await client.send_message(message.channel, str(i[0])+" eats a "+str(shark)+" and heals "+str(healing)+" hp.")
+												rocktail = get(client.get_all_emojis(), name='rocktail')
+												await client.send_message(message.channel, str(i[0])+" eats a "+str(rocktail)+" and heals "+str(healing)+" hp.")
 												break
 
 										elif str(move.content).lower()=="!ice":
