@@ -322,8 +322,7 @@ async def on_message(message):
 											#"\n `!transfer (@USER) (AMOUNT)` - Transfers that amount of tokens from your wallet to the user's wallet\n"
 
 		embed.set_author(name="CryptoScape Bot Commands", icon_url=str(message.server.icon_url))
-		await client.send_message(message.author, embed=embed)
-		await client.send_message(message.channel, "The commands have been sent to your private messages.")
+		await client.send_message(message.channel, embed=embed)
 	###################################
 	elif ((message.content).lower()).startswith("!transfer"):
 		try:
