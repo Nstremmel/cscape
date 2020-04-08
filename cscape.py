@@ -104,7 +104,7 @@ async def on_ready():
 async def on_reaction_add(reaction, user):
     guildroles = await user.guild.fetch_roles()
     memberRole = get(guildroles, name='CyptoScape Members')
-    if reaction.channel.id == 539166773820391443 and memberRole not in user.roles:
+    if reaction.message.channel.id == 539166773820391443 and memberRole not in user.roles:
         await client.add_roles(user, memberRole)
 
 @client.event
