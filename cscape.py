@@ -10,6 +10,7 @@ from discord.utils import get
 DATABASE_URL = os.environ['DATABASE_URL']
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 c=conn.cursor()
+conn.set_session(autocommit=True)
 
 # c.execute("DROP TABLE rsmoney")
 # c.execute("""CREATE TABLE rsmoney (
@@ -51,9 +52,11 @@ def reset():
 	wrong=[]
 	word1="placeholderplaceholderplaceholderplaceholder"
 
-def isstaff(checkedid):
+def isstaff(checkedid,serverroles,authorroles):
 	for i in open("staff.txt"):
-		if str(i.split(" ")[0])==str(checkedid):
+		client.get_guild(550630947767320578)
+		role=get(serverroles, name=str(i.strip()))
+		if role in authorroles:
 			return "verified"
 
 def formatok(amount):
@@ -104,9 +107,6 @@ colors=["A","B","C","D","E","F","0","1","2","3","4","5","6","7","8","9"]
 objects=[]
 flowers=["Red","Orange","Yellow","Green","Blue","Purple"]
 sidecolors=[16711680, 16743712, 16776960, 1305146, 1275391, 16730111]
-word="placeholderplaceholderplaceholderplaceholder"
-answer="placeholderplaceholderplaceholderplaceholder"
-word1="placeholderplaceholderplaceholderplaceholder"
 blank=[]
 meleduel=False
 magicduel=False
@@ -277,7 +277,7 @@ async def on_message(message):
 
 				await client.send_message(message.channel, str(member)+"'s tokens have been reset to 0. RIP")
 			else:
-				await client.send_message(message.channel, "DON'T TOUCHA MY SPAGHET!")
+				await client.send_message(message.channel, "Admin Command Only!")
 		except:
 			await client.send_message(message.channel, "An **error** occurred. Make sure you use `!reset (@user)`")
 	###########################################
@@ -297,7 +297,7 @@ async def on_message(message):
 				await client.send_message(message.channel, str(member)+"'s tokens have been updated.")
 
 			else:
-				await client.send_message(message.channel, "DON'T TOUCHA MY SPAGHET!")
+				await client.send_message(message.channel, "Admin Command Only!")
 		except:
 			await client.send_message(message.channel, "An **error** has occurred. Make sure you use `!update (@user) (amount)`.")
 	#############################################
@@ -356,15 +356,6 @@ async def on_message(message):
 				None
 		except:
 			await client.send_message(message.channel, "An **error** has occurred. Make sure you use `!transfer (@user) (Amount you want to give)`.")
-	#######################################
-	elif message.content.startswith("!total wallet"):
-		c.execute("SELECT SUM(tokens) FROM rsmoney")
-		tokens="{:,}".format(int(float(str(c.fetchall())[11:-5])))
-		embed = discord.Embed(color=16766463)
-		embed.set_author(name="Everyone's Wallet", icon_url="https://images.ecosia.org/xSQHmzfpe-a49ZZX3B8q8kX9ycs=/0x390/smart/https%3A%2F%2Fjustmeint.files.wordpress.com%2F2012%2F08%2Fearth-small.jpg")
-		embed.add_field(name="tokens", value=tokens, inline=True)
-		embed.set_footer(text="Total Wallet checked on: "+str(datetime.datetime.now())[:-7])
-		await client.send_message(message.channel, embed=embed)
 	################################
 	elif message.content.startswith("!flower"):
 		try:
