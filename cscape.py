@@ -42,7 +42,7 @@ def update_money(userid, amount):
 
 def isstaff(authorroles):
     for i in open('staff.txt'):
-        guild = client.get_guild(550630947767320578)
+        guild = client. guild(550630947767320578)
         role = get(guild.roles, name=str(i.strip()))
         if role in authorroles:
             return 'verified'
@@ -310,6 +310,13 @@ async def on_message(message):
         except:
             await message.channel.send('An **error** has occurred. Make sure you use `!transfer (@user) (Amount you want to give)`.')
     #######################################
+    elif message.content.startswith('message'):
+        channel = client.get_channel(int((message.content).split(' ')[1]))
+        embed = discord.Embed(description='React to this message with <:crytoscapelogo:676988116451590226> to create a __private room__.', color=sidecolor)
+        embed.set_author(name=(channel.name).title() + 'Ticket', icon_url=message.guild.icon_url)
+        sent = await channel.send(embed=embed)
+        await sent.add_reaction(client.get_emoji(676988116451590226))
+
     # elif message.content.startswith('!flower'):
     #     try:
     #         enough = True
