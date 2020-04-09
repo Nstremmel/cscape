@@ -111,8 +111,8 @@ async def on_ready():
 
 @client.event
 async def on_reaction_add(reaction, user):
-    messageids = [697903966343659632, 697904029744758835, 697904276323958807, 697904294422380584, 697904310201090128]
-    if reaction.message.id in messageids and reaction.emoji.id == 676988116451590226 and user.id != 479862852895899649:
+    messageids = [697870018007793755, 697869949774856203, 676872117266153474, 676866824557690880, 676891269280170052, 676891575988518985, 685274381173391395]
+    if reaction.message.channel.id in channelids and reaction.emoji.id == 676988116451590226 and user.id != 479862852895899649:
         channels = getvalue(user.id, 'channels')#.split('|')
         print(channels)
         print(str(channels))
