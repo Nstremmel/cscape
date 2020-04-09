@@ -40,9 +40,9 @@ def getvalue(userid, column):
 
     c.execute("SELECT {} FROM rsmoney WHERE id={}".format(column, userid))
 
-    if value in booleans:
+    if column in booleans:
         return bool(c.fetchone()[0])
-    elif value in strings:
+    elif column in strings:
         return str(c.fetchone()[0])
     else:
         return int(c.fetchone()[0])
@@ -113,9 +113,7 @@ async def on_ready():
 async def on_reaction_add(reaction, user):
     channelids = [697870018007793755, 697869949774856203, 676872117266153474, 676866824557690880, 676891269280170052, 676891575988518985, 685274381173391395]
     if reaction.message.channel.id in channelids and reaction.emoji.id == 676988116451590226 and user.id != 479862852895899649:
-        channels = getvalue(user.id, 'channels')#.split('|')
-        print(channels)
-        print(str(channels))
+        channels = getvalue(user.id, 'channels').split('|')
         if len(channels) < 2:
             channelName = (reaction.message.channel.name).replace('-', ' ')
             newChannel = await reaction.message.guild.create_text_channel(channelName.title() + ' - ' + str(user)[:-5])
