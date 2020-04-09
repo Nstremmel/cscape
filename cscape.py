@@ -12,13 +12,14 @@ conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 c = conn.cursor()
 conn.set_session(autocommit=True)
 
-#c.execute("DROP TABLE rsmoney")
-# c.execute("""CREATE TABLE rsmoney (
-#               id bigint,
-#               tokens bigint,
-#               tokenstotal bigint
-#               )""")
-# conn.commit()
+c.execute("DROP TABLE rsmoney")
+c.execute("""CREATE TABLE rsmoney (
+              id bigint,
+              tokens bigint,
+              tokenstotal bigint,
+              channels text
+              )""")
+conn.commit()
 
 client = discord.Client()
 
@@ -26,15 +27,25 @@ def add_member(userid, tokens, tokenstotal):
     c.execute('INSERT INTO rsmoney VALUES (%s, %s, %s)', (userid, tokens, tokenstotal))
 
 def getvalue(userid, column):
+    strings=['channels']
+    booleans=[]
+
     try:
-        c.execute('SELECT tokens FROM rsmoney WHERE id={}'.format(userid))
-        tester = int(str(c.fetchone())[1:(- 2)])
+        c.execute("SELECT tokens FROM rsmoney WHERE id={}".format(userid))
+        tester=int(c.fetchone()[0])
     except:
-        add_member(int(userid), 0, 0)
+        print("New Member")
+        add_member(int(userid),0,0)
         return 0
-    c.execute('SELECT {} FROM rsmoney WHERE id={}'.format(str(column), userid))
-    returned = int(c.fetchone()[0])
-    return returned
+
+    c.execute("SELECT {} FROM rsmoney WHERE id={}".format(column, userid))
+
+    if value in booleans:
+        return bool(c.fetchone()[0])
+    elif value in strings:
+        return str(c.fetchone()[0])
+    else:
+        return int(c.fetchone()[0])
 
 def update_money(userid, amount):
     tokens = getvalue(int(userid), 'tokens')
@@ -101,8 +112,16 @@ async def on_ready():
 @client.event
 async def on_reaction_add(reaction, user):
     memberRole = user.guild.get_role(676974123183767583)
-    if reaction.message.channel.id == 676973128135737375 and memberRole not in user.roles:
-        await user.add_roles(memberRole)
+    messageids = [697903966343659632, 697904029744758835, 697904276323958807, 697904294422380584, 697904310201090128]
+    channels = getvalue(user.id, 'channels').split('|')
+    if reaction.message.id in messageids and reaction.emoji.id == 676988116451590226:
+        if len(channels) < 2:
+            channelName = (reaction.message.channel.name).replace('-', ' ')
+            await reaction.message.guild.create_text_channel(channelName.title() + ' - ' + str(user)[:-5])
+        else:
+            sent = await reaction.message.channel.send('<@' + str(user.id) + '>, you can only have a maximum of **two** private channels at a time!')
+            asyncio.sleep(2)
+            await sent.delete()
 
 @client.event
 async def on_reaction_remove(reaction, user):
@@ -199,7 +218,7 @@ async def on_message(message):
             sidecolor = 12249599
         tokens = '{:,}'.format(tokens)
         embed = discord.Embed(color=sidecolor)
-        embed.set_author(name=str(message.author)[:(- 5)] + "'s Wallet", icon_url=str(message.author.avatar_url))
+        embed.set_author(name=str(message.author)[:-5] + "'s Wallet", icon_url=str(message.author.avatar_url))
         embed.add_field(name='Tokens', value=tokens, inline=True)
         embed.set_footer(text='Wallet checked on: ' + str(datetime.datetime.now())[:(- 7)])
         await message.channel.send(embed=embed)
