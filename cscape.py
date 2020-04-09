@@ -44,7 +44,7 @@ def update_money(userid, amount):
 
 def isstaff(authorroles):
     for i in open('staff.txt'):
-        guild = client.get_guild(550630947767320578)
+        guild = client.get_guild(516851968900202498)
         role = get(guild.roles, name=str(i.strip()))
         if role in authorroles:
             return 'verified'
@@ -102,8 +102,8 @@ async def on_ready():
 
 @client.event
 async def on_reaction_add(reaction, user):
-    memberRole = user.guild.get_role(697584696670027806)
-    if reaction.message.channel.id == 539166773820391443 and memberRole not in user.roles:
+    memberRole = user.guild.get_role(676974123183767583)
+    if reaction.message.channel.id == 676973128135737375 and memberRole not in user.roles:
         await user.add_roles(memberRole)
 
 @client.event
