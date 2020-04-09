@@ -112,8 +112,10 @@ async def on_ready():
 @client.event
 async def on_reaction_add(reaction, user):
     messageids = [697903966343659632, 697904029744758835, 697904276323958807, 697904294422380584, 697904310201090128]
-    channels = getvalue(user.id, 'channels').split('|')
     if reaction.message.id in messageids and reaction.emoji.id == 676988116451590226 and user.id != 479862852895899649:
+        channels = getvalue(user.id, 'channels')#.split('|')
+        print(channels)
+        print(str(channels))
         if len(channels) < 2:
             channelName = (reaction.message.channel.name).replace('-', ' ')
             newChannel = await reaction.message.guild.create_text_channel(channelName.title() + ' - ' + str(user)[:-5])
