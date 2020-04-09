@@ -113,7 +113,7 @@ async def on_ready():
 async def on_reaction_add(reaction, user):
     channelids = [697870018007793755, 697869949774856203, 676872117266153474, 676866824557690880, 676891269280170052, 676891575988518985, 685274381173391395]
     if reaction.message.channel.id in channelids and reaction.emoji.id == 676988116451590226 and user.id != 479862852895899649:
-        channels = getvalue(user.id, 'channels').split('|')
+        channels = (getvalue(user.id, 'channels')).split('|')
         if len(channels) < 2:
             channelName = (reaction.message.channel.name).replace('-', ' ')
             newChannel = await reaction.message.guild.create_text_channel(channelName.title() + ' - ' + str(user)[:-5])
@@ -693,4 +693,5 @@ async def on_message(message):
 client.loop.create_task(my_background_task())
 Bot_Token = os.environ['TOKEN']
 client.run(str(Bot_Token))
+#heroku pg:psql postgresql-shallow-22073 --app cscape2
 #https://discordapp.com/oauth2/authorize?client_id=479862852895899649&scope=bot&permissions=0
