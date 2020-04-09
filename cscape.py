@@ -17,17 +17,17 @@ c.execute("""CREATE TABLE rsmoney (
               id bigint,
               tokens bigint,
               tokenstotal bigint,
-              channels text
+              channels int
               )""")
 conn.commit()
 
 client = discord.Client()
 
 def add_member(userid, tokens, tokenstotal):
-    c.execute('INSERT INTO rsmoney VALUES (%s, %s, %s, %s)', (userid, tokens, tokenstotal, ''))
+    c.execute('INSERT INTO rsmoney VALUES (%s, %s, %s, %s)', (userid, tokens, tokenstotal, 0))
 
 def getvalue(userid, column):
-    strings=['channels']
+    strings=[]
     booleans=[]
 
     try:
@@ -113,11 +113,11 @@ async def on_ready():
 async def on_reaction_add(reaction, user):
     channelids = [697870018007793755, 697869949774856203, 676872117266153474, 676866824557690880, 676891269280170052, 676891575988518985, 685274381173391395]
     if reaction.message.channel.id in channelids and reaction.emoji.id == 676988116451590226 and user.id != 479862852895899649:
-        channels = (getvalue(user.id, 'channels')).split('|')
-        if len(channels) < 2:
+        channels = getvalue(user.id, 'channels')
+        if channels < 2:
             channelName = (reaction.message.channel.name).replace('-', ' ')
             newChannel = await reaction.message.guild.create_text_channel(channelName.title() + ' - ' + str(user)[:-5])
-            c.execute("UPDATE rsmoney SET channels={} WHERE id={}".format('|'.join(channels)+'|'+str(newChannel.id), user.id))
+            c.execute("UPDATE rsmoney SET channels={} WHERE id={}".format(channels + 1, user.id))
         else:
             sent = await reaction.message.channel.send('<@' + str(user.id) + '>, you can only have a maximum of **two** private channels at a time!')
             asyncio.sleep(2)
