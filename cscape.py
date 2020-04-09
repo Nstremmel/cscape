@@ -312,7 +312,7 @@ async def on_message(message):
     #######################################
     elif message.content.startswith('message'):
         channel = client.get_channel(int((message.content).split(' ')[1]))
-        embed = discord.Embed(description='React to this message with <:crytoscapelogo:676988116451590226> to create a __private room__.', color=sidecolor)
+        embed = discord.Embed(description='React to this message with <:crytoscapelogo:676988116451590226> to create a __private room__.', color=11854069)
         embed.set_author(name=(channel.name).title() + 'Ticket', icon_url=message.guild.icon_url)
         sent = await channel.send(embed=embed)
         await sent.add_reaction(client.get_emoji(676988116451590226))
