@@ -24,7 +24,6 @@ client = discord.Client()
 
 def add_member(userid, tokens, tokenstotal):
     c.execute('INSERT INTO rsmoney VALUES (%s, %s, %s)', (userid, tokens, tokenstotal))
-    conn.commit()
 
 def getvalue(userid, column):
     try:
@@ -40,7 +39,6 @@ def getvalue(userid, column):
 def update_money(userid, amount):
     tokens = getvalue(int(userid), 'tokens')
     c.execute('UPDATE rsmoney SET tokens={} WHERE id={}'.format(tokens + amount, userid))
-    conn.commit()
 
 def isstaff(authorroles):
     for i in open('staff.txt'):
@@ -147,7 +145,7 @@ async def on_message(message):
     elif message.content.startswith('!poll'):
         message.content = message.content.title()
         embed = discord.Embed(description='Respond below with 👍 for YES, 👎 for NO, or 🤔 for UNSURE/NEUTRAL', color=16724721)
-        embed.set_author(name=str(message.content[6:]), icon_url='https://cdn.discordapp.com/attachments/457004723158122498/466268822735683584/00c208fecf617c79a3f719f1a9d9c9e8.png')
+        embed.set_author(name=str(message.content[6:]), icon_url=message.guild.icon_url)
         embed.set_footer(text='Polled on: ' + str(datetime.datetime.now())[:(- 7)])
         sent = await message.channel.send(embed=embed)
         await sent.add_reaction('👍')
@@ -157,9 +155,9 @@ async def on_message(message):
     elif message.content.startswith('!userinfo'):
         try:
             int(str(message.content[12:13]))
-            member = message.guild.get_member(message.content[12:30])
+            member = message.guild.get_member(int(message.content[12:30]))
         except:
-            member = message.guild.get_member(message.content[13:31])
+            member = message.guild.get_member(int(message.content[13:31]))
         roles = []
         for i in member.roles:
             if str(i) == '@everyone':
@@ -204,15 +202,15 @@ async def on_message(message):
         if message.content.startswith('!wallet <@'):
             try:
                 int(str(message.content[10:11]))
-                member = message.guild.get_member(message.content[10:28])
+                member = message.guild.get_member(int(message.content[10:28]))
             except:
-                member = message.guild.get_member(message.content[11:29])
+                member = message.guild.get_member(int(message.content[11:29]))
         else:
             try:
                 int(str(message.content[5:6]))
-                member = message.guild.get_member(message.content[5:23])
+                member = message.guild.get_member(int(message.content[5:23]))
             except:
-                member = message.guild.get_member(message.content[6:24])
+                member = message.guild.get_member(int(message.content[6:24]))
         tokens = getvalue(int(member.id), 'tokens')
         if tokens >= 1000000:
             sidecolor = 2693614
@@ -232,12 +230,11 @@ async def on_message(message):
             if isstaff(message.author.roles) == 'verified':
                 try:
                     int(str(message.content).split(' ')[1][2:3])
-                    member = message.guild.get_member(str(message.content).split(' ')[1][2:(- 1)])
+                    member = message.guild.get_member(int((message.content).split(' ')[1][2:-1]))
                 except:
-                    member = message.guild.get_member(str(message.content).split(' ')[1][3:(- 1)])
+                    member = message.guild.get_member(int((message.content).split(' ')[1][3:-1]))
                 c.execute('UPDATE rsmoney SET tokens={} WHERE id={}'.format(0, int(member.id)))
-                conn.commit()
-                await message.channel.send(str(member) + "'s tokens have been reset to 0. RIP")
+                await message.channel.send(str(member) + "'s tokens have been reset to 0.")
             else:
                 await message.channel.send('Admin Command Only!')
         except:
@@ -249,9 +246,9 @@ async def on_message(message):
                 amount = formatok(str(message.content).split(' ')[2])
                 try:
                     int(str(message.content).split(' ')[1][2:3])
-                    member = message.guild.get_member(str(message.content).split(' ')[1][2:(- 1)])
+                    member = message.guild.get_member(int((message.content).split(' ')[1][2:-1]))
                 except:
-                    member = message.guild.get_member(str(message.content).split(' ')[1][3:(- 1)])
+                    member = message.guild.get_member(int((message.content).split(' ')[1][3:-1]))
                 update_money(int(member.id), amount)
                 member = message.guild.get_member(str(member.id))
                 await message.channel.send(str(member) + "'s tokens have been updated.")
@@ -300,7 +297,6 @@ async def on_message(message):
                     taker = getvalue(int(member.id), 'tokens')
                     c.execute('UPDATE rsmoney SET tokens={} WHERE id={}'.format(current - transfered, message.author.id))
                     c.execute('UPDATE rsmoney SET tokens={} WHERE id={}'.format(taker + transfered, member.id))
-                    conn.commit()
                     await message.channel.send(((((('<@' + str(message.author.id)) + '> has transfered ') + '{:,}'.format(transfered)) + ' tokens to <@') + str(member.id)) + ">'s wallet.")
                 else:
                     await message.channel.send(('<@' + str(message.author.id)) + ">, You don't have enough tokens to transfer that amount!")
@@ -357,7 +353,6 @@ async def on_message(message):
     #                     words = ((((('Sorry, the color the flower was `' + flower) + '`. ') + str(message.author)) + ' lost `') + '{:,}'.format(bet)) + '` tokens.'
     #                     update_money(int(message.author.id), bet * (- 1))
     #                 c.execute('UPDATE rsmoney SET tokenstotal={} WHERE id={}'.format(totaltokens + bet, message.author.id))
-    #                 conn.commit()
     #                 embed = discord.Embed(description=words, color=sidecolor)
     #                 embed.set_author(name=str(message.author)[:(- 5)] + "'s Gamble", icon_url=str(message.author.avatar_url))
     #                 embed.set_footer(text='Gambled on: ' + str(datetime.datetime.now())[:(- 7)])
@@ -511,7 +506,6 @@ async def on_message(message):
     #                     else:
     #                         winnert = getvalue(int(winner[0].id), 'tokens')
     #                         c.execute('UPDATE rsmoney SET tokens={} WHERE id={}'.format((winnert + melebet) + melebet, winner[0].id))
-    #                         conn.commit()
     #                         await message.channel.send(((('<@' + str(melewinner[0].id)) + '> Has won the duel and gained ') + '{:,}'.format(melebet * 2)) + ' tokens!')
     #                         meleduel = False
     #                         melewinner = None
@@ -649,7 +643,6 @@ async def on_message(message):
     #                     else:
     #                         winnert = getvalue(int(magicwinner[0].id), 'tokens')
     #                         c.execute('UPDATE rsmoney SET tokens={} WHERE id={}'.format((winnert + magicbet) + magicbet, magicwinner[0].id))
-    #                         conn.commit()
     #                         await message.channel.send(((('<@' + str(magicwinner[0].id)) + '> Has won the duel and gained ') + '{:,}'.format(magicbet * 2)) + ' tokens!')
     #                         magicduel = False
     #                         magicwinner = None
