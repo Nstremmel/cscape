@@ -42,7 +42,7 @@ def update_money(userid, amount):
 
 def isstaff(authorroles):
     for i in open('staff.txt'):
-        guild = client.get_guild(516851968900202498)
+        guild = client.get_guild(550630947767320578)
         role = get(guild.roles, name=str(i.strip()))
         if role in authorroles:
             return 'verified'
@@ -249,8 +249,7 @@ async def on_message(message):
                     member = message.guild.get_member(int((message.content).split(' ')[1][2:-1]))
                 except:
                     member = message.guild.get_member(int((message.content).split(' ')[1][3:-1]))
-                update_money(int(member.id), amount)
-                member = message.guild.get_member(str(member.id))
+                update_money(member.id, amount)
                 await message.channel.send(str(member) + "'s tokens have been updated.")
             else:
                 await message.channel.send('Admin Command Only!')
