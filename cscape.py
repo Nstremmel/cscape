@@ -117,7 +117,8 @@ async def on_reaction_add(reaction, user):
     if reaction.message.id in messageids and reaction.emoji.id == 676988116451590226:
         if len(channels) < 2:
             channelName = (reaction.message.channel.name).replace('-', ' ')
-            await reaction.message.guild.create_text_channel(channelName.title() + ' - ' + str(user)[:-5])
+            newChannel = await reaction.message.guild.create_text_channel(channelName.title() + ' - ' + str(user)[:-5])
+            c.execute("UPDATE rsmoney SET channels={} WHERE id={}".format('|'.join(channels)+'|'+str(newChannel.id), user.id))
         else:
             sent = await reaction.message.channel.send('<@' + str(user.id) + '>, you can only have a maximum of **two** private channels at a time!')
             asyncio.sleep(2)
