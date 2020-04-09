@@ -105,6 +105,12 @@ async def on_reaction_add(reaction, user):
         await user.add_roles(memberRole)
 
 @client.event
+async def on_reaction_remove(reaction, user):
+    memberRole = user.guild.get_role(676974123183767583)
+    if reaction.message.channel.id == 676973128135737375 and memberRole in user.roles:
+        await user.remove_roles(memberRole)
+
+@client.event
 async def on_message(message):
     global meleduel, magicduel
    
