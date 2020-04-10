@@ -12,14 +12,14 @@ conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 c = conn.cursor()
 conn.set_session(autocommit=True)
 
-c.execute("DROP TABLE rsmoney")
-c.execute("""CREATE TABLE rsmoney (
-              id bigint,
-              tokens bigint,
-              tokenstotal bigint,
-              openchannel bigint
-              )""")
-conn.commit()
+# c.execute("DROP TABLE rsmoney")
+# c.execute("""CREATE TABLE rsmoney (
+#               id bigint,
+#               tokens bigint,
+#               tokenstotal bigint,
+#               openchannel bigint
+#               )""")
+# conn.commit()
 
 client = discord.Client()
 
@@ -27,7 +27,7 @@ def add_member(userid, tokens, tokenstotal):
     c.execute('INSERT INTO rsmoney VALUES (%s, %s, %s, %s)', (userid, tokens, tokenstotal, 0))
 
 def getvalue(userid, column):
-    strings=['openchannel']
+    strings=[]
     booleans=[]
 
     try:
