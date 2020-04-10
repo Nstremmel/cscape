@@ -125,7 +125,7 @@ async def on_raw_reaction_add(payload):
             c.execute("UPDATE rsmoney SET channels={} WHERE id={}".format(channels + 1, user.id))
         else:
             sent = await channel.send('<@' + str(user.id) + '>, you can only have a maximum of **two** private channels at a time!')
-            asyncio.sleep(2)
+            await asyncio.sleep(3)
             await sent.delete()
 
 @client.event
