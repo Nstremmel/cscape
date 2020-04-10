@@ -114,7 +114,7 @@ async def on_raw_reaction_add(payload):
     user = client.get_user(payload.user_id)
     channel = client.get_channel(payload.channel_id)
     message = await channel.fetch_message(payload.message_id)
-    messageids = [697903966343659632, 697904029744758835, 697965944542068756, 697965985013170247, 697904276323958807, 697904294422380584, 697904310201090128]
+    messageids = [697903966343659632, 697904029744758835, 697965944542068756, 697965985013170247, 697904276323958807, 697904294422380584, 697904310201090128, 698245454168850462]
     if message.id in messageids and payload.emoji.id == 676988116451590226 and user.id != 479862852895899649:
         openchannel = getvalue(user.id, 'openchannel')
         if openchannel == 0:
