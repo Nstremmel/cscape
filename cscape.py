@@ -122,7 +122,7 @@ async def on_raw_reaction_add(payload):
             newChannel = await message.guild.create_text_channel(channel.name + ' ' + str(user)[:-5], category=category)
             await newChannel.set_permissions(user, read_messages=True, send_messages=True, read_message_history=True)
             c.execute("UPDATE rsmoney SET openchannel={} WHERE id={}".format(newChannel.id, user.id))
-            embed = discord.Embed(description='<@' + str(user.id) + '>, this is your temporary private channel. You or a staff member can use `!close` when you are done with it to delete the channel.', color=11854069)
+            embed = discord.Embed(description='<@' + str(user.id) + '>, this is your temporary private channel. You or a staff member can use `!close` when you are done to delete the channel.', color=11854069)
             embed.set_author(name='Private Channel Info', icon_url=message.guild.icon_url)
             embed.set_footer(text='Channel Opened On: ' + str(datetime.datetime.now())[:-7])
             await newChannel.send(embed=embed)
@@ -339,8 +339,8 @@ async def on_message(message):
     #######################################
     elif message.content == '!close':
         if message.channel.category.id == 697938290149425155:
-            await message.channel.delete()
             c.execute("UPDATE rsmoney SET openchannel={} WHERE openchannel={}".format(0, message.channel.id))
+            await message.channel.delete()
     #######################################
     elif message.content.startswith('message'):
         channel = client.get_channel(int((message.content).split(' ')[1]))
