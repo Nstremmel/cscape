@@ -17,7 +17,7 @@ c.execute("""CREATE TABLE rsmoney (
               id bigint,
               tokens bigint,
               tokenstotal bigint,
-              channels int
+              openchannel int
               )""")
 conn.commit()
 
@@ -27,7 +27,7 @@ def add_member(userid, tokens, tokenstotal):
     c.execute('INSERT INTO rsmoney VALUES (%s, %s, %s, %s)', (userid, tokens, tokenstotal, 0))
 
 def getvalue(userid, column):
-    strings=[]
+    strings=['openchannel']
     booleans=[]
 
     try:
@@ -116,15 +116,18 @@ async def on_raw_reaction_add(payload):
     message = await channel.fetch_message(payload.message_id)
     messageids = [697903966343659632, 697904029744758835, 697965944542068756, 697965985013170247, 697904276323958807, 697904294422380584, 697904310201090128]
     if message.id in messageids and payload.emoji.id == 676988116451590226 and user.id != 479862852895899649:
-        channels = getvalue(user.id, 'channels')
-        if channels < 2:
-            channelName = (channel.name).replace('-', ' ')
+        openchannel = getvalue(user.id, 'openchannel')
+        if openchannel == 0:
             category = (client.get_channel(697959708572778627)).category
-            newChannel = await message.guild.create_text_channel(channelName.title() + ' - ' + str(user)[:-5], category=category)
+            newChannel = await message.guild.create_text_channel(channel.name + ' ' + str(user)[:-5], category=category)
             await newChannel.set_permissions(user, read_messages=True, send_messages=True, read_message_history=True)
-            c.execute("UPDATE rsmoney SET channels={} WHERE id={}".format(channels + 1, user.id))
+            c.execute("UPDATE rsmoney SET openchannel={} WHERE id={}".format(newChannel.id, user.id))
+            embed = discord.Embed(description='<@' + str(user.id) + '>, this is your temporary private channel. You or a staff member can use `!close` when you are done with it to delete the channel.', color=11854069)
+            embed.set_author(name='Private Channel Info', icon_url=message.guild.icon_url)
+            embed.set_footer(text='Channel Opened On: ' + str(datetime.datetime.now())[:-7])
+            await newChannel.send(embed=embed)
         else:
-            sent = await channel.send('<@' + str(user.id) + '>, you can only have a maximum of **two** private channels at a time!')
+            sent = await channel.send('<@' + str(user.id) + '>, you can only have *one* private channel at a time!')
             await asyncio.sleep(3)
             await sent.delete()
 
@@ -337,9 +340,7 @@ async def on_message(message):
     elif message.content == '!close':
         if message.channel.category.id == 697938290149425155:
             await message.channel.delete()
-            user = message.guild.get_member_named((message.channel.name).split('-')[-1])
-            channels = getvalue(user.id, 'channels')
-            c.execute("UPDATE rsmoney SET channels={} WHERE id={}".format(channels - 1, user.id))
+            c.execute("UPDATE rsmoney SET openchannel={} WHERE openchannel={}".format(0, message.channel.id))
     #######################################
     elif message.content.startswith('message'):
         channel = client.get_channel(int((message.content).split(' ')[1]))
