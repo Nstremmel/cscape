@@ -17,7 +17,7 @@ c.execute("""CREATE TABLE rsmoney (
               id bigint,
               tokens bigint,
               tokenstotal bigint,
-              openchannel int
+              openchannel bigint
               )""")
 conn.commit()
 
