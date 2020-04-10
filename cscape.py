@@ -118,7 +118,7 @@ async def on_raw_reaction_add(payload):
     if message.id in messageids and payload.emoji.id == 676988116451590226 and user.id != 479862852895899649:
         openchannel = getvalue(user.id, 'openchannel')
         if openchannel == 0:
-            category = (client.get_channel(697959708572778627)).category
+            category = (client.get_channel(698305509140201523)).category
             newChannel = await message.guild.create_text_channel(channel.name + ' ' + str(user)[:-5], category=category)
             await newChannel.set_permissions(user, read_messages=True, send_messages=True, read_message_history=True)
             c.execute("UPDATE rsmoney SET openchannel={} WHERE id={}".format(newChannel.id, user.id))
@@ -133,9 +133,7 @@ async def on_raw_reaction_add(payload):
 
 @client.event
 async def on_reaction_remove(reaction, user):
-    memberRole = user.guild.get_role(676974123183767583)
-    if reaction.message.channel.id == 676973128135737375 and memberRole in user.roles:
-        await user.remove_roles(memberRole)
+    None
 
 @client.event
 async def on_message(message):
@@ -338,7 +336,7 @@ async def on_message(message):
             await message.channel.send('An **error** has occurred. Make sure you use `!transfer (@user) (Amount you want to give)`.')
     #######################################
     elif message.content == '!close':
-        if message.channel.category.id == 697938290149425155:
+        if message.channel.category.id == 698305427284165121:
             c.execute("UPDATE rsmoney SET openchannel={} WHERE openchannel={}".format(0, message.channel.id))
             await message.channel.delete()
     #######################################
