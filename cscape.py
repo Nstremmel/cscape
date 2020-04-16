@@ -124,7 +124,7 @@ sidecolors = [16711680, 16743712, 16776960, 1305146, 1275391, 16730111]
 meleduel = False
 magicduel = False
 class currencies():
-    osrs, ikov, spawnpk, runewild, zenyte, roatzpk = (0, 'osrs'), (0, 'ikov'), (0, 'spawnpk'), (0, 'runewild'), (0, 'zenyte'), (0, 'roatzpk')
+    osrs, ikov, spawnpk, runewild, zenyte, roatzpk = [0, 'osrs'], [0, 'ikov'], [0, 'spawnpk'], [0, 'runewild'], [0, 'zenyte'], [0, 'roatzpk']
     currencies = [osrs, ikov, spawnpk, runewild, zenyte, roatzpk]
 
 async def my_background_task():
