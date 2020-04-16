@@ -66,11 +66,11 @@ def isstaff(authorroles):
 
 def formatok(amount):
     if amount[-1:].lower() == 'm':
-        return int(float(str(amount[:-1])) * 1000000)
-    elif amount[-1:].lower() == 'k':
         return int(float(str(amount[:-1])) * 1000)
+    elif amount[-1:].lower() == 'k':
+        return int(float(str(amount[:-1])))
     elif amount[-1:].lower() == 'b':
-        return int(float(str(amount[:-1])) * 1000000000)
+        return int(float(str(amount[:-1])) * 1_000_000)
     else:
         return int(amount)
 
@@ -322,21 +322,23 @@ async def on_message(message):
             await message.channel.send('An **error** occurred. Make sure you use `!reset (@USER) (CURRENCY)`')
     #######################################
     elif message.content.startswith('!update'):
-        #try:
-        if isstaff(message.author.roles) == 'verified':
-            try:
-                int(str(message.content).split(' ')[1][2:3])
-                member = message.guild.get_member(int((message.content).split(' ')[1][2:-1]))
-            except:
-                member = message.guild.get_member(int((message.content).split(' ')[1][3:-1]))
-            amount = formatok(str(message.content).split(' ')[2])
-            currency = (message.content).split(' ')[3]
-            update_money(member.id, currency, amount)
-            await message.channel.send(str(member) + "'s **" + currency + "** balance has been updated.")
-        else:
-            await message.channel.send('Admin Command Only!')
-        #except:
-        #    await message.channel.send('An **error** has occurred. Make sure you use `!update (@USER) (AMOUNT) (CURRENCY)`.')
+        try:
+            if isstaff(message.author.roles) == 'verified':
+                try:
+                    int(str(message.content).split(' ')[1][2:3])
+                    member = message.guild.get_member(int((message.content).split(' ')[1][2:-1]))
+                except:
+                    member = message.guild.get_member(int((message.content).split(' ')[1][3:-1]))
+                amount = formatok(str(message.content).split(' ')[2])
+                currency = (message.content).split(' ')[3]
+                update_money(member.id, currency, amount)
+                embed = discord.Embed(description=('<@' + str(member.id)) + ">'s **" + currency + "** balance has been updated.", color=5174318)
+                embed.set_author(name='Update Request', icon_url=str(member.avatar_url))
+                await message.channel.send(embed=embed)
+            else:
+                await message.channel.send('Admin Command Only!')
+        except:
+            await message.channel.send('An **error** has occurred. Make sure you use `!update (@USER) (AMOUNT) (CURRENCY)`.')
     #######################################
     elif message.content.startswith('!help') or message.content.startswith('!commands'):
         embed = discord.Embed(description=  #"\n `!colorpicker` - Shows a random color\n" +
