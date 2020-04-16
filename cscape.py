@@ -268,6 +268,8 @@ async def on_message(message):
             i[0] = formatfromk(i[0])
             if i[0] == '0k':
                 i[0] = '0 k'
+            if i[1] == 'osrs':
+                i[1] = '07'
             embed.add_field(name=i[1].title(), value=i[0], inline=True)
         
         await message.channel.send(embed=embed)
@@ -297,6 +299,8 @@ async def on_message(message):
             i[0] = formatfromk(i[0])
             if i[0] == '0k':
                 i[0] = '0 k'
+            if i[1] == 'osrs':
+                i[1] = '07'
             embed.add_field(name=i[1].title(), value=i[0], inline=True)
         
         await message.channel.send(embed=embed)    
@@ -318,21 +322,21 @@ async def on_message(message):
             await message.channel.send('An **error** occurred. Make sure you use `!reset (@USER) (CURRENCY)`')
     #######################################
     elif message.content.startswith('!update'):
-        try:
-            if isstaff(message.author.roles) == 'verified':
-                try:
-                    int(str(message.content).split(' ')[1][2:3])
-                    member = message.guild.get_member(int((message.content).split(' ')[1][2:-1]))
-                except:
-                    member = message.guild.get_member(int((message.content).split(' ')[1][3:-1]))
-                amount = formatok(str(message.content).split(' ')[2])
-                currency = (message.content).split(' ')[3]
-                update_money(member.id, currency, amount)
-                await message.channel.send(str(member) + "'s **" + currency + "** balance has been updated.")
-            else:
-                await message.channel.send('Admin Command Only!')
-        except:
-            await message.channel.send('An **error** has occurred. Make sure you use `!update (@USER) (AMOUNT) (CURRENCY)`.')
+        #try:
+        if isstaff(message.author.roles) == 'verified':
+            try:
+                int(str(message.content).split(' ')[1][2:3])
+                member = message.guild.get_member(int((message.content).split(' ')[1][2:-1]))
+            except:
+                member = message.guild.get_member(int((message.content).split(' ')[1][3:-1]))
+            amount = formatok(str(message.content).split(' ')[2])
+            currency = (message.content).split(' ')[3]
+            update_money(member.id, currency, amount)
+            await message.channel.send(str(member) + "'s **" + currency + "** balance has been updated.")
+        else:
+            await message.channel.send('Admin Command Only!')
+        #except:
+        #    await message.channel.send('An **error** has occurred. Make sure you use `!update (@USER) (AMOUNT) (CURRENCY)`.')
     #######################################
     elif message.content.startswith('!help') or message.content.startswith('!commands'):
         embed = discord.Embed(description=  #"\n `!colorpicker` - Shows a random color\n" +
