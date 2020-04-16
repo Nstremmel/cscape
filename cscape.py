@@ -34,8 +34,8 @@ def getvalue(userid, column):
     strings=[]
     booleans=[]
 
-    if value == '07':
-        value = 'osrs'
+    if column == '07':
+        column = 'osrs'
     try:
         c.execute("SELECT osrs FROM rsmoney WHERE id={}".format(userid))
         tester=int(c.fetchone()[0])
@@ -65,14 +65,33 @@ def isstaff(authorroles):
             return 'verified'
 
 def formatok(amount):
-    if amount[(- 1):].lower() == 'm':
-        return int(float(str(amount[:(- 1)])) * 1000000)
-    elif amount[(- 1):].lower() == 'k':
-        return int(float(str(amount[:(- 1)])) * 1000)
-    elif amount[(- 1):].lower() == 'b':
-        return int(float(str(amount[:(- 1)])) * 1000000000)
+    if amount[-1:].lower() == 'm':
+        return int(float(str(amount[:-1])) * 1000000)
+    elif amount[-1:].lower() == 'k':
+        return int(float(str(amount[:-1])) * 1000)
+    elif amount[-1:].lower() == 'b':
+        return int(float(str(amount[:-1])) * 1000000000)
     else:
         return int(amount)
+
+def formatfromk(amount):
+    if amount>=1000000:
+        if len(str(amount))==7:
+            return '{0:.3g}'.format(amount*0.000001)+"B"
+        elif len(str(amount))==8:
+            return '{0:.4g}'.format(amount*0.000001)+"B"
+        else:
+            return '{0:.5g}'.format(amount*0.000001)+"B"
+    elif amount>=1000:
+        if len(str(amount))==4:
+            return '{0:.3g}'.format(amount*0.001)+"M"
+        elif len(str(amount))==5:
+            return '{0:.4g}'.format(amount*0.001)+"M"
+        elif len(str(amount))==6:
+            return '{0:.5g}'.format(amount*0.001)+"M"
+    else:
+        return str(amount)+"k"
+
 
 def hpupdate(players, url, dueltype):
     embed = discord.Embed(color=16766463)
@@ -246,8 +265,11 @@ async def on_message(message):
         embed.set_footer(text='Wallet checked on: ' + str(datetime.datetime.now())[:-7])
         
         for i in currencies.currencies:
-            i = '{:,}'.format(i)
-            embed.add_field(name=i.title(), value=i, inline=True)
+            i[0] = '{:,}'.format(i[0])
+            i[0] = formatfromk(i[0])
+            if i[0] == '0k'
+                i[0] = '0 k'
+            embed.add_field(name=i[1].title(), value=i[0], inline=True)
         
         await message.channel.send(embed=embed)
 
@@ -273,8 +295,11 @@ async def on_message(message):
         embed.set_footer(text='Wallet checked on: ' + str(datetime.datetime.now())[:-7])
         
         for i in currencies.currencies:
-            i = '{:,}'.format(i)
-            embed.add_field(name=i.title(), value=i, inline=True)
+            i[0] = '{:,}'.format(i[0])
+            i[0] = formatfromk(i[0])
+            if i[0] == '0k'
+                i[0] = '0 k'
+            embed.add_field(name=i[1].title(), value=i[0], inline=True)
         
         await message.channel.send(embed=embed)    
     #######################################
