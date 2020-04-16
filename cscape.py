@@ -12,30 +12,36 @@ conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 c = conn.cursor()
 conn.set_session(autocommit=True)
 
-# c.execute("DROP TABLE rsmoney")
-# c.execute("""CREATE TABLE rsmoney (
-#               id bigint,
-#               tokens bigint,
-#               tokenstotal bigint,
-#               openchannel bigint
-#               )""")
-# conn.commit()
+c.execute("DROP TABLE rsmoney")
+c.execute("""CREATE TABLE rsmoney (
+              id bigint,
+              osrs bigint,
+              ikov bigint,
+              spawnpk bigint,
+              runewild bigint,
+              zenyte bigint,
+              roatzpk bigint,
+              openchannel bigint
+              )""")
+conn.commit()
 
 client = discord.Client()
 
-def add_member(userid, tokens, tokenstotal):
-    c.execute('INSERT INTO rsmoney VALUES (%s, %s, %s, %s)', (userid, tokens, tokenstotal, 0))
+def add_member(userid):
+    c.execute('INSERT INTO rsmoney VALUES (%s, %s, %s, %s, %s, %s, %s, %s)', (userid, 0, 0, 0, 0, 0, 0, 0))
 
 def getvalue(userid, column):
     strings=[]
     booleans=[]
 
+    if value == '07':
+        value = 'osrs'
     try:
-        c.execute("SELECT tokens FROM rsmoney WHERE id={}".format(userid))
+        c.execute("SELECT osrs FROM rsmoney WHERE id={}".format(userid))
         tester=int(c.fetchone()[0])
     except:
         print("New Member")
-        add_member(int(userid),0,0)
+        add_member(int(userid))
         return 0
 
     c.execute("SELECT {} FROM rsmoney WHERE id={}".format(column, userid))
@@ -47,9 +53,9 @@ def getvalue(userid, column):
     else:
         return int(c.fetchone()[0])
 
-def update_money(userid, amount):
-    tokens = getvalue(int(userid), 'tokens')
-    c.execute('UPDATE rsmoney SET tokens={} WHERE id={}'.format(tokens + amount, userid))
+def update_money(userid, currency, amount):
+    total = getvalue(int(userid), currency)
+    c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, total + amount, userid))
 
 def isstaff(authorroles):
     for i in open('staff.txt'):
@@ -98,6 +104,9 @@ flowers = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple']
 sidecolors = [16711680, 16743712, 16776960, 1305146, 1275391, 16730111]
 meleduel = False
 magicduel = False
+class currencies():
+    osrs, ikov, spawnpk, runewild, zenyte, roatzpk = (0, 'osrs'), (0, 'ikov'), (0, 'spawnpk'), (0, 'runewild'), (0, 'zenyte'), (0, 'roatzpk')
+    currencies = [osrs, ikov, spawnpk, runewild, zenyte, roatzpk]
 
 async def my_background_task():
     await client.wait_until_ready()
@@ -183,19 +192,26 @@ async def on_message(message):
         await sent.add_reaction('👎')
         await sent.add_reaction('🤔')
     #######################################
-    elif message.content.startswith('!userinfo'):
+    elif message.content.startswith('$userinfo'):
         try:
             int(str(message.content[12:13]))
             member = message.guild.get_member(int(message.content[12:30]))
         except:
             member = message.guild.get_member(int(message.content[13:31]))
+        
         roles = []
+        
         for i in member.roles:
             if str(i) == '@everyone':
-                roles.append('everyone')
+                roles.append('Everyone')
             else:
                 roles.append(i.name)
-        embed = discord.Embed(description=((((((((((((' `Name:` ' + str(member)) + '\n') + '\n`ID:` ') + str(member.id)) + '\n\n`Roles:` ') + ', '.join(roles)) + '\n\n`Joined server on:` ') + str(member.joined_at).split(' ')[0]) + '\n\n`Created account on:` ') + str(member.created_at).split(' ')[0]) + '\n\n`Playing:` ') + str(member.game)) + '\n', color=8270499)
+        
+        embed = discord.Embed(description=" Name: "+str(member)+"\n"+
+                                            "\nRoles: "+', '.join(roles)+"\n"+
+                                            "\nJoined server on: "+str(member.joined_at).split(" ")[0]+"\n"+
+                                            "\nCreated account on: "+str(member.created_at).split(" ")[0]+"\n"+
+                                            "\nPlaying: "+str(member.activity)+"\n", color=8270499)
         embed.set_author(name='Information of ' + str(member)[:(- 5)], icon_url=str(member.avatar_url))
         embed.set_footer(text="Spying on people's information isn't very nice...")
         await message.channel.send(embed=embed)
@@ -214,47 +230,53 @@ async def on_message(message):
 
 
     #######################################
-    elif (message.content == '!wallet') or (message.content == '!w') or (message.content == '!$') or (message.content == '!tokens'):
-        tokens = getvalue(int(message.author.id), 'tokens')
-        if tokens >= 1000000:
+    elif (message.content == '!wallet') or (message.content == '!w') or (message.content == '!$'):
+        for i in currencies.currencies:
+            i[0] = getvalue(message.author.id, i[1])
+
+        if any(x[0] >= 1000000 for x in currencies.currencies):
             sidecolor = 2693614
-        elif tokens >= 100000:
+        elif any(x[0] >= 100000 for x in currencies.currencies):
             sidecolor = 2490163
         else:
             sidecolor = 12249599
-        tokens = '{:,}'.format(tokens)
+
         embed = discord.Embed(color=sidecolor)
         embed.set_author(name=str(message.author)[:-5] + "'s Wallet", icon_url=str(message.author.avatar_url))
-        embed.add_field(name='Tokens', value=tokens, inline=True)
-        embed.set_footer(text='Wallet checked on: ' + str(datetime.datetime.now())[:(- 7)])
+        embed.set_footer(text='Wallet checked on: ' + str(datetime.datetime.now())[:-7])
+        
+        for i in currencies.currencies:
+            i = '{:,}'.format(i)
+            embed.add_field(name=i.title(), value=i, inline=True)
+        
         await message.channel.send(embed=embed)
 
-    elif message.content.startswith('!wallet <@') or message.content.startswith('!w <@') or message.content.startswith('!$ <@') or message.content.startswith('!tokens <@'):
-        if message.content.startswith('!wallet <@'):
-            try:
-                int(str(message.content[10:11]))
-                member = message.guild.get_member(int(message.content[10:28]))
-            except:
-                member = message.guild.get_member(int(message.content[11:29]))
-        else:
-            try:
-                int(str(message.content[5:6]))
-                member = message.guild.get_member(int(message.content[5:23]))
-            except:
-                member = message.guild.get_member(int(message.content[6:24]))
-        tokens = getvalue(int(member.id), 'tokens')
-        if tokens >= 1000000:
+    elif message.content.startswith('!wallet <@') or message.content.startswith('!w <@') or message.content.startswith('!$ <@'):
+        try:
+            int(str(message.content).split(' ')[1][2:3])
+            member = message.guild.get_member(int((message.content).split(' ')[1][2:-1]))
+        except:
+            member = message.guild.get_member(int((message.content).split(' ')[1][3:-1]))
+        
+        for i in currencies.currencies:
+            i[0] = getvalue(member.id, i[1])
+
+        if any(x[0] >= 1000000 for x in currencies.currencies):
             sidecolor = 2693614
-        elif tokens >= 100000:
+        elif any(x[0] >= 100000 for x in currencies.currencies):
             sidecolor = 2490163
         else:
             sidecolor = 12249599
-        tokens = '{:,}'.format(tokens)
+
         embed = discord.Embed(color=sidecolor)
-        embed.set_author(name=str(member)[:(- 5)] + "'s Wallet", icon_url=str(member.avatar_url))
-        embed.add_field(name='Tokens', value=tokens, inline=True)
-        embed.set_footer(text='Wallet checked on: ' + str(datetime.datetime.now())[:(- 7)])
-        await message.channel.send(embed=embed)
+        embed.set_author(name=str(member)[:-5] + "'s Wallet", icon_url=str(member.avatar_url))
+        embed.set_footer(text='Wallet checked on: ' + str(datetime.datetime.now())[:-7])
+        
+        for i in currencies.currencies:
+            i = '{:,}'.format(i)
+            embed.add_field(name=i.title(), value=i, inline=True)
+        
+        await message.channel.send(embed=embed)    
     #######################################
     elif message.content.startswith('!reset'):
         try:
@@ -264,28 +286,30 @@ async def on_message(message):
                     member = message.guild.get_member(int((message.content).split(' ')[1][2:-1]))
                 except:
                     member = message.guild.get_member(int((message.content).split(' ')[1][3:-1]))
-                c.execute('UPDATE rsmoney SET tokens={} WHERE id={}'.format(0, int(member.id)))
-                await message.channel.send(str(member) + "'s tokens have been reset to 0.")
+                currency = (message.content).split(' ')[2]
+                c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, member.id))
+                await message.channel.send(str(member) + "'s **" + currency + "** balance has been reset to 0.")
             else:
                 await message.channel.send('Admin Command Only!')
         except:
-            await message.channel.send('An **error** occurred. Make sure you use `!reset (@USER)`')
+            await message.channel.send('An **error** occurred. Make sure you use `!reset (@USER) (CURRENCY)`')
     #######################################
-    elif message.content.lower().startswith('!update'):
+    elif message.content.startswith('!update'):
         try:
             if isstaff(message.author.roles) == 'verified':
-                amount = formatok(str(message.content).split(' ')[2])
                 try:
                     int(str(message.content).split(' ')[1][2:3])
                     member = message.guild.get_member(int((message.content).split(' ')[1][2:-1]))
                 except:
                     member = message.guild.get_member(int((message.content).split(' ')[1][3:-1]))
-                update_money(member.id, amount)
-                await message.channel.send(str(member) + "'s tokens have been updated.")
+                amount = formatok(str(message.content).split(' ')[2])
+                currency = (message.content).split(' ')[3]
+                update_money(member.id, currency, amount)
+                await message.channel.send(str(member) + "'s **" + currency + "** balance has been updated.")
             else:
                 await message.channel.send('Admin Command Only!')
         except:
-            await message.channel.send('An **error** has occurred. Make sure you use `!update (@USER) (AMOUNT)`.')
+            await message.channel.send('An **error** has occurred. Make sure you use `!update (@USER) (AMOUNT) (CURRENCY)`.')
     #######################################
     elif message.content.startswith('!help') or message.content.startswith('!commands'):
         embed = discord.Embed(description=  #"\n `!colorpicker` - Shows a random color\n" +
@@ -312,28 +336,25 @@ async def on_message(message):
     elif message.content.lower().startswith('!transfer'):
         try:
             transfered = formatok(str(message.content).split(' ')[2])
-            enough = True
-            if transfered < 1:
-                await message.channel.send('You must transfer at least **1** token.')
-                enough = False
-            current = getvalue(int(message.author.id), 'tokens')
-            if enough == True:
+            currency = (message.content).split(' ')[3]
+            current = getvalue(message.author.id, currency)
+            if transfered >= 1:
                 if current >= transfered:
                     try:
                         int(str(message.content).split(' ')[1][2:3])
                         member = message.guild.get_member(str(message.content).split(' ')[1][2:(- 1)])
                     except:
                         member = message.guild.get_member(str(message.content).split(' ')[1][3:(- 1)])
-                    taker = getvalue(int(member.id), 'tokens')
-                    c.execute('UPDATE rsmoney SET tokens={} WHERE id={}'.format(current - transfered, message.author.id))
-                    c.execute('UPDATE rsmoney SET tokens={} WHERE id={}'.format(taker + transfered, member.id))
-                    await message.channel.send(((((('<@' + str(message.author.id)) + '> has transfered ') + '{:,}'.format(transfered)) + ' tokens to <@') + str(member.id)) + ">'s wallet.")
+                    taker = getvalue(member.id, currency)
+                    c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, current - transfered, message.author.id))
+                    c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, taker + transfered, member.id))
+                    await message.channel.send('<@' + str(message.author.id) + '> has transfered **' + '{:,}'.format(transfered) + ' ' + currency.title() + '** to <@' + str(member.id) + ">'s wallet.")
                 else:
-                    await message.channel.send(('<@' + str(message.author.id)) + ">, You don't have enough tokens to transfer that amount!")
+                    await message.channel.send('<@' + str(message.author.id) + ">, You don't have enough money to transfer that amount!")
             else:
-                None
+                await message.channel.send('You must transfer at least **1** unit of currency.')
         except:
-            await message.channel.send('An **error** has occurred. Make sure you use `!transfer (@user) (Amount you want to give)`.')
+            await message.channel.send('An **error** has occurred. Make sure you use `!transfer (@USER) (AMOUNT) (CURRENCY)`.')
     #######################################
     elif message.content == '!close':
         if message.channel.category.id == 698305020617031742:
