@@ -265,8 +265,8 @@ async def on_message(message):
         embed.set_footer(text='Wallet checked on: ' + str(datetime.datetime.now())[:-7])
         
         for i in currencies.currencies:
-            i[0] = '{:,}'.format(i[0])
             i[0] = formatfromk(i[0])
+            i[0] = '{:,}'.format(i[0])
             if i[0] == '0k':
                 i[0] = '0 k'
             embed.add_field(name=i[1].title(), value=i[0], inline=True)
@@ -295,8 +295,8 @@ async def on_message(message):
         embed.set_footer(text='Wallet checked on: ' + str(datetime.datetime.now())[:-7])
         
         for i in currencies.currencies:
-            i[0] = '{:,}'.format(i[0])
             i[0] = formatfromk(i[0])
+            i[0] = '{:,}'.format(i[0])
             if i[0] == '0k':
                 i[0] = '0 k'
             embed.add_field(name=i[1].title(), value=i[0], inline=True)
