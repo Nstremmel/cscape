@@ -59,7 +59,7 @@ def update_money(userid, currency, amount):
 
 def isstaff(authorroles):
     for i in open('staff.txt'):
-        guild = client. guild(550630947767320578)
+        guild = client.get_guild(550630947767320578)
         role = get(guild.roles, name=str(i.strip()))
         if role in authorroles:
             return 'verified'
