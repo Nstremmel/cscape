@@ -469,7 +469,7 @@ async def on_message(message):
                         winnings = formatok(winnings)
                         (sidecolor, gains, win) = (3997475, (bet * multiplier) - bet, True)
                     
-                    update_money(int(message.author.id), gains, currency)
+                    update_money(message.author.id, currency, gains)
                     # c.execute('SELECT nonce FROM data')
                     # nonce = int(c.fetchone()[0])
                     # clientseed = getvalue(message.author.id, 'clientseed', 'rsmoney')
