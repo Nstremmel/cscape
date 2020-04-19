@@ -66,6 +66,8 @@ def getvalue(userid, column):
         return int(c.fetchone()[0])
 
 def update_money(userid, currency, amount):
+    if currency == '07':
+        currency = 'osrs'
     total = getvalue(int(userid), currency)
     c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, total + amount, userid))
 
