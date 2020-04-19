@@ -311,13 +311,13 @@ async def on_message(message):
         
         await message.channel.send(embed=embed)    
     #######################################
-    elif message.content == '$privacy on':
+    elif message.content == '!privacy on':
         c.execute('UPDATE rsmoney SET privacy=True WHERE id={}'.format(message.author.id))
         embed = discord.Embed(description=('<@' + str(message.author.id)) + ">'s wallet privacy is now enabled.", color=5174318)
         embed.set_author(name='Privacy Mode', icon_url=str(message.author.avatar_url))
         await message.channel.send(embed=embed)
     
-    elif message.content == '$privacy off':
+    elif message.content == '!privacy off':
         c.execute('UPDATE rsmoney SET privacy=False WHERE id={}'.format(message.author.id))
         embed = discord.Embed(description=('<@' + str(message.author.id)) + ">'s wallet privacy is now disabled.", color=5174318)
         embed.set_author(name='Privacy Mode', icon_url=str(message.author.avatar_url))
@@ -332,7 +332,7 @@ async def on_message(message):
                 except:
                     member = message.guild.get_member(int((message.content).split(' ')[1][3:-1]))
                 currency = (message.content).split(' ')[2]
-                c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, member.id))
+                c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, 0, member.id))
                 await message.channel.send('<@' + str(member.id) + ">'s **" + currency + "** balance has been reset to 0.")
             else:
                 await message.channel.send('Admin Command Only!')
@@ -389,9 +389,9 @@ async def on_message(message):
             if current >= transfered:
                 try:
                     int(str(message.content).split(' ')[1][2:3])
-                    member = message.guild.get_member(str(message.content).split(' ')[1][2:(- 1)])
+                    member = message.guild.get_member(str(message.content).split(' ')[1][2:-1])
                 except:
-                    member = message.guild.get_member(str(message.content).split(' ')[1][3:(- 1)])
+                    member = message.guild.get_member(str(message.content).split(' ')[1][3:-1])
                 taker = getvalue(member.id, currency)
                 c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, current - transfered, message.author.id))
                 c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, taker + transfered, member.id))
@@ -417,50 +417,50 @@ async def on_message(message):
     #######################################
     elif message.content.startswith('!53') or message.content.startswith('!50') or message.content.startswith('!75') or message.content.startswith('!95'):
         if message.channel.id in [701470129942429697, 700186111422627870]:
-            try:
-                currency = str(message.content).split(' ')[2]
-                bet = formatok(str(message.content).split(' ')[1])
-                current = getvalue(message.author.id, currency, 'rsmoney')
+            #try:
+            currency = str(message.content).split(' ')[2]
+            bet = formatok(str(message.content).split(' ')[1])
+            current = getvalue(message.author.id, currency, 'rsmoney')
+            
+            if isenough(bet, currency)[0]:
+                if message.content.startswith('$53x2') or message.content.startswith('$53'):
+                    (title, odds, multiplier) = ('53x2', 54, 2)
+                elif message.content.startswith('$50x1.8') or message.content.startswith('$50'):
+                    (title, odds, multiplier) = ('50x1.8', 51, 1.8)
+                elif message.content.startswith('$75x3') or message.content.startswith('$75'):
+                    (title, odds, multiplier) = ('75x3', 76, 3)
+                elif message.content.startswith('$95x7') or message.content.startswith('$95'):
+                    (title, odds, multiplier) = ('95x7', 96, 7)
                 
-                if isenough(bet, currency)[0]:
-                    if message.content.startswith('$53x2') or message.content.startswith('$53'):
-                        (title, odds, multiplier) = ('53x2', 54, 2)
-                    elif message.content.startswith('$50x1.8') or message.content.startswith('$50'):
-                        (title, odds, multiplier) = ('50x1.8', 51, 1.8)
-                    elif message.content.startswith('$75x3') or message.content.startswith('$75'):
-                        (title, odds, multiplier) = ('75x3', 76, 3)
-                    elif message.content.startswith('$95x7') or message.content.startswith('$95'):
-                        (title, odds, multiplier) = ('95x7', 96, 7)
+                if current >= bet:
+                    #getrandint(id)
+                    roll = random.randint(message.author.id)
                     
-                    if current >= bet:
-                        #getrandint(id)
-                        roll = random.randint(message.author.id)
-                        
-                        if roll in range(1, odds):
-                            winnings = bet
-                            words = 'Rolled **' + str(roll) + '** out of **100**. You lost **' + formatfromk(bet) + '** ' + str(currency) + '.'
-                            (sidecolor, gains, win) = (16718121, bet * -1, False)
-                        else:
-                            winnings = formatfromk(int(bet * multiplier))
-                            words = 'Rolled **' + str(roll) + '** out of **100**. You won **' + str(winnings) + '** ' + str(currency) + '.'
-                            winnings = formatok(winnings)
-                            (sidecolor, gains, win) = (3997475, (bet * multiplier) - bet, True)
-                        
-                        update_money(int(message.author.id), gains, currency)
-                        # c.execute('SELECT nonce FROM data')
-                        # nonce = int(c.fetchone()[0])
-                        clientseed = getvalue(message.author.id, 'clientseed', 'rsmoney')
-                        embed = discord.Embed(color=sidecolor)
-                        embed.set_author(name=str(message.author), icon_url=str(message.author.avatar_url))
-                        embed.add_field(name=title, value=words, inline=True)
-                        # embed.set_footer(text=((('Nonce: ' + str(nonce - 1)) + ' | Client Seed: "') + str(clientseed)) + '"')
-                        await message.channel.send(embed=embed)
+                    if roll in range(1, odds):
+                        winnings = bet
+                        words = 'Rolled **' + str(roll) + '** out of **100**. You lost **' + formatfromk(bet) + '** ' + str(currency) + '.'
+                        (sidecolor, gains, win) = (16718121, bet * -1, False)
                     else:
-                        await message.channel.send(('<@' + str(message.author.id)) + ">, you don't have that much gold!")
+                        winnings = formatfromk(int(bet * multiplier))
+                        words = 'Rolled **' + str(roll) + '** out of **100**. You won **' + str(winnings) + '** ' + str(currency) + '.'
+                        winnings = formatok(winnings)
+                        (sidecolor, gains, win) = (3997475, (bet * multiplier) - bet, True)
+                    
+                    update_money(int(message.author.id), gains, currency)
+                    # c.execute('SELECT nonce FROM data')
+                    # nonce = int(c.fetchone()[0])
+                    clientseed = getvalue(message.author.id, 'clientseed', 'rsmoney')
+                    embed = discord.Embed(color=sidecolor)
+                    embed.set_author(name=str(message.author), icon_url=str(message.author.avatar_url))
+                    embed.add_field(name=title, value=words, inline=True)
+                    # embed.set_footer(text=((('Nonce: ' + str(nonce - 1)) + ' | Client Seed: "') + str(clientseed)) + '"')
+                    await message.channel.send(embed=embed)
                 else:
-                    await message.channel.send(isenough(bet, currency)[1])
-            except:
-                await message.channel.send('An **error** has occurred. Make sure you use `$(50, 53, 75, or 95) (BET) (rs3 or 07)`.')
+                    await message.channel.send(('<@' + str(message.author.id)) + ">, you don't have that much gold!")
+            else:
+                await message.channel.send(isenough(bet, currency)[1])
+            #except:
+            #    await message.channel.send('An **error** has occurred. Make sure you use `$(50, 53, 75, or 95) (BET) (CURRENCY)`.')
         else:
             await message.channel.send('This command can only be used in one of the dicing channels.')
     # elif message.content.startswith('!flower'):
