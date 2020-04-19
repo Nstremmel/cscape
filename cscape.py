@@ -446,13 +446,13 @@ async def on_message(message):
             current = getvalue(message.author.id, currency)
             
             if isenough(bet, currency)[0]:
-                if message.content.startswith('$53x2') or message.content.startswith('$53'):
+                if message.content.startswith('!53x2') or message.content.startswith('!53'):
                     (title, odds, multiplier) = ('53x2', 54, 2)
-                elif message.content.startswith('$50x1.8') or message.content.startswith('$50'):
+                elif message.content.startswith('!50x1.8') or message.content.startswith('!50'):
                     (title, odds, multiplier) = ('50x1.8', 51, 1.8)
-                elif message.content.startswith('$75x3') or message.content.startswith('$75'):
+                elif message.content.startswith('!75x3') or message.content.startswith('!75'):
                     (title, odds, multiplier) = ('75x3', 76, 3)
-                elif message.content.startswith('$95x7') or message.content.startswith('$95'):
+                elif message.content.startswith('!95x7') or message.content.startswith('!95'):
                     (title, odds, multiplier) = ('95x7', 96, 7)
                 
                 if current >= bet:
@@ -483,7 +483,7 @@ async def on_message(message):
             else:
                 await message.channel.send(isenough(bet, currency)[1])
             #except:
-            #    await message.channel.send('An **error** has occurred. Make sure you use `$(50, 53, 75, or 95) (BET) (CURRENCY)`.')
+            #    await message.channel.send('An **error** has occurred. Make sure you use `!(50, 53, 75, or 95) (BET) (CURRENCY)`.')
         else:
             await message.channel.send('This command can only be used in one of the dicing channels.')
     # elif message.content.startswith('!flower'):
