@@ -12,19 +12,19 @@ conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 c = conn.cursor()
 conn.set_session(autocommit=True)
 
-c.execute("DROP TABLE rsmoney")
-c.execute("""CREATE TABLE rsmoney (
-              id bigint,
-              osrs bigint,
-              ikov bigint,
-              spawnpk bigint,
-              runewild bigint,
-              zenyte bigint,
-              roatzpk bigint,
-              privacy boolean,
-              openchannel bigint
-              )""")
-conn.commit()
+# c.execute("DROP TABLE rsmoney")
+# c.execute("""CREATE TABLE rsmoney (
+#               id bigint,
+#               osrs bigint,
+#               ikov bigint,
+#               spawnpk bigint,
+#               runewild bigint,
+#               zenyte bigint,
+#               roatzpk bigint,
+#               privacy boolean,
+#               openchannel bigint
+#               )""")
+# conn.commit()
 
 # c.execute("DROP TABLE duels")
 # c.execute("""CREATE TABLE duels (
@@ -549,135 +549,136 @@ async def on_message(message):
         if meleduel:
             await message.channel.send('There is a mele duel already going on. Please wait until that one finishes.')
         else:
-            currency = (message.content).split(' ')[2]
-            melecurrent = getvalue(message.author.id, currency)
+            melecurrency = (message.content).split(' ')[2]
+            melecurrent = getvalue(message.author.id, melecurrency)
             melebet = formatok(message.content.split(' ')[1])
 
-            if isenough(melebet, currency):
-                meleduel = True
-                c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, melecurrent - melebet, message.author.id))
-                await message.channel.send('<@' + str(message.author.id) + '> wants to duel for ' + formatfromk(melebet) + ' ' + currency + '. Use `!call` to accept the duel.')
-                while True:
-                    call = await client.wait_for('message', timeout=60)
-
-                    if call is None:
-                        await message.channel.send('<@' + str(message.author.id) + ">'s duel request has timed out.")
-                        c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, melecurrent, message.author.id))
-                        meleduel = False
-                        break
-
-                    melecaller = call.author
-
-                    if str(melecaller.id) == str(message.author.id):
-                        await message.channel.send('As exciting as it may sound, you cannot duel yourself ._.')
-                        continue
-
-                    meleCallerCurrent = getvalue(melecaller.id, currency)
-
-                    if meleCallerCurrent < melebet:
-                        await message.channel.send("You don't have enough tokens to call that duel.")
-                        continue
-                    else:
-                        c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, meleCallerCurrent - melebet, melecaller.id))
-                        break
-
-                if meleduel:
-                    melegambler = [message.author, 99, 5, 4, False, 0, 4, 0]
-                    melecaller = [melecaller, 99, 5, 4, False, 0, 4, 0]
-                    meleplayers = [melegambler, melecaller]
-                    melewinner = None
+            if isenough(melebet, melecurrency):
+                if melecurrent >= melebet:
+                    meleduel = True
+                    update_money(message.author.id, melecurrency, melebet * -1)
+                    await message.channel.send('<@' + str(message.author.id) + '> wants to duel for ' + formatfromk(melebet) + ' ' + melecurrency + '. Use `!call` to accept the duel.')
                     while True:
-                        if melewinner == None:
-                            melesent = await message.channel.send(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
-                            for i in meleplayers:
-                                if melewinner != None:
-                                    break
-                                else:
-                                    meleopponent = meleplayers[int(meleplayers.index(i)) - 1]
-                                    if i[3] < 4:
-                                        i[7] += 1
-                                        if (i[7] % 4) == 0:
-                                            i[3] += 1
-                                            await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
-                                    if i[4]:
-                                        i[5] += 1
-                                        if (i[5] % 4) == 0:
-                                            i[1] -= i[6]
-                                            await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
-                                            await message.channel.send(str(i[0]) + ' took ' + str(i[6]) + ' damage from poison.')
-                                    await message.channel.send(str(i[0]) + ', it is your turn. Use `!rocktail`, `!dds` or `!whip`.')
-                                    while True:
-                                        move = await client.wait_for('message', timeout=20)
-                                        if move is None:
-                                            whip = get(client.emojis, name='whip')
-                                            await message.channel.send('Took too long. Automatically used ' + str(whip) + '.')
-                                            hit = random.randint(0, 27)
-                                            meleopponent[1] -= hit
-                                            if meleopponent[1] < 0:
-                                                meleopponent[1] = 0
-                                            await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
-                                            await message.channel.send(str(i[0]) + ' has hit ' + str(meleopponent[0]) + ' with their ' + str(whip) + ' and dealt ' + str(hit) + ' damage.')
-                                            if meleopponent[1] < 1:
-                                                melewinner = i
-                                            break
-                                        if str(move.content).lower() == '!rocktail':
-                                            rocktail = get(client.emojis, name='rocktail')
-                                            if i[2] < 1:
-                                                await message.channel.send('You are out of ' + str(rocktail) + '. Please use `!dds` or `!whip`.')
-                                                continue
-                                            else:
-                                                healing = random.randint(22, 29)
-                                                i[2] -= 1
-                                                i[1] += healing
-                                                if i[1] > 99:
-                                                    i[1] = 99
+                        call = await client.wait_for('message', timeout=60)
+
+                        if call is None:
+                            await message.channel.send('<@' + str(message.author.id) + ">'s duel request has timed out.")
+                            update_money(message.author.id, melecurrency, melebet)
+                            meleduel = False
+                            break
+
+                        melecaller = call.author
+
+                        if str(melecaller.id) == str(message.author.id):
+                            await message.channel.send('As exciting as it may sound, you cannot duel yourself ._.')
+                            continue
+
+                        meleCallerCurrent = getvalue(melecaller.id, melecurrency)
+
+                        if meleCallerCurrent < melebet:
+                            await message.channel.send("You don't have enough money to call that duel.")
+                            continue
+                        else:
+                            c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(melecurrency, meleCallerCurrent - melebet, melecaller.id))
+                            break
+
+                    if meleduel:
+                        melegambler = [message.author, 99, 5, 4, False, 0, 4, 0]
+                        melecaller = [melecaller, 99, 5, 4, False, 0, 4, 0]
+                        meleplayers = [melegambler, melecaller]
+                        melewinner = None
+                        while True:
+                            if melewinner == None:
+                                melesent = await message.channel.send(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
+                                for i in meleplayers:
+                                    if melewinner != None:
+                                        break
+                                    else:
+                                        meleopponent = meleplayers[int(meleplayers.index(i)) - 1]
+                                        if i[3] < 4:
+                                            i[7] += 1
+                                            if (i[7] % 4) == 0:
+                                                i[3] += 1
                                                 await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
-                                                await message.channel.send(str(i[0]) + ' eats a ' + str(rocktail) + ' and heals ' + str(healing) + ' hp.')
-                                                break
-                                        elif str(move.content).lower() == '!dds':
-                                            dds = get(client.emojis, name='dds')
-                                            if i[3] < 1:
-                                                await message.channel.send('You are out of ' + str(dds) + ' specs. Please use `!rocktail` or `!whip`.')
-                                                continue
-                                            else:
-                                                i[3] -= 1
-                                                hit = random.randint(0, 20) + random.randint(0, 20)
+                                        if i[4]:
+                                            i[5] += 1
+                                            if (i[5] % 4) == 0:
+                                                i[1] -= i[6]
+                                                await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
+                                                await message.channel.send(str(i[0]) + ' took ' + str(i[6]) + ' damage from poison.')
+                                        await message.channel.send(str(i[0]) + ', it is your turn. Use `!rocktail`, `!dds` or `!whip`.')
+                                        while True:
+                                            move = await client.wait_for('message', timeout=20)
+                                            if move is None:
+                                                whip = get(client.emojis, name='whip')
+                                                await message.channel.send('Took too long. Automatically used ' + str(whip) + '.')
+                                                hit = random.randint(0, 27)
                                                 meleopponent[1] -= hit
                                                 if meleopponent[1] < 0:
                                                     meleopponent[1] = 0
                                                 await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
-                                                await message.channel.send(str(i[0]) + ' has used a ' + str(dds) + ' on ' + str(meleopponent[0]) + ' and dealt ' + str(hit) + ' damage.')
+                                                await message.channel.send(str(i[0]) + ' has hit ' + str(meleopponent[0]) + ' with their ' + str(whip) + ' and dealt ' + str(hit) + ' damage.')
                                                 if meleopponent[1] < 1:
-                                                    winner = i
-                                                elif random.randint(1, 4) == 4:
-                                                    meleopponent[4] = True
-                                                    meleopponent[6] = 4
-                                                    await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
-                                                    await message.channel.send(str(meleopponent[0]) + ' has been poisoned by the ' + str(dds) + '!')
+                                                    melewinner = i
                                                 break
-                                        elif str(move.content).lower() == '!whip':
-                                            hit = random.randint(0, 27)
-                                            meleopponent[1] -= hit
-                                            await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
-                                            whip = get(client.emojis, name='whip')
-                                            await message.channel.send(str(i[0]) + ' has hit ' + str(meleopponent[0]) + ' with their ' + str(whip) + ' and dealt ' + str(hit) + ' damage.')
-                                            if meleopponent[1] < 1:
-                                                melewinner = i
-                                            break
-                                        else:
-                                            await message.channel.send('An **error** has occured. Make sure to use `!rocktail` `!dds` or `!whip`.')
-                                            continue
-                        else:
-                            winnert = getvalue(int(winner[0].id), currency)
-                            c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, winnert + (melebet * 2), winner[0].id))
-                            await message.channel.send('<@' + str(melewinner[0].id) + '> Has won the duel and gained **' + formatfromk(melebet * 2) + ' ' + currency + '**!')
-                            meleduel = False
-                            melewinner = None
-                            break
+                                            if str(move.content).lower() == '!rocktail':
+                                                rocktail = get(client.emojis, name='rocktail')
+                                                if i[2] < 1:
+                                                    await message.channel.send('You are out of ' + str(rocktail) + '. Please use `!dds` or `!whip`.')
+                                                    continue
+                                                else:
+                                                    healing = random.randint(22, 29)
+                                                    i[2] -= 1
+                                                    i[1] += healing
+                                                    if i[1] > 99:
+                                                        i[1] = 99
+                                                    await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
+                                                    await message.channel.send(str(i[0]) + ' eats a ' + str(rocktail) + ' and heals ' + str(healing) + ' hp.')
+                                                    break
+                                            elif str(move.content).lower() == '!dds':
+                                                dds = get(client.emojis, name='dds')
+                                                if i[3] < 1:
+                                                    await message.channel.send('You are out of ' + str(dds) + ' specs. Please use `!rocktail` or `!whip`.')
+                                                    continue
+                                                else:
+                                                    i[3] -= 1
+                                                    hit = random.randint(0, 20) + random.randint(0, 20)
+                                                    meleopponent[1] -= hit
+                                                    if meleopponent[1] < 0:
+                                                        meleopponent[1] = 0
+                                                    await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
+                                                    await message.channel.send(str(i[0]) + ' has used a ' + str(dds) + ' on ' + str(meleopponent[0]) + ' and dealt ' + str(hit) + ' damage.')
+                                                    if meleopponent[1] < 1:
+                                                        winner = i
+                                                    elif random.randint(1, 4) == 4:
+                                                        meleopponent[4] = True
+                                                        meleopponent[6] = 4
+                                                        await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
+                                                        await message.channel.send(str(meleopponent[0]) + ' has been poisoned by the ' + str(dds) + '!')
+                                                    break
+                                            elif str(move.content).lower() == '!whip':
+                                                hit = random.randint(0, 27)
+                                                meleopponent[1] -= hit
+                                                await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
+                                                whip = get(client.emojis, name='whip')
+                                                await message.channel.send(str(i[0]) + ' has hit ' + str(meleopponent[0]) + ' with their ' + str(whip) + ' and dealt ' + str(hit) + ' damage.')
+                                                if meleopponent[1] < 1:
+                                                    melewinner = i
+                                                break
+                                            else:
+                                                await message.channel.send('An **error** has occured. Make sure to use `!rocktail` `!dds` or `!whip`.')
+                                                continue
+                            else:
+                                winnert = getvalue(int(winner[0].id), melecurrency)
+                                c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(melecurrency, winnert + (melebet * 2), winner[0].id))
+                                await message.channel.send('<@' + str(melewinner[0].id) + '> Has won the duel and gained **' + formatfromk(melebet * 2) + ' ' + melecurrency + '**!')
+                                meleduel = False
+                                melewinner = None
+                                break
                 else:
-                    None
+                    await message.channel.send("You don't have that much money!")
             else:
-                await message.channel.send(isenough(bet, currency)[1])
+                await message.channel.send(isenough(bet, melecurrency)[1])
     #######################################
     # elif message.content.startswith('!magebox'):
     #     #try:
