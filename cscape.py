@@ -21,6 +21,7 @@ c.execute("""CREATE TABLE rsmoney (
               runewild bigint,
               zenyte bigint,
               roatzpk bigint,
+              privacy boolean,
               openchannel bigint
               )""")
 conn.commit()
@@ -28,7 +29,7 @@ conn.commit()
 client = discord.Client()
 
 def add_member(userid):
-    c.execute('INSERT INTO rsmoney VALUES (%s, %s, %s, %s, %s, %s, %s, %s)', (userid, 0, 0, 0, 0, 0, 0, 0))
+    c.execute('INSERT INTO rsmoney VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)', (userid, 0, 0, 0, 0, 0, 0, False, 0))
 
 def getvalue(userid, column):
     strings=[]
@@ -146,6 +147,8 @@ async def on_raw_reaction_add(payload):
     tradecategory = (client.get_channel(676865747451904046)).category
     for channel in tradecategory.channels:
         messageids.append(channel.id)
+        print(messageids)
+        print(channel.id)
     if message.id in messageids and payload.emoji.id == 676988116451590226 and user.id != 479862852895899649:
         openchannel = getvalue(user.id, 'openchannel')
         if openchannel == 0:
@@ -308,8 +311,20 @@ async def on_message(message):
         
         await message.channel.send(embed=embed)    
     #######################################
+    elif message.content == '$privacy on':
+        c.execute('UPDATE rsmoney SET privacy=True WHERE id={}'.format(message.author.id))
+        embed = discord.Embed(description=('<@' + str(message.author.id)) + ">'s wallet privacy is now enabled.", color=5174318)
+        embed.set_author(name='Privacy Mode', icon_url=str(message.author.avatar_url))
+        await message.channel.send(embed=embed)
+    
+    elif message.content == '$privacy off':
+        c.execute('UPDATE rsmoney SET privacy=False WHERE id={}'.format(message.author.id))
+        embed = discord.Embed(description=('<@' + str(message.author.id)) + ">'s wallet privacy is now disabled.", color=5174318)
+        embed.set_author(name='Privacy Mode', icon_url=str(message.author.avatar_url))
+        await message.channel.send(embed=embed)
+    #######################################
     elif message.content.startswith('!reset'):
-        try:
+        #try:
             if isstaff(message.author.roles) == 'verified':
                 try:
                     int(str(message.content).split(' ')[1][2:3])
@@ -318,11 +333,11 @@ async def on_message(message):
                     member = message.guild.get_member(int((message.content).split(' ')[1][3:-1]))
                 currency = (message.content).split(' ')[2]
                 c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, member.id))
-                await message.channel.send(str(member) + "'s **" + currency + "** balance has been reset to 0.")
+                await message.channel.send('<@' + str(member.id) + ">'s **" + currency + "** balance has been reset to 0.")
             else:
                 await message.channel.send('Admin Command Only!')
-        except:
-            await message.channel.send('An **error** occurred. Make sure you use `!reset (@USER) (CURRENCY)`')
+        #except:
+        #    await message.channel.send('An **error** occurred. Make sure you use `!reset (@USER) (CURRENCY)`')
     #######################################
     elif message.content.startswith('!update'):
         try:
@@ -362,31 +377,31 @@ async def on_message(message):
                                             "\n `!ddsstake (AMOUNT)` - Hosts a mele duel betting that amount of tokens\n" +
                                             "\n `!magebox (AMOUNT)` - Hosts a magic duel betting that amount of tokens\n", color=2513759)
                                             #"\n `!transfer (@USER) (AMOUNT)` - Transfers that amount of tokens from your wallet to the user's wallet\n"
-        embed.set_author(name='CryptoScape Bot Commands', icon_url=str(message.server.icon_url))
+        embed.set_author(name='CryptoScape Bot Commands', icon_url=str(message.guild.icon_url))
         await message.channel.send(embed=embed)
     #######################################
     elif message.content.lower().startswith('!transfer'):
-        try:
-            transfered = formatok(str(message.content).split(' ')[2])
-            currency = (message.content).split(' ')[3]
-            current = getvalue(message.author.id, currency)
-            if transfered >= 1:
-                if current >= transfered:
-                    try:
-                        int(str(message.content).split(' ')[1][2:3])
-                        member = message.guild.get_member(str(message.content).split(' ')[1][2:(- 1)])
-                    except:
-                        member = message.guild.get_member(str(message.content).split(' ')[1][3:(- 1)])
-                    taker = getvalue(member.id, currency)
-                    c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, current - transfered, message.author.id))
-                    c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, taker + transfered, member.id))
-                    await message.channel.send('<@' + str(message.author.id) + '> has transfered **' + '{:,}'.format(transfered) + ' ' + currency.title() + '** to <@' + str(member.id) + ">'s wallet.")
-                else:
-                    await message.channel.send('<@' + str(message.author.id) + ">, You don't have enough money to transfer that amount!")
+        #try:
+        transfered = formatok(str(message.content).split(' ')[2])
+        currency = (message.content).split(' ')[3]
+        current = getvalue(message.author.id, currency)
+        if transfered >= 1:
+            if current >= transfered:
+                try:
+                    int(str(message.content).split(' ')[1][2:3])
+                    member = message.guild.get_member(str(message.content).split(' ')[1][2:(- 1)])
+                except:
+                    member = message.guild.get_member(str(message.content).split(' ')[1][3:(- 1)])
+                taker = getvalue(member.id, currency)
+                c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, current - transfered, message.author.id))
+                c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, taker + transfered, member.id))
+                await message.channel.send('<@' + str(message.author.id) + '> has transfered **' + '{:,}'.format(transfered) + ' ' + currency.title() + '** to <@' + str(member.id) + ">'s wallet.")
             else:
-                await message.channel.send('You must transfer at least **1** unit of currency.')
-        except:
-            await message.channel.send('An **error** has occurred. Make sure you use `!transfer (@USER) (AMOUNT) (CURRENCY)`.')
+                await message.channel.send('<@' + str(message.author.id) + ">, You don't have enough money to transfer that amount!")
+        else:
+            await message.channel.send('You must transfer at least **1** unit of currency.')
+        #except:
+        #    await message.channel.send('An **error** has occurred. Make sure you use `!transfer (@USER) (AMOUNT) (CURRENCY)`.')
     #######################################
     elif message.content == '!close':
         if message.channel.category.id == 698305020617031742:
@@ -400,7 +415,7 @@ async def on_message(message):
         sent = await channel.send(embed=embed)
         await sent.add_reaction(client.get_emoji(676988116451590226))
     #######################################
-    elif message.content.startswith('$53') or message.content.startswith('$50') or message.content.startswith('$75') or message.content.startswith('$95'):
+    elif message.content.startswith('!53') or message.content.startswith('!50') or message.content.startswith('!75') or message.content.startswith('!95'):
         if message.channel.id in [701470129942429697, 700186111422627870]:
             try:
                 currency = str(message.content).split(' ')[2]
@@ -555,7 +570,7 @@ async def on_message(message):
     #                 melewinner = None
     #                 while True:
     #                     if melewinner == None:
-    #                         melesent = await message.channel.send(embed=hpupdate(meleplayers, str(message.server.icon_url), 'mele'))
+    #                         melesent = await message.channel.send(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
     #                         for i in meleplayers:
     #                             if melewinner != None:
     #                                 break
@@ -565,12 +580,12 @@ async def on_message(message):
     #                                     i[7] += 1
     #                                     if (i[7] % 4) == 0:
     #                                         i[3] += 1
-    #                                         await melesent.edit(embed=hpupdate(meleplayers, str(message.server.icon_url), 'mele'))
+    #                                         await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
     #                                 if i[4] == True:
     #                                     i[5] += 1
     #                                     if (i[5] % 4) == 0:
     #                                         i[1] -= i[6]
-    #                                         await melesent.edit(embed=hpupdate(meleplayers, str(message.server.icon_url), 'mele'))
+    #                                         await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
     #                                         await message.channel.send(((str(i[0]) + ' took ') + str(i[6])) + ' damage from poison.')
     #                                 await message.channel.send(str(i[0]) + ', it is your turn. Use `!rocktail`, `!dds` or `!whip`.')
     #                                 while True:
@@ -583,7 +598,7 @@ async def on_message(message):
     #                                         meleopponent[1] -= hit
     #                                         if meleopponent[1] < 0:
     #                                             meleopponent[1] = 0
-    #                                         await melesent.edit(embed=hpupdate(meleplayers, str(message.server.icon_url), 'mele'))
+    #                                         await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
     #                                         whip = get(
     #                                         client.emojis, name='whip')
     #                                         await message.channel.send(((((((str(i[0]) + ' has hit ') + str(meleopponent[0])) + ' with their ') + str(whip)) + ' and dealt ') + str(hit)) + ' damage.')
@@ -602,7 +617,7 @@ async def on_message(message):
     #                                             i[1] += healing
     #                                             if i[1] > 99:
     #                                                 i[1] = 99
-    #                                             await melesent.edit(embed=hpupdate(meleplayers, str(message.server.icon_url), 'mele'))
+    #                                             await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
     #                                             rocktail = get(
     #                                             client.emojis, name='rocktail')
     #                                             await message.channel.send(((((str(i[0]) + ' eats a ') + str(rocktail)) + ' and heals ') + str(healing)) + ' hp.')
@@ -619,7 +634,7 @@ async def on_message(message):
     #                                             meleopponent[1] -= hit
     #                                             if meleopponent[1] < 0:
     #                                                 meleopponent[1] = 0
-    #                                             await melesent.edit(embed=hpupdate(meleplayers, str(message.server.icon_url), 'mele'))
+    #                                             await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
     #                                             dds = get(
     #                                             client.emojis, name='dds')
     #                                             await message.channel.send(((((((str(i[0]) + ' has used a ') + str(dds)) + ' on ') + str(meleopponent[0])) + ' and dealt ') + str(hit)) + ' damage.')
@@ -628,7 +643,7 @@ async def on_message(message):
     #                                             elif random.randint(1, 4) == 4:
     #                                                 meleopponent[4] = True
     #                                                 meleopponent[6] = 4
-    #                                                 await melesent.edit(embed=hpupdate(meleplayers, str(message.server.icon_url), 'mele'))
+    #                                                 await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
     #                                                 dds = get(
     #                                                 client.emojis, name='dds')
     #                                                 await message.channel.send(((str(meleopponent[0]) + ' has been poisoned by the ') + str(dds)) + '!')
@@ -636,7 +651,7 @@ async def on_message(message):
     #                                     elif str(move.content).lower() == '!whip':
     #                                         hit = random.randint(0, 27)
     #                                         meleopponent[1] -= hit
-    #                                         await melesent.edit(embed=hpupdate(meleplayers, str(message.server.icon_url), 'mele'))
+    #                                         await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
     #                                         whip = get(
     #                                         client.emojis, name='whip')
     #                                         await message.channel.send(((((((str(i[0]) + ' has hit ') + str(meleopponent[0])) + ' with their ') + str(whip)) + ' and dealt ') + str(hit)) + ' damage.')
@@ -698,7 +713,7 @@ async def on_message(message):
     #                 magicwinner = None
     #                 while True:
     #                     if magicwinner == None:
-    #                         magicsent = await message.channel.send(embed=hpupdate(magicplayers, str(message.server.icon_url), 'magic'))
+    #                         magicsent = await message.channel.send(embed=hpupdate(magicplayers, str(message.guild.icon_url), 'magic'))
     #                         for i in magicplayers:
     #                             if magicwinner != None:
     #                                 break
@@ -723,7 +738,7 @@ async def on_message(message):
     #                                         i[1] += healed
     #                                         if i[1] > 99:
     #                                             i[1] = 99
-    #                                         await magicsent.edit(embed=hpupdate(magicplayers, str(message.server.icon_url), 'magic'))
+    #                                         await magicsent.edit(embed=hpupdate(magicplayers, str(message.guild.icon_url), 'magic'))
     #                                         blood = get(
     #                                         client.emojis, name='blood')
     #                                         await message.channel.send(((((((((str(i[0]) + ' has used ') + str(blood)) + ' on ') + str(magicopponent[0])) + ', dealt ') + str(hit)) + ' damage, and was healed for ') + str(healed)) + ' HP.')
@@ -742,7 +757,7 @@ async def on_message(message):
     #                                             i[1] += healing
     #                                             if i[1] > 99:
     #                                                 i[1] = 99
-    #                                             await magicsent.edit(embed=hpupdate(magicplayers, str(message.server.icon_url), 'magic'))
+    #                                             await magicsent.edit(embed=hpupdate(magicplayers, str(message.guild.icon_url), 'magic'))
     #                                             rocktail = get(
     #                                             client.emojis, name='rocktail')
     #                                             await message.channel.send(((((str(i[0]) + ' eats a ') + str(rocktail)) + ' and heals ') + str(healing)) + ' hp.')
@@ -752,7 +767,7 @@ async def on_message(message):
     #                                         magicopponent[1] -= hit
     #                                         if magicopponent[1] < 0:
     #                                             magicopponent[1] = 0
-    #                                         await magicsent.edit(embed=hpupdate(magicplayers, str(message.server.icon_url), 'magic'))
+    #                                         await magicsent.edit(embed=hpupdate(magicplayers, str(message.guild.icon_url), 'magic'))
     #                                         ice = get(
     #                                         client.emojis, name='ice')
     #                                         await message.channel.send(((((((str(i[0]) + ' has used ') + str(ice)) + ' on ') + str(magicopponent[0])) + ' and dealt ') + str(hit)) + ' damage.')
@@ -773,7 +788,7 @@ async def on_message(message):
     #                                         i[1] += healed
     #                                         if i[1] > 99:
     #                                             i[1] = 99
-    #                                         await magicsent.edit(embed=hpupdate(magicplayers, str(message.server.icon_url), 'magic'))
+    #                                         await magicsent.edit(embed=hpupdate(magicplayers, str(message.guild.icon_url), 'magic'))
     #                                         blood = get(
     #                                         client.emojis, name='blood')
     #                                         await message.channel.send(((((((((str(i[0]) + ' has used ') + str(blood)) + ' on ') + str(magicopponent[0])) + ', dealt ') + str(hit)) + ' damage, and was healed for ') + str(healed)) + ' HP.')
