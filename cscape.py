@@ -142,22 +142,19 @@ async def on_ready():
 async def on_raw_reaction_add(payload):
     user = client.get_user(payload.user_id)
     channel = client.get_channel(payload.channel_id)
-    message = await channel.fetch_message(payload.message_id)
-    messageids = [676891269280170052, 676891575988518985, 685274381173391395, 701265042330484756, 676872099041771565, 676872117266153474]
+    channelids = [676891269280170052, 676891575988518985, 685274381173391395, 701265042330484756, 676872099041771565, 676872117266153474]
     tradecategory = (client.get_channel(676865747451904046)).category
     for channel in tradecategory.channels:
-        messageids.append(channel.id)
-        print(messageids)
-        print(channel.id)
-    if message.id in messageids and payload.emoji.id == 676988116451590226 and user.id != 479862852895899649:
+        channelids.append(channel.id)
+    if channel.id in channelids and payload.emoji.id == 676988116451590226 and user.id != 479862852895899649:
         openchannel = getvalue(user.id, 'openchannel')
         if openchannel == 0:
             category = (client.get_channel(698306053590351872)).category
-            newChannel = await message.guild.create_text_channel(channel.name + ' ' + str(user)[:-5], category=category)
+            newChannel = await channel.guild.create_text_channel(channel.name + ' ' + str(user)[:-5], category=category)
             await newChannel.set_permissions(user, read_messages=True, send_messages=True, read_message_history=True)
             c.execute("UPDATE rsmoney SET openchannel={} WHERE id={}".format(newChannel.id, user.id))
             embed = discord.Embed(description='<@' + str(user.id) + '>, this is your temporary private channel. You or a staff member can use `!close` when you are done to delete the channel.', color=11854069)
-            embed.set_author(name='Private Channel Info', icon_url=message.guild.icon_url)
+            embed.set_author(name='Private Channel Info', icon_url=channel.guild.icon_url)
             embed.set_footer(text='Channel Opened On: ' + str(datetime.datetime.now())[:-7])
             await newChannel.send(embed=embed)
         else:
