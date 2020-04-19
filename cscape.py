@@ -84,7 +84,7 @@ def formatok(amount):
     elif amount[-1:].lower() == 'b':
         return int(float(str(amount[:-1])) * 1_000_000)
     else:
-        return int(amount)
+        return int(float(amount)*1000)
 
 def formatfromk(amount):
     if amount>=1000000:
@@ -280,9 +280,9 @@ async def on_message(message):
         for i in currencies.currencies:
             i[0] = getvalue(message.author.id, i[1])
 
-        if any(x[0] >= 1000000 for x in currencies.currencies):
+        if any(x[0] >= 1_000_000 for x in currencies.currencies):
             sidecolor = 2693614
-        elif any(x[0] >= 100000 for x in currencies.currencies):
+        elif any(x[0] >= 10_000 for x in currencies.currencies):
             sidecolor = 2490163
         else:
             sidecolor = 12249599
@@ -311,9 +311,9 @@ async def on_message(message):
         for i in currencies.currencies:
             i[0] = getvalue(member.id, i[1])
 
-        if any(x[0] >= 1000000 for x in currencies.currencies):
+        if any(x[0] >= 1_000_000 for x in currencies.currencies):
             sidecolor = 2693614
-        elif any(x[0] >= 100000 for x in currencies.currencies):
+        elif any(x[0] >= 10_000 for x in currencies.currencies):
             sidecolor = 2490163
         else:
             sidecolor = 12249599
@@ -345,7 +345,7 @@ async def on_message(message):
         await message.channel.send(embed=embed)
     #######################################
     elif message.content.startswith('!reset'):
-        #try:
+        try:
             if isstaff(message.author.roles) == 'verified':
                 try:
                     int(str(message.content).split(' ')[1][2:3])
@@ -354,11 +354,11 @@ async def on_message(message):
                     member = message.guild.get_member(int((message.content).split(' ')[1][3:-1]))
                 currency = (message.content).split(' ')[2]
                 c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, 0, member.id))
-                await message.channel.send('<@' + str(member.id) + ">'s **" + currency + "** balance has been reset to 0.")
+                await message.channel.send('<@' + str(member.id) + ">'s **" + currency.title() + "** balance has been reset to 0.")
             else:
                 await message.channel.send('Admin Command Only!')
-        #except:
-        #    await message.channel.send('An **error** occurred. Make sure you use `!reset (@USER) (CURRENCY)`')
+        except:
+            await message.channel.send('An **error** occurred. Make sure you use `!reset (@USER) (CURRENCY)`')
     #######################################
     elif message.content.startswith('!update'):
         try:
@@ -371,7 +371,7 @@ async def on_message(message):
                 amount = formatok(str(message.content).split(' ')[2])
                 currency = (message.content).split(' ')[3]
                 update_money(member.id, currency, amount)
-                embed = discord.Embed(description=('<@' + str(member.id)) + ">'s **" + currency + "** balance has been updated.", color=5174318)
+                embed = discord.Embed(description='<@' + str(member.id) + ">'s **" + currency.title() + "** balance has been updated.", color=5174318)
                 embed.set_author(name='Update Request', icon_url=str(member.avatar_url))
                 await message.channel.send(embed=embed)
             else:
@@ -402,27 +402,27 @@ async def on_message(message):
         await message.channel.send(embed=embed)
     #######################################
     elif message.content.lower().startswith('!transfer'):
-        #try:
-        transfered = formatok(str(message.content).split(' ')[2])
-        currency = (message.content).split(' ')[3]
-        current = getvalue(message.author.id, currency)
-        if transfered >= 1:
-            if current >= transfered:
-                try:
-                    int(str(message.content).split(' ')[1][2:3])
-                    member = message.guild.get_member(int((message.content).split(' ')[1][2:-1]))
-                except:
-                    member = message.guild.get_member(int((message.content).split(' ')[1][3:-1]))
-                taker = getvalue(member.id, currency)
-                c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, current - transfered, message.author.id))
-                c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, taker + transfered, member.id))
-                await message.channel.send('<@' + str(message.author.id) + '> has transfered **' + '{:,}'.format(transfered) + ' ' + currency.title() + '** to <@' + str(member.id) + ">'s wallet.")
+        try:
+            transfered = formatok(str(message.content).split(' ')[2])
+            currency = (message.content).split(' ')[3]
+            current = getvalue(message.author.id, currency)
+            if transfered >= 1:
+                if current >= transfered:
+                    try:
+                        int(str(message.content).split(' ')[1][2:3])
+                        member = message.guild.get_member(int((message.content).split(' ')[1][2:-1]))
+                    except:
+                        member = message.guild.get_member(int((message.content).split(' ')[1][3:-1]))
+                    taker = getvalue(member.id, currency)
+                    c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, current - transfered, message.author.id))
+                    c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, taker + transfered, member.id))
+                    await message.channel.send('<@' + str(message.author.id) + '> has transfered **' + formatfromk(transfered) + ' ' + currency.title() + '** to <@' + str(member.id) + ">'s wallet.")
+                else:
+                    await message.channel.send('<@' + str(message.author.id) + ">, You don't have enough money to transfer that amount!")
             else:
-                await message.channel.send('<@' + str(message.author.id) + ">, You don't have enough money to transfer that amount!")
-        else:
-            await message.channel.send('You must transfer at least **1** unit of currency.')
-        #except:
-        #    await message.channel.send('An **error** has occurred. Make sure you use `!transfer (@USER) (AMOUNT) (CURRENCY)`.')
+                await message.channel.send('You must transfer at least **1** unit of currency.')
+        except:
+            await message.channel.send('An **error** has occurred. Make sure you use `!transfer (@USER) (AMOUNT) (CURRENCY)`.')
     #######################################
     elif message.content == '!close':
         if message.channel.category.id == 698305020617031742:
@@ -455,15 +455,15 @@ async def on_message(message):
                 
                 if current >= bet:
                     #getrandint(id)
-                    roll = random.randint(message.author.id)
+                    roll = random.randint(1, 100)
                     
                     if roll in range(1, odds):
                         winnings = bet
-                        words = 'Rolled **' + str(roll) + '** out of **100**. You lost **' + formatfromk(bet) + '** ' + str(currency) + '.'
+                        words = 'Rolled **' + str(roll) + '** out of **100**. You lost **' + formatfromk(bet) + '** ' + currency.title() + '.'
                         (sidecolor, gains, win) = (16718121, bet * -1, False)
                     else:
                         winnings = formatfromk(int(bet * multiplier))
-                        words = 'Rolled **' + str(roll) + '** out of **100**. You won **' + str(winnings) + '** ' + str(currency) + '.'
+                        words = 'Rolled **' + str(roll) + '** out of **100**. You won **' + str(winnings) + '** ' + currency.title() + '.'
                         winnings = formatok(winnings)
                         (sidecolor, gains, win) = (3997475, (bet * multiplier) - bet, True)
                     
@@ -543,15 +543,6 @@ async def on_message(message):
     #     except:
     #         await message.channel.send('An **error** has occurred. Make sure you use `!flower (Amount) (hot, cold, red, orange, yellow, green, blue, or purple)`.')
     #######################################
-    # elif message.content.lower().startswith('!wager') or message.content.lower().startswith('!total bet') or message.content.lower().startswith('!tb'):
-    #     tokens = getvalue(int(message.author.id), 'tokenstotal')
-    #     tokens = '{:,}'.format(tokens)
-    #     embed = discord.Embed(color=16766463)
-    #     embed.set_author(name=str(message.author)[:(- 5)] + "'s Total Bets", icon_url=str(message.author.avatar_url))
-    #     embed.add_field(name='Total Tokens Bet', value=tokens, inline=True)
-    #     embed.set_footer(text='Total Bets checked on: ' + str(datetime.datetime.now())[:(- 7)])
-    #     await message.channel.send(embed=embed)
-    # #######################################
     elif message.content.startswith('!ddsstake'):
         if meleduel:
             await message.channel.send('There is a mele duel already going on. Please wait until that one finishes.')
