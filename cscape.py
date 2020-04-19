@@ -116,6 +116,12 @@ def hpupdate(players, url, dueltype):
             embed.add_field(name=str(i[0])[:(- 5)], value=(((((((('\n' + str(rocktail)) + ': ') + str(i[2])) + '\nFrozen: ') + str(i[3])) + '\nHP Left: ') + str(i[1])) + ' ') + str(hp), inline=True)
     return embed
 
+def isenough(amount, currency):
+    if amount < 100:
+        words = 'The minimum amount you can bet is **10k** gp ' + currency + '.'
+        return (False, words)
+    else:
+        return (True, ' ')
 ##############################################################################################################
 
 #Predefined Variables
@@ -386,9 +392,9 @@ async def on_message(message):
             if current >= transfered:
                 try:
                     int(str(message.content).split(' ')[1][2:3])
-                    member = message.guild.get_member(str(message.content).split(' ')[1][2:-1])
+                    member = message.guild.get_member(int((message.content).split(' ')[1][2:-1]))
                 except:
-                    member = message.guild.get_member(str(message.content).split(' ')[1][3:-1])
+                    member = message.guild.get_member(int((message.content).split(' ')[1][3:-1]))
                 taker = getvalue(member.id, currency)
                 c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, current - transfered, message.author.id))
                 c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, taker + transfered, member.id))
@@ -417,7 +423,7 @@ async def on_message(message):
             #try:
             currency = str(message.content).split(' ')[2]
             bet = formatok(str(message.content).split(' ')[1])
-            current = getvalue(message.author.id, currency, 'rsmoney')
+            current = getvalue(message.author.id, currency)
             
             if isenough(bet, currency)[0]:
                 if message.content.startswith('$53x2') or message.content.startswith('$53'):
@@ -446,7 +452,7 @@ async def on_message(message):
                     update_money(int(message.author.id), gains, currency)
                     # c.execute('SELECT nonce FROM data')
                     # nonce = int(c.fetchone()[0])
-                    clientseed = getvalue(message.author.id, 'clientseed', 'rsmoney')
+                    # clientseed = getvalue(message.author.id, 'clientseed', 'rsmoney')
                     embed = discord.Embed(color=sidecolor)
                     embed.set_author(name=str(message.author), icon_url=str(message.author.avatar_url))
                     embed.add_field(name=title, value=words, inline=True)
