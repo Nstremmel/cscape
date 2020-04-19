@@ -142,7 +142,10 @@ async def on_raw_reaction_add(payload):
     user = client.get_user(payload.user_id)
     channel = client.get_channel(payload.channel_id)
     message = await channel.fetch_message(payload.message_id)
-    messageids = [697903966343659632, 697904029744758835, 697965944542068756, 697965985013170247, 697904276323958807, 697904294422380584, 697904310201090128, 698245454168850462]
+    messageids = [676891269280170052, 676891575988518985, 685274381173391395, 701265042330484756, 676872099041771565, 676872117266153474]
+    tradecategory = (client.get_channel(676865747451904046)).category
+    for channel in tradecategory.channels:
+        messageids.append(channel.id)
     if message.id in messageids and payload.emoji.id == 676988116451590226 and user.id != 479862852895899649:
         openchannel = getvalue(user.id, 'openchannel')
         if openchannel == 0:
@@ -396,7 +399,55 @@ async def on_message(message):
         embed.set_author(name=(channel.name).title() + ' Ticket', icon_url=message.guild.icon_url)
         sent = await channel.send(embed=embed)
         await sent.add_reaction(client.get_emoji(676988116451590226))
-
+    #######################################
+    elif message.content.startswith('$53') or message.content.startswith('$50') or message.content.startswith('$75') or message.content.startswith('$95'):
+        if message.channel.id in [701470129942429697, 700186111422627870]:
+            try:
+                currency = str(message.content).split(' ')[2]
+                bet = formatok(str(message.content).split(' ')[1])
+                current = getvalue(message.author.id, currency, 'rsmoney')
+                
+                if isenough(bet, currency)[0]:
+                    if message.content.startswith('$53x2') or message.content.startswith('$53'):
+                        (title, odds, multiplier) = ('53x2', 54, 2)
+                    elif message.content.startswith('$50x1.8') or message.content.startswith('$50'):
+                        (title, odds, multiplier) = ('50x1.8', 51, 1.8)
+                    elif message.content.startswith('$75x3') or message.content.startswith('$75'):
+                        (title, odds, multiplier) = ('75x3', 76, 3)
+                    elif message.content.startswith('$95x7') or message.content.startswith('$95'):
+                        (title, odds, multiplier) = ('95x7', 96, 7)
+                    
+                    if current >= bet:
+                        #getrandint(id)
+                        roll = random.randint(message.author.id)
+                        
+                        if roll in range(1, odds):
+                            winnings = bet
+                            words = 'Rolled **' + str(roll) + '** out of **100**. You lost **' + formatfromk(bet) + '** ' + str(currency) + '.'
+                            (sidecolor, gains, win) = (16718121, bet * -1, False)
+                        else:
+                            winnings = formatfromk(int(bet * multiplier))
+                            words = 'Rolled **' + str(roll) + '** out of **100**. You won **' + str(winnings) + '** ' + str(currency) + '.'
+                            winnings = formatok(winnings)
+                            (sidecolor, gains, win) = (3997475, (bet * multiplier) - bet, True)
+                        
+                        update_money(int(message.author.id), gains, currency)
+                        # c.execute('SELECT nonce FROM data')
+                        # nonce = int(c.fetchone()[0])
+                        clientseed = getvalue(message.author.id, 'clientseed', 'rsmoney')
+                        embed = discord.Embed(color=sidecolor)
+                        embed.set_author(name=str(message.author), icon_url=str(message.author.avatar_url))
+                        embed.add_field(name=title, value=words, inline=True)
+                        # embed.set_footer(text=((('Nonce: ' + str(nonce - 1)) + ' | Client Seed: "') + str(clientseed)) + '"')
+                        await message.channel.send(embed=embed)
+                    else:
+                        await message.channel.send(('<@' + str(message.author.id)) + ">, you don't have that much gold!")
+                else:
+                    await message.channel.send(isenough(bet, currency)[1])
+            except:
+                await message.channel.send('An **error** has occurred. Make sure you use `$(50, 53, 75, or 95) (BET) (rs3 or 07)`.')
+        else:
+            await message.channel.send('This command can only be used in one of the dicing channels.')
     # elif message.content.startswith('!flower'):
     #     try:
     #         enough = True
