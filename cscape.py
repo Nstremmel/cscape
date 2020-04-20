@@ -567,7 +567,8 @@ async def on_message(message):
                             meleduel = False
                             break
 
-                        melecaller = call.author
+                        if call == '!call':
+                            melecaller = call.author
 
                         if str(melecaller.id) == str(message.author.id):
                             await message.channel.send('As exciting as it may sound, you cannot duel yourself ._.')
