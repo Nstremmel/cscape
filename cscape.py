@@ -167,7 +167,7 @@ async def on_ready():
 async def on_raw_reaction_add(payload):
     user = client.get_user(payload.user_id)
     channel = client.get_channel(payload.channel_id)
-    category1 = get(channel.guild.categories, name = 'rs services')
+    category1 = get(channel.guild.categories, name = '🛒 rs services 🛒')
     category2 = get(channel.guild.categories, name = '💰 RSPS Trade 💰')
     channelids = []
     for channel in category1.channels + category2.channels:
