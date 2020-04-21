@@ -560,7 +560,9 @@ async def on_message(message):
                     await message.channel.send('<@' + str(message.author.id) + '> wants to duel for **' + formatfromk(melebet) + ' ' + melecurrency + '**. Use `!call` to accept the duel.')
                     while True:
                         try:
-                            call = await client.wait_for('message', timeout=60)
+                            def check(m):
+                                return (m.content).startswith('!call') and m.channel == message.channel
+                            call = await client.wait_for('message', timeout=60, check=check)
                         except asyncio.TimeoutError:
                             await message.channel.send('<@' + str(message.author.id) + ">'s duel request has timed out.")
                             update_money(message.author.id, melecurrency, melebet)
