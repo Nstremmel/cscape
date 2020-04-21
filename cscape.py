@@ -561,7 +561,7 @@ async def on_message(message):
                     while True:
                         try:
                             def check(m):
-                                return (m.content).startswith('!call') and m.channel == message.channel
+                                return m.content == '!call' and m.channel == message.channel
                             call = await client.wait_for('message', timeout=60, check=check)
                         except asyncio.TimeoutError:
                             await message.channel.send('<@' + str(message.author.id) + ">'s duel request has timed out.")
@@ -569,8 +569,7 @@ async def on_message(message):
                             meleduel = False
                             break
 
-                        if call == '!call':
-                            melecaller = call.author
+                        melecaller = call.author
 
                         if str(melecaller.id) == str(message.author.id):
                             await message.channel.send('As exciting as it may sound, you cannot duel yourself ._.')
