@@ -581,7 +581,7 @@ async def on_message(message):
                             await message.channel.send("You don't have enough money to call that duel.")
                             continue
                         else:
-                            c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(melecurrency, meleCallerCurrent - melebet, melecaller.id))
+                            update_money(melecaller.id, melecurrency, melebet * -1)
                             break
 
                     if meleduel:
