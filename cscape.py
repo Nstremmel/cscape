@@ -79,7 +79,7 @@ def getvalue(userid, column, table):
             add_member(int(userid))
             return 0
 
-        c.execute("SELECT {} FROM {} WHERE id={}".format(column, userid))
+        c.execute("SELECT {} FROM {} WHERE id={}".format(column, table, userid))
 
         if column in booleans:
             return bool(c.fetchone()[0])
