@@ -205,7 +205,7 @@ async def dds(user, opponent, player, bot, channel):
         if opponent[1] < 0:
             opponent[1] = 0
         words = str(user[0]) + ' uses a ' + str(dds) + ' and deals **' + str(hit) + '** damage.'
-        await sent.edit(embed=hpupdate(player, bot, 'mele', words))
+        await sent.edit(embed=hpupdate(bot, player, 'mele', words))
         if opponent[1] < 1:
             updateDuel(user, player[0].id)
             updateDuel(opponent, player[0].id)
