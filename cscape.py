@@ -50,8 +50,7 @@ c.execute("""CREATE TABLE duels (
               Bspecturns integer,
               Brocktails integer,
               Bspecial integer,
-              messageid bigint,
-              channelid bigint
+              messageid bigint
               )""")
 conn.commit()
 
@@ -228,8 +227,6 @@ def whip(user, opponent, player, bot, channel):
 colors = ['A', 'B', 'C', 'D', 'E', 'F', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 flowers = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple']
 sidecolors = [16711680, 16743712, 16776960, 1305146, 1275391, 16730111]
-meleduel = False
-magicduel = False
 
 class currencies():
     osrs, ikov, spawnpk, runewild, zenyte, roatzpk, dreamscape, pkhonor, vitality, rs3, alora, simplicity = [0, 'osrs'], [0, 'ikov'], [0, 'spawnpk'], [0, 'runewild'], [0, 'zenyte'], [0, 'roatzpk'], [0, 'dreamscape'], [0, 'pkhonor'], [0, 'vitality'], [0, 'rs3'], [0, 'alora'], [0, 'simplicity']
@@ -647,7 +644,7 @@ async def on_message(message):
                         #player=[0               1     2           3        4                 5                 6]
                         #player=[member object, hp, rocktails, speical, poisoned, turns since poisoned, turns since speced]
                         sent = await message.channel.send(embed=hpupdate([str(message.author)[:-5], 99, 5, 100, False, 0, 0], ['CryptoScape Bot', 99, 5, 100, False, 0, 0], 'mele', 'New Game'))
-                        c.execute('INSERT INTO duels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (userid, currency, bet, 'mele', 99, False, 5, 100, sent.id, message.channel.id))
+                        c.execute('INSERT INTO duels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (userid, currency, bet, 'mele', 99, False, 0, 0, 5, 100, 99, False, 0, 0, 5, 100, sent.id))
                 else:
                     await message.channel.send("You don't have that much money!")
             else:
@@ -719,6 +716,7 @@ async def on_message(message):
                 bet = getvalue(winner[1], 'bet', 'duels')
                 update_money(winner[1], currency, bet * 2)
                 await message.channel.send('<@' + str(winner[0].id) + '> won the duel and gained **' + formatfromk(bet * 2) + ' ' + currency + '**!')
+                c.execute('DELETE FROM duels WHERE id={}'.format(winner[1].id))
     #######################################
     # elif message.content.startswith('!magebox'):
     #player=[member object, hp, sharks, frozen]
