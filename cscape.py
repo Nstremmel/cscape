@@ -595,7 +595,7 @@ async def on_message(message):
             await message.channel.send('An **error** has occured. Make sure you use `!meleduel (AMOUNT) (CURRENCY)`')
 
 
-    else message.content == '!rocktail' or message.content == '!dds' or message.content == '!whip':
+    elif message.content == '!rocktail' or message.content == '!dds' or message.content == '!whip':
         player = getvalue(message.author.id, ['Php', 'Procktails', 'Pspecial', 'Ppoisoned', 'Ppoisonturns', 'Pspecturns'], 'duels')
         player.insert(0, message.author.id)
         bot = getvalue(message.author.id, ['Bhp', 'Brocktails', 'Bspecial', 'Bpoisoned', 'Bpoisonturns', 'Bspecturns'], 'duels')
