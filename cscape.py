@@ -151,7 +151,7 @@ def hpupdate(bot, player, dueltype, words):
         if dueltype == 'mele':
             embed.add_field(name=str(i[0]), value="Poisoned: "+str(i[4]) +
                                                         "\n"+str(rocktail)+": "+str(i[2]) +
-                                                        "\nSpecial Attack: "+str(i[3]*25)+"%" +
+                                                        "\nSpecial Attack: "+str(i[3])+"%" +
                                                         "\nHP Left: "+str(i[1])+" "+str(hp), inline=True)
         elif dueltype == 'magic':
             embed.add_field(name=str(i[0]), value= "\n"+str(rocktail)+": "+str(i[2]) +
@@ -685,21 +685,21 @@ async def on_message(message):
                 await asyncio.sleep(2)
 
         if message.content == '!rocktail':
-            winner = rocktail(player, player, bot, channel)
+            winner = await rocktail(player, player, bot, channel)
         
         elif message.content == '!dds':
-            winner = dds(player, bot, player, bot, channel)
+            winner = await dds(player, bot, player, bot, channel)
         
         else:
-            winner = whip(player, bot, player, bot, channel)
+            winner = await whip(player, bot, player, bot, channel)
 
         if winner == None:
             if bot[1] < 40 and bot[2] > 0:
-                winner = rocktail(bot, player, bot, channel)
+                winner = await rocktail(bot, player, bot, channel)
             elif bot[3] >= 25:
-                winner = dds(bot, player, player, bot, channel)
+                winner = await dds(bot, player, player, bot, channel)
             else:
-                winner = whip(bot, player, player, bot, channel)
+                winner = await whip(bot, player, player, bot, channel)
 
         if winner == None:
             if bot[3] < 100:
