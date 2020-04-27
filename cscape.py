@@ -165,7 +165,7 @@ def isenough(amount, currency):
     else:
         return (True, ' ')
 
-def updateDuel(updater, userid)
+def updateDuel(updater, userid):
     user = updater.pop(0)
     for i in updater:
         if user == 'CryptoScape Bot':
