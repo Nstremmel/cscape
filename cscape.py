@@ -164,6 +164,60 @@ def isenough(amount, currency):
         return (False, words)
     else:
         return (True, ' ')
+
+def rocktail(user, player, bot, channelid):
+    channel = client.get_channel(channelid)
+    sentid = getvalue(player[1].id, 'messageid', 'duels')
+    sent = player[1].fetch_message(sentid)
+    rocktail = get(client.emojis, name='rocktail')
+    if user[2] < 1:
+        return 'You are out of ' + str(rocktail) + '. Please use `!dds` or `!whip`.'
+    else:
+        healing = random.randint(22, 29)
+        user[2] -= 1
+        user[1] += healing
+        if user[1] > 99:
+            user[1] = 99
+        words = str(user[0]) + ' eats a ' + str(rocktail) + ' and heals **' + str(healing) + '** hp.'
+        await sent.edit(embed=hpupdate(player, bot, 'mele', words))
+    return None
+
+def dds(user, opponent, player, bot, channelid):
+    channel = client.get_channel(channelid)
+    sentid = getvalue(player[1].id, 'messageid', 'duels')
+    sent = player[1].fetch_message(sentid)
+    dds = get(client.emojis, name='dds')
+    if user[3] < 25:
+        return 'You are out of ' + str(dds) + ' specs. Please use `!rocktail` or `!whip`.'
+    else:
+        user[3] -= 1
+        hit = random.randint(0, 20) + random.randint(0, 20)
+        opponent[1] -= hit
+        if opponent[1] < 0:
+            opponent[1] = 0
+        words = str(user[0]) + ' uses a ' + str(dds) + ' and deals **' + str(hit) + '** damage.'
+        await sent.edit(embed=hpupdate(player, bot, 'mele', words))
+        if opponent[1] < 1:
+            return user
+        elif random.randint(1, 4) == 4:
+            opponent[4] = True
+            await asyncio.sleep(2)
+            words = str(opponent[0]) + ' has been poisoned by the ' + str(dds) + '!'
+            await sent.edit(embed=hpupdate(player, bot, 'mele', words))
+    return None
+
+def whip(user, opponent, player, bot, channelid):
+    sentid = getvalue(player[1].id, 'messageid', 'duels')
+    sent = player[1].fetch_message(sentid)
+    whip = get(client.emojis, name='whip')
+    hit = random.randint(0, 27)
+    opponent[1] -= hit
+    words = str(user[0]) + ' has hit ' + str(opponent[0]) + ' with their ' + str(whip) + ' and dealt ' + str(hit) + ' damage.'
+    await sent.edit(embed=hpupdate(player, bot, 'mele', words))
+    if opponent[1] < 1:
+        return user
+    else:
+        return None
             
 ##############################################################################################################
 
@@ -595,7 +649,7 @@ async def on_message(message):
             await message.channel.send('An **error** has occured. Make sure you use `!meleduel (AMOUNT) (CURRENCY)`')
 
 
-    elif message.content == '!rocktail' or message.content == '!dds' or message.content == '!whip':
+    if message.content == '!rocktail' or message.content == '!dds' or message.content == '!whip':
         player = getvalue(message.author.id, ['Php', 'Procktails', 'Pspecial', 'Ppoisoned', 'Ppoisonturns', 'Pspecturns'], 'duels')
         player.insert(0, message.author.id)
         bot = getvalue(message.author.id, ['Bhp', 'Brocktails', 'Bspecial', 'Bpoisoned', 'Bpoisonturns', 'Bspecturns'], 'duels')
@@ -614,69 +668,18 @@ async def on_message(message):
                 await sent.edit(embed=hpupdate(player, bot, 'mele', 'You take **6** damage from poison.'))
                 await asyncio.sleep(2)
 
-        def rocktail(user, player, bot, channelid):
-            channel = client.get_channel(channelid)
-            sentid = getvalue(player[1].id, 'messageid', 'duels')
-            sent = player[1].fetch_message(sentid)
-            rocktail = get(client.emojis, name='rocktail')
-            if user[2] < 1:
-                await channel.send('You are out of ' + str(rocktail) + '. Please use `!dds` or `!whip`.', delete_after = 3.0)
-            else:
-                healing = random.randint(22, 29)
-                user[2] -= 1
-                user[1] += healing
-                if user[1] > 99:
-                    user[1] = 99
-                words = str(user[0]) + ' eats a ' + str(rocktail) + ' and heals **' + str(healing) + '** hp.'
-                await sent.edit(embed=hpupdate(player, bot, 'mele', words))
-            return None
-
-        def dds(user, opponent, player, bot, channelid):
-            channel = client.get_channel(channelid)
-            sentid = getvalue(player[1].id, 'messageid', 'duels')
-            sent = player[1].fetch_message(sentid)
-            dds = get(client.emojis, name='dds')
-            if user[3] < 25:
-                await channel.send('You are out of ' + str(dds) + ' specs. Please use `!rocktail` or `!whip`.', delete_after = 3.0)
-            else:
-                user[3] -= 1
-                hit = random.randint(0, 20) + random.randint(0, 20)
-                opponent[1] -= hit
-                if opponent[1] < 0:
-                    opponent[1] = 0
-                words = str(user[0]) + ' uses a ' + str(dds) + ' and deals **' + str(hit) + '** damage.'
-                await sent.edit(embed=hpupdate(player, bot, 'mele', words))
-                if opponent[1] < 1:
-                    return user
-                elif random.randint(1, 4) == 4:
-                    opponent[4] = True
-                    await asyncio.sleep(2)
-                    words = str(opponent[0]) + ' has been poisoned by the ' + str(dds) + '!'
-                    await sent.edit(embed=hpupdate(player, bot, 'mele', words))
-            return None
-
-        def whip(user, opponent, player, bot, channelid):
-            sentid = getvalue(player[1].id, 'messageid', 'duels')
-            sent = player[1].fetch_message(sentid)
-            whip = get(client.emojis, name='whip')
-            hit = random.randint(0, 27)
-            opponent[1] -= hit
-            words = str(user[0]) + ' has hit ' + str(opponent[0]) + ' with their ' + str(whip) + ' and dealt ' + str(hit) + ' damage.'
-            await sent.edit(embed=hpupdate(player, bot, 'mele', words))
-            if opponent[1] < 1:
-                return user
-            else:
-                return None
-
         if message.content == '!rocktail':
             winner = rocktail(player, player, bot, channelid)
         
         elif message.content == '!dds':
             winner = dds(player, bot, player, bot, channelid)
+        
         else:
             winner = whip(player, bot, player, bot, channelid)
 
-        if winner == None:
+        if isinstance(winner, str):
+            await channel.send(winner, delete_after = 3.0)
+        elif winner == None:
             if bot[1] < 40 and bot[2] > 0:
                 winner = rocktail(bot, player, bot, channelid)
             elif bot[3] >= 25:
@@ -697,7 +700,7 @@ async def on_message(message):
                     bot[1] -= 6
                     await sent.edit(embed=hpupdate(player, bot, 'mele', 'CryptoScape Bot takes **6** damage from poison.'))
                     await asyncio.sleep(2)
-        else:
+        elif isinstance(winner, list):
             if winner[1] == 'CryptoScape Bot':
                 await message.channel.send('CryptoScape Bot won the duel.')
             else:
