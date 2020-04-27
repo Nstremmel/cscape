@@ -667,14 +667,14 @@ async def on_message(message):
                 return user
             else:
                 return None
-                if message.content == '!rocktail':
-                    winner = rocktail(player, player, bot, channelid)
-                
-                elif message.content == '!dds':
-                    winner = dds(player, bot, player, bot, channelid)
-                
-                else:
-                    winner = whip(player, bot, player, bot, channelid)
+
+        if message.content == '!rocktail':
+            winner = rocktail(player, player, bot, channelid)
+        
+        elif message.content == '!dds':
+            winner = dds(player, bot, player, bot, channelid)
+        else:
+            winner = whip(player, bot, player, bot, channelid)
 
         if winner == None:
             if bot[1] < 40 and bot[2] > 0:
