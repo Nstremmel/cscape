@@ -165,7 +165,8 @@ def isenough(amount, currency):
     else:
         return (True, ' ')
 
-def rocktail(user, player, bot, channel):
+def rocktail(user, player, bot, channelid):
+    channel = client.get_channel(channelid)
     sentid = getvalue(player[1].id, 'messageid', 'duels')
     sent = player[1].fetch_message(sentid)
     rocktail = get(client.emojis, name='rocktail')
@@ -183,7 +184,8 @@ def rocktail(user, player, bot, channel):
         await sent.edit(embed=hpupdate(player, bot, 'mele', words))
     return None
 
-def dds(user, opponent, player, bot, channel):
+def dds(user, opponent, player, bot, channelid):
+    channel = client.get_channel(channelid)
     sentid = getvalue(player[1].id, 'messageid', 'duels')
     sent = player[1].fetch_message(sentid)
     dds = get(client.emojis, name='dds')
@@ -208,7 +210,7 @@ def dds(user, opponent, player, bot, channel):
             await sent.edit(embed=hpupdate(player, bot, 'mele', words))
     return None
 
-def whip(user, opponent, player, bot, channel):
+def whip(user, opponent, player, bot, channelid):
     sentid = getvalue(player[1].id, 'messageid', 'duels')
     sent = player[1].fetch_message(sentid)
     whip = get(client.emojis, name='whip')
@@ -643,7 +645,7 @@ async def on_message(message):
                         update_money(message.author.id, currency, bet * -1)
                         #player=[0               1     2           3        4                 5                 6]
                         #player=[member object, hp, rocktails, speical, poisoned, turns since poisoned, turns since speced]
-                        sent = await message.channel.send(embed=hpupdate([str(message.author)[:-5], 99, 5, 100, False, 0, 0], ['CryptoScape Bot', 99, 5, 100, False, 0, 0], 'mele', 'New Game'))
+                        sent = await message.channel.send(embed=hpupdate([str(message.author)[:-5], 99, 5, 100, False, 0, 0], ['CryptoScape Bot', 99, 5, 100, False, 0, 0], 'mele', 'New Game. Use `!rocktail`, `!dds`, or `!whip`.'))
                         c.execute('INSERT INTO duels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (userid, currency, bet, 'mele', 99, False, 0, 0, 5, 100, 99, False, 0, 0, 5, 100, sent.id))
                 else:
                     await message.channel.send("You don't have that much money!")
@@ -652,11 +654,6 @@ async def on_message(message):
         except:
             await message.channel.send('An **error** has occured. Make sure you use `!meleduel (AMOUNT) (CURRENCY)`')
 
-                                    
-
-
-
-
 
     else message.content == '!rocktail' or message.content == '!dds' or message.content == '!whip':
         player = getvalue(message.author.id, ['Php', 'Procktails', 'Pspecial', 'Ppoisoned', 'Ppoisonturns', 'Pspecturns'], 'duels')
@@ -664,7 +661,6 @@ async def on_message(message):
         bot = getvalue(message.author.id, ['Bhp', 'Brocktails', 'Bspecial', 'Bpoisoned', 'Bpoisonturns', 'Bspecturns'], 'duels')
         bot.insert(0, 'CryptoScape Bot')
         channelid = getvalue(message.author.id, 'channelid', 'duels')
-        channel = client.get_channel(channelid)
         if player[3] < 100:
             player[6] += 1
             if (player[6] % 4) == 0:
@@ -679,34 +675,34 @@ async def on_message(message):
                 await asyncio.sleep(2)
 
         if message.content == '!rocktail':
-            winner = rocktail(player, player, bot, channel)
+            winner = rocktail(player, player, bot, channelid)
         
         elif message.content == '!dds':
-            winner = dds(player, bot, player, bot, channel)
+            winner = dds(player, bot, player, bot, channelid)
         
         else:
-            winner = whip(player, bot, player, bot, channel)
+            winner = whip(player, bot, player, bot, channelid)
 
         if winner == None:
             if bot[1] < 40 and bot[2] > 0:
-                winner = rocktail(bot, player, bot, channel)
+                winner = rocktail(bot, player, bot, channelid)
             elif bot[3] >= 25:
-                winner = dds(bot, player, player, bot, channel)
+                winner = dds(bot, player, player, bot, channelid)
             else:
-                winner = whip(bot, player, player, bot, channel)
+                winner = whip(bot, player, player, bot, channelid)
 
         if winner == None:
             if bot[3] < 100:
                 bot[6] += 1
                 if (bot[6] % 4) == 0:
                     bot[3] += 25
-                    await sent.edit(embed=hpupdate(player, bot, 'mele', 'You regain **25%** special attack.'))
+                    await sent.edit(embed=hpupdate(player, bot, 'mele', 'CryptoScape Bot regains **25%** special attack.'))
                     await asyncio.sleep(2)
             if bot[4]:
                 bot[5] += 1
                 if (bot[5] % 4) == 0:
                     bot[1] -= 6
-                    await sent.edit(embed=hpupdate(player, bot, 'mele', 'You take **6** damage from poison.'))
+                    await sent.edit(embed=hpupdate(player, bot, 'mele', 'CryptoScape Bot takes **6** damage from poison.'))
                     await asyncio.sleep(2)
         else:
             if winner[1] == 'CryptoScape Bot':
