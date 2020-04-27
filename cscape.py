@@ -68,7 +68,7 @@ def getvalue(userid, column, table):
         return returned
     else:
         strings = ['currency', 'type']
-        booleans = ['poisoned']
+        booleans = ['Ppoisoned', 'Bpoisoned']
 
         if column == '07':
             column = 'osrs'
@@ -168,7 +168,6 @@ def isenough(amount, currency):
 
 def updateDuel(updater, userid):
     user = updater.pop(0)
-    print(updater)
     for counter, i in enumerate(updater):
         if user == 'CryptoScape Bot':
             columns = ['Bhp', 'Brocktails', 'Bspecial', 'Bpoisoned', 'Bpoisonturns', 'Bspecturns']
@@ -200,7 +199,7 @@ async def dds(user, opponent, player, bot, channel):
     if user[3] < 25:
         await channel.send('You are out of ' + str(dds) + ' specs. Please use `!rocktail` or `!whip`.', delete_after = 3.0)
     else:
-        user[3] -= 1
+        user[3] -= 25
         hit = random.randint(0, 20) + random.randint(0, 20)
         opponent[1] -= hit
         if opponent[1] < 0:
@@ -668,7 +667,6 @@ async def on_message(message):
     elif message.content == '!rocktail' or message.content == '!dds' or message.content == '!whip':
         player = getvalue(message.author.id, ['Php', 'Procktails', 'Pspecial', 'Ppoisoned', 'Ppoisonturns', 'Pspecturns'], 'duels')
         player.insert(0, message.author)
-        print(player)
         bot = getvalue(message.author.id, ['Bhp', 'Brocktails', 'Bspecial', 'Bpoisoned', 'Bpoisonturns', 'Bspecturns'], 'duels')
         bot.insert(0, 'CryptoScape Bot')
         channelid = getvalue(message.author.id, 'channelid', 'duels')
@@ -690,7 +688,6 @@ async def on_message(message):
             winner = await rocktail(player, player, bot, channel)
         
         elif message.content == '!dds':
-            print(player)
             winner = await dds(player, bot, player, bot, channel)
         
         else:
