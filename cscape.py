@@ -177,7 +177,7 @@ def updateDuel(updater, userid):
     
 async def rocktail(user, player, bot, channel):
     sentid = getvalue(player[0].id, 'messageid', 'duels')
-    sent = player[0].fetch_message(sentid)
+    sent = await player[0].fetch_message(sentid)
     rocktail = get(client.emojis, name='rocktail')
     if user[2] < 1:
         await channel.send('You are out of ' + str(rocktail) + '. Please use `!dds` or `!whip`.', delete_after = 3.0)
@@ -194,7 +194,7 @@ async def rocktail(user, player, bot, channel):
 
 async def dds(user, opponent, player, bot, channel):
     sentid = getvalue(player[0].id, 'messageid', 'duels')
-    sent = player[0].fetch_message(sentid)
+    sent = await player[0].fetch_message(sentid)
     dds = get(client.emojis, name='dds')
     if user[3] < 25:
         await channel.send('You are out of ' + str(dds) + ' specs. Please use `!rocktail` or `!whip`.', delete_after = 3.0)
@@ -221,7 +221,7 @@ async def dds(user, opponent, player, bot, channel):
 
 async def whip(user, opponent, player, bot, channel):
     sentid = getvalue(player[0].id, 'messageid', 'duels')
-    sent = player[0].fetch_message(sentid)
+    sent = await player[0].fetch_message(sentid)
     whip = get(client.emojis, name='whip')
     hit = random.randint(0, 27)
     opponent[1] -= hit
