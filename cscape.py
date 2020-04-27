@@ -12,25 +12,25 @@ conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 c = conn.cursor()
 conn.set_session(autocommit=True)
 
-c.execute("DROP TABLE rsmoney")
-c.execute("""CREATE TABLE rsmoney (
-              id bigint,
-              osrs bigint,
-              rs3 bigint,
-              alora bigint,
-              ikov bigint,
-              spawnpk bigint,
-              runewild bigint,
-              zenyte bigint,
-              roatzpk bigint,
-              dreamscape bigint,
-              pkhonor bigint,
-              vitality bigint,
-              simplicity bigint,
-              privacy boolean,
-              channels integer
-              )""")
-conn.commit()
+# c.execute("DROP TABLE rsmoney")
+# c.execute("""CREATE TABLE rsmoney (
+#               id bigint,
+#               osrs bigint,
+#               rs3 bigint,
+#               alora bigint,
+#               ikov bigint,
+#               spawnpk bigint,
+#               runewild bigint,
+#               zenyte bigint,
+#               roatzpk bigint,
+#               dreamscape bigint,
+#               pkhonor bigint,
+#               vitality bigint,
+#               simplicity bigint,
+#               privacy boolean,
+#               channels integer
+#               )""")
+# conn.commit()
 
 c.execute("DROP TABLE duels")
 c.execute("""CREATE TABLE duels (
@@ -131,7 +131,7 @@ def formatfromk(amount):
 
 
 def hpupdate(bot, player, url, dueltype):
-    url = str(player[1].guild.icon_url)
+    url = str(player[0].guild.icon_url)
     embed = discord.Embed(color=16766463)
     embed.set_author(name='Fight to the Death!', icon_url=url)
     for i in [bot, player]:
@@ -166,8 +166,8 @@ def isenough(amount, currency):
         return (True, ' ')
 
 async def rocktail(user, player, bot, channel):
-    sentid = getvalue(player[1].id, 'messageid', 'duels')
-    sent = player[1].fetch_message(sentid)
+    sentid = getvalue(player[0].id, 'messageid', 'duels')
+    sent = player[0].fetch_message(sentid)
     rocktail = get(client.emojis, name='rocktail')
     if user[2] < 1:
         await channel.send('You are out of ' + str(rocktail) + '. Please use `!dds` or `!whip`.', delete_after = 3.0)
@@ -182,8 +182,8 @@ async def rocktail(user, player, bot, channel):
     return None
 
 async def dds(user, opponent, player, bot, channel):
-    sentid = getvalue(player[1].id, 'messageid', 'duels')
-    sent = player[1].fetch_message(sentid)
+    sentid = getvalue(player[0].id, 'messageid', 'duels')
+    sent = player[0].fetch_message(sentid)
     dds = get(client.emojis, name='dds')
     if user[3] < 25:
         await channel.send('You are out of ' + str(dds) + ' specs. Please use `!rocktail` or `!whip`.', delete_after = 3.0)
@@ -205,8 +205,8 @@ async def dds(user, opponent, player, bot, channel):
     return None
 
 async def whip(user, opponent, player, bot, channel):
-    sentid = getvalue(player[1].id, 'messageid', 'duels')
-    sent = player[1].fetch_message(sentid)
+    sentid = getvalue(player[0].id, 'messageid', 'duels')
+    sent = player[0].fetch_message(sentid)
     whip = get(client.emojis, name='whip')
     hit = random.randint(0, 27)
     opponent[1] -= hit
@@ -630,9 +630,9 @@ async def on_message(message):
         if isenough(bet, currency):
             if current >= bet:
                 try:
-                    c.execute('SELECT playerscore FROM bj WHERE id={}'.format(message.author.id))
+                    c.execute('SELECT hp FROM duels WHERE id={}'.format(message.author.id))
                     tester = int(c.fetchone()[0])
-                    await message.channel.send('You are already in a duel! Use `!rocktail`, `!dds`, or `!whip` to continue the game!')
+                    await message.channel.send('You are already in a duel! Use `!rocktail`, `!dds`, or `!whip` to continue.')
                 except:
                     update_money(message.author.id, currency, bet * -1)
                     #player=[0               1     2           3        4                 5                 6]
