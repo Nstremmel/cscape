@@ -32,7 +32,7 @@ c.execute("""CREATE TABLE rsmoney (
               )""")
 conn.commit()
 
-c.execute("DROP TABLE duels")
+# c.execute("DROP TABLE duels")
 c.execute("""CREATE TABLE duels (
               id bigint,
               currency text,
