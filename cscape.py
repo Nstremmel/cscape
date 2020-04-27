@@ -165,6 +165,15 @@ def isenough(amount, currency):
     else:
         return (True, ' ')
 
+def updateDuel(updater, userid)
+    user = updater.pop(0)
+    for i in updater:
+        if user == 'CryptoScape Bot':
+            columns = ['Bhp', 'Brocktails', 'Boisoned', 'Bspecial', 'Bpoisonturns', 'Bspecturns']
+        else:
+            columns = ['Php', 'Procktails', 'Ppoisoned', 'Pspecial', 'Ppoisonturns', 'Pspecturns']
+        c.execute("UPDATE duels SET {}={} WHERE id={}".format(columns, i, userid))
+    
 async def rocktail(user, player, bot, channel):
     sentid = getvalue(player[0].id, 'messageid', 'duels')
     sent = player[0].fetch_message(sentid)
@@ -179,6 +188,7 @@ async def rocktail(user, player, bot, channel):
             user[1] = 99
         words = str(user[0]) + ' eats a ' + str(rocktail) + ' and heals **' + str(healing) + '** hp.'
         await sent.edit(embed=hpupdate(player, bot, 'mele', words))
+    updateDuel(user, player[0].id)
     return None
 
 async def dds(user, opponent, player, bot, channel):
@@ -196,12 +206,16 @@ async def dds(user, opponent, player, bot, channel):
         words = str(user[0]) + ' uses a ' + str(dds) + ' and deals **' + str(hit) + '** damage.'
         await sent.edit(embed=hpupdate(player, bot, 'mele', words))
         if opponent[1] < 1:
+            updateDuel(user, player[0].id)
+            updateDuel(opponent, player[0].id)
             return user
         elif random.randint(1, 4) == 4:
             opponent[4] = True
             await asyncio.sleep(2)
             words = str(opponent[0]) + ' has been poisoned by the ' + str(dds) + '!'
             await sent.edit(embed=hpupdate(player, bot, 'mele', words))
+    updateDuel(user, player[0].id)
+    updateDuel(opponent, player[0].id)
     return None
 
 async def whip(user, opponent, player, bot, channel):
@@ -212,6 +226,8 @@ async def whip(user, opponent, player, bot, channel):
     opponent[1] -= hit
     words = str(user[0]) + ' has hit ' + str(opponent[0]) + ' with their ' + str(whip) + ' and dealt ' + str(hit) + ' damage.'
     await sent.edit(embed=hpupdate(player, bot, 'mele', words))
+    updateDuel(user, player[0].id)
+    updateDuel(opponent, player[0].id)
     if opponent[1] < 1:
         return user
     else:
@@ -630,14 +646,14 @@ async def on_message(message):
         if isenough(bet, currency):
             if current >= bet:
                 try:
-                    c.execute('SELECT hp FROM duels WHERE id={}'.format(message.author.id))
+                    c.execute('SELECT Php FROM duels WHERE id={}'.format(message.author.id))
                     tester = int(c.fetchone()[0])
                     await message.channel.send('You are already in a duel! Use `!rocktail`, `!dds`, or `!whip` to continue.')
                 except:
                     update_money(message.author.id, currency, bet * -1)
                     #player=[0               1     2           3        4                 5                 6]
                     #player=[member object, hp, rocktails, speical, poisoned, turns since poisoned, turns since speced]
-                    sent = await message.channel.send(embed=hpupdate([str(message.author)[:-5], 99, 5, 100, False, 0, 0], ['CryptoScape Bot', 99, 5, 100, False, 0, 0], 'mele', 'New Game. Use `!rocktail`, `!dds`, or `!whip`.'))
+                    sent = await message.channel.send(embed=hpupdate([message.author, 99, 5, 100, False, 0, 0], ['CryptoScape Bot', 99, 5, 100, False, 0, 0], 'mele', 'New Game. Use `!rocktail`, `!dds`, or `!whip`.'))
                     c.execute('INSERT INTO duels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (userid, currency, bet, 'mele', 99, False, 0, 0, 5, 100, 99, False, 0, 0, 5, 100, sent.id))
             else:
                 await message.channel.send("You don't have that much money!")
