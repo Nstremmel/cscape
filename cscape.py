@@ -187,7 +187,7 @@ async def rocktail(user, player, bot, channel):
         if user[1] > 99:
             user[1] = 99
         words = str(user[0]) + ' eats a ' + str(rocktail) + ' and heals **' + str(healing) + '** hp.'
-        await sent.edit(embed=hpupdate(player, bot, 'mele', words))
+        await sent.edit(embed=hpupdate(bot, player, 'mele', words))
     updateDuel(user, player[0].id)
     return None
 
@@ -213,7 +213,7 @@ async def dds(user, opponent, player, bot, channel):
             opponent[4] = True
             await asyncio.sleep(2)
             words = str(opponent[0]) + ' has been poisoned by the ' + str(dds) + '!'
-            await sent.edit(embed=hpupdate(player, bot, 'mele', words))
+            await sent.edit(embed=hpupdate(bot, player, 'mele', words))
     updateDuel(user, player[0].id)
     updateDuel(opponent, player[0].id)
     return None
@@ -225,7 +225,7 @@ async def whip(user, opponent, player, bot, channel):
     hit = random.randint(0, 27)
     opponent[1] -= hit
     words = str(user[0]) + ' has hit ' + str(opponent[0]) + ' with their ' + str(whip) + ' and dealt ' + str(hit) + ' damage.'
-    await sent.edit(embed=hpupdate(player, bot, 'mele', words))
+    await sent.edit(embed=hpupdate(bot, player, 'mele', words))
     updateDuel(user, player[0].id)
     updateDuel(opponent, player[0].id)
     if opponent[1] < 1:
@@ -674,13 +674,13 @@ async def on_message(message):
             player[6] += 1
             if (player[6] % 4) == 0:
                 player[3] += 25
-                await sent.edit(embed=hpupdate(player, bot, 'mele', 'You regain **25%** special attack.'))
+                await sent.edit(embed=hpupdate(bot, player, 'mele', 'You regain **25%** special attack.'))
                 await asyncio.sleep(2)
         if player[4]:
             player[5] += 1
             if (player[5] % 4) == 0:
                 player[1] -= 6
-                await sent.edit(embed=hpupdate(player, bot, 'mele', 'You take **6** damage from poison.'))
+                await sent.edit(embed=hpupdate(bot, player, 'mele', 'You take **6** damage from poison.'))
                 await asyncio.sleep(2)
 
         if message.content == '!rocktail':
@@ -705,13 +705,13 @@ async def on_message(message):
                 bot[6] += 1
                 if (bot[6] % 4) == 0:
                     bot[3] += 25
-                    await sent.edit(embed=hpupdate(player, bot, 'mele', 'CryptoScape Bot regains **25%** special attack.'))
+                    await sent.edit(embed=hpupdate(bot, player, 'mele', 'CryptoScape Bot regains **25%** special attack.'))
                     await asyncio.sleep(2)
             if bot[4]:
                 bot[5] += 1
                 if (bot[5] % 4) == 0:
                     bot[1] -= 6
-                    await sent.edit(embed=hpupdate(player, bot, 'mele', 'CryptoScape Bot takes **6** damage from poison.'))
+                    await sent.edit(embed=hpupdate(bot, player, 'mele', 'CryptoScape Bot takes **6** damage from poison.'))
                     await asyncio.sleep(2)
         else:
             if winner[1] == 'CryptoScape Bot':
