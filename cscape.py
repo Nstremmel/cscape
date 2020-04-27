@@ -666,7 +666,7 @@ async def on_message(message):
 
     elif message.content == '!rocktail' or message.content == '!dds' or message.content == '!whip':
         player = getvalue(message.author.id, ['Php', 'Procktails', 'Pspecial', 'Ppoisoned', 'Ppoisonturns', 'Pspecturns'], 'duels')
-        player.insert(0, message.author.id)
+        player.insert(0, message.author)
         bot = getvalue(message.author.id, ['Bhp', 'Brocktails', 'Bspecial', 'Bpoisoned', 'Bpoisonturns', 'Bspecturns'], 'duels')
         bot.insert(0, 'CryptoScape Bot')
         channelid = getvalue(message.author.id, 'channelid', 'duels')
