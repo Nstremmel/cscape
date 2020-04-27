@@ -166,12 +166,12 @@ def isenough(amount, currency):
         return (True, ' ')
 
 def rocktail(user, player, bot, channelid):
-    channel = client.get_channel(channelid)
+    chan = client.get_channel(channelid)
     sentid = getvalue(player[1].id, 'messageid', 'duels')
     sent = player[1].fetch_message(sentid)
     rocktail = get(client.emojis, name='rocktail')
     if user[2] < 1:
-        warn = await channel.send('You are out of ' + str(rocktail) + '. Please use `!dds` or `!whip`.')
+        warn = await chan.send('You are out of ' + str(rocktail) + '. Please use `!dds` or `!whip`.')
         await asyncio.sleep(3)
         await warn.delete()
     else:
@@ -185,12 +185,12 @@ def rocktail(user, player, bot, channelid):
     return None
 
 def dds(user, opponent, player, bot, channelid):
-    channel = client.get_channel(channelid)
+    chan = client.get_channel(channelid)
     sentid = getvalue(player[1].id, 'messageid', 'duels')
     sent = player[1].fetch_message(sentid)
     dds = get(client.emojis, name='dds')
     if user[3] < 25:
-        warn = await channel.send('You are out of ' + str(dds) + ' specs. Please use `!rocktail` or `!whip`.')
+        warn = await chan.send('You are out of ' + str(dds) + ' specs. Please use `!rocktail` or `!whip`.')
         await asyncio.sleep(3)
         await warn.delete()
     else:
