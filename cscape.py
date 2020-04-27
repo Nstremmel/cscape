@@ -130,9 +130,9 @@ def formatfromk(amount):
         return str(amount)+"k"
 
 
-def hpupdate(bot, player, url, dueltype):
+def hpupdate(bot, player, dueltype, words):
     url = str(player[0].guild.icon_url)
-    embed = discord.Embed(color=16766463)
+    embed = discord.Embed(description = words, color = 16766463)
     embed.set_author(name='Fight to the Death!', icon_url=url)
     for i in [bot, player]:
         hp = int(i[1])
@@ -653,7 +653,7 @@ async def on_message(message):
                     update_money(message.author.id, currency, bet * -1)
                     #player=[0               1     2           3        4                 5                 6]
                     #player=[member object, hp, rocktails, speical, poisoned, turns since poisoned, turns since speced]
-                    sent = await message.channel.send(embed=hpupdate([message.author, 99, 5, 100, False, 0, 0], ['CryptoScape Bot', 99, 5, 100, False, 0, 0], 'mele', 'New Game. Use `!rocktail`, `!dds`, or `!whip`.'))
+                    sent = await message.channel.send(embed=hpupdate(['CryptoScape Bot', 99, 5, 100, False, 0, 0], [message.author, 99, 5, 100, False, 0, 0], 'mele', 'New Game. Use `!rocktail`, `!dds`, or `!whip`.'))
                     c.execute('INSERT INTO duels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (userid, currency, bet, 'mele', 99, False, 0, 0, 5, 100, 99, False, 0, 0, 5, 100, sent.id))
             else:
                 await message.channel.send("You don't have that much money!")
