@@ -168,13 +168,14 @@ def isenough(amount, currency):
 
 def updateDuel(updater, userid):
     user = updater.pop(0)
+    print(updater)
     for counter, i in enumerate(updater):
         if user == 'CryptoScape Bot':
             columns = ['Bhp', 'Brocktails', 'Bspecial', 'Bpoisoned', 'Bpoisonturns', 'Bspecturns']
         else:
             columns = ['Php', 'Procktails', 'Pspecial', 'Ppoisoned', 'Ppoisonturns', 'Pspecturns']
         c.execute("UPDATE duels SET {}={} WHERE id={}".format(columns[counter], i, userid))
-        
+
 async def rocktail(user, player, bot, channel):
     sentid = getvalue(player[0].id, 'messageid', 'duels')
     sent = await channel.fetch_message(sentid)
