@@ -265,7 +265,7 @@ async def on_raw_reaction_add(payload):
         channelids.append(channel.id)
     if channel.id in channelids and payload.emoji.id == 676988116451590226 and user.id != 479862852895899649:
         channels = getvalue(user.id, 'channels', 'rsmoney')
-        if openchannel < 10:
+        if channels < 10:
             category = (client.get_channel(698306053590351872)).category
             newChannel = await channel.guild.create_text_channel(channel.name + ' ' + str(user)[:-5], category=category)
             await newChannel.set_permissions(user, read_messages=True, send_messages=True, read_message_history=True)
