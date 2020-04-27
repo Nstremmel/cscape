@@ -625,7 +625,7 @@ async def on_message(message):
     elif message.content.startswith('!meleduel'):
         #try:
         currency = (message.content).split(' ')[2]
-        current = getvalue(message.author.id, melecurrency, 'rsmoney')
+        current = getvalue(message.author.id, currency, 'rsmoney')
         bet = formatok(message.content.split(' ')[1])
         if isenough(bet, currency):
             if current >= bet:
