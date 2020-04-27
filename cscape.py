@@ -32,7 +32,7 @@ c.execute("""CREATE TABLE rsmoney (
               )""")
 conn.commit()
 
-# c.execute("DROP TABLE duels")
+c.execute("DROP TABLE duels")
 c.execute("""CREATE TABLE duels (
               id bigint,
               currency text,
@@ -57,7 +57,7 @@ conn.commit()
 client = discord.Client()
 
 def add_member(userid):
-    c.execute('INSERT INTO rsmoney VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)', (userid, 0, 0, 0, 0, 0, 0, False, 0))
+    c.execute('INSERT INTO rsmoney VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (userid, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, False, 0))
 
 def getvalue(userid, column, table):
     if isinstance(column, list):
