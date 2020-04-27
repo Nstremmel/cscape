@@ -12,63 +12,87 @@ conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 c = conn.cursor()
 conn.set_session(autocommit=True)
 
-# c.execute("DROP TABLE rsmoney")
-# c.execute("""CREATE TABLE rsmoney (
-#               id bigint,
-#               osrs bigint,
-#               ikov bigint,
-#               spawnpk bigint,
-#               runewild bigint,
-#               zenyte bigint,
-#               roatzpk bigint,
-#               privacy boolean,
-#               openchannel bigint
-#               )""")
-# conn.commit()
+c.execute("DROP TABLE rsmoney")
+c.execute("""CREATE TABLE rsmoney (
+              id bigint,
+              osrs bigint,
+              rs3 bigint,
+              alora bigint,
+              ikov bigint,
+              spawnpk bigint,
+              runewild bigint,
+              zenyte bigint,
+              roatzpk bigint,
+              dreamscape bigint,
+              pkhonor bigint,
+              vitality bigint,
+              simplicity bigint,
+              privacy boolean,
+              channels integer
+              )""")
+conn.commit()
 
-# c.execute("DROP TABLE duels")
-# c.execute("""CREATE TABLE duels (
-#               id bigint,
-#               currency text,
-#               bet integer,
-#               type text,
-#               messageid bigint,
-#               channelid bigint,
-#               )""")
-# conn.commit()
+c.execute("DROP TABLE duels")
+c.execute("""CREATE TABLE duels (
+              id bigint,
+              currency text,
+              bet integer,
+              type text,
+              Php integer,
+              Ppoisoned boolean,
+              Ppoisonturns integer,
+              Pspecturns integer,
+              Procktails integer,
+              Pspecial integer,
+              Bhp integer,
+              Bpoisoned boolean,
+              Bpoisonturns integer,
+              Bspecturns integer,
+              Brocktails integer,
+              Bspecial integer,
+              messageid bigint,
+              channelid bigint
+              )""")
+conn.commit()
 
 client = discord.Client()
 
 def add_member(userid):
     c.execute('INSERT INTO rsmoney VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)', (userid, 0, 0, 0, 0, 0, 0, False, 0))
 
-def getvalue(userid, column):
-    strings=[]
-    booleans=[]
-
-    if column == '07':
-        column = 'osrs'
-    try:
-        c.execute("SELECT osrs FROM rsmoney WHERE id={}".format(userid))
-        tester=int(c.fetchone()[0])
-    except:
-        print("New Member")
-        add_member(int(userid))
-        return 0
-
-    c.execute("SELECT {} FROM rsmoney WHERE id={}".format(column, userid))
-
-    if column in booleans:
-        return bool(c.fetchone()[0])
-    elif column in strings:
-        return str(c.fetchone()[0])
+def getvalue(userid, column, table):
+    if isinstance(column, list):
+        returned = []
+        for i in column:
+            returned.append(getvalue(userid, i, table))
+        return returned
     else:
-        return int(c.fetchone()[0])
+        strings = ['currency', 'type']
+        booleans = ['poisoned']
+
+        if column == '07':
+            column = 'osrs'
+        try:
+            c.execute("SELECT osrs FROM rsmoney WHERE id={}".format(userid))
+            tester=int(c.fetchone()[0])
+        except:
+            print("New Member")
+            add_member(int(userid))
+            return 0
+
+        c.execute("SELECT {} FROM {} WHERE id={}".format(column, userid))
+
+        if column in booleans:
+            return bool(c.fetchone()[0])
+        elif column in strings:
+            return str(c.fetchone()[0])
+        else:
+            return int(c.fetchone()[0])
 
 def update_money(userid, currency, amount):
     if currency == '07':
         currency = 'osrs'
-    total = getvalue(int(userid), currency)
+    total = getvalue(int(userid), currency, 'rsmoney')
     c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, total + amount, userid))
 
 def isstaff(authorroles):
@@ -107,10 +131,11 @@ def formatfromk(amount):
         return str(amount)+"k"
 
 
-def hpupdate(players, url, dueltype):
+def hpupdate(bot, player, url, dueltype):
+    url = str(player[1].guild.icon_url)
     embed = discord.Embed(color=16766463)
     embed.set_author(name='Fight to the Death!', icon_url=url)
-    for i in players:
+    for i in [bot, player]:
         hp = int(i[1])
         if hp in range(76, 100):
             hp = get(client.emojis, name='hpbar100')
@@ -123,13 +148,13 @@ def hpupdate(players, url, dueltype):
         elif hp < 1:
             hp = get(client.emojis, name='hpbar0')
         rocktail = get(client.emojis, name='rocktail')
-        if dueltype=="mele":
-            embed.add_field(name=str(i[0])[:-5], value="Poisoned: "+str(i[4]) +
+        if dueltype == 'mele':
+            embed.add_field(name=str(i[0]), value="Poisoned: "+str(i[4]) +
                                                         "\n"+str(rocktail)+": "+str(i[2]) +
                                                         "\nSpecial Attack: "+str(i[3]*25)+"%" +
                                                         "\nHP Left: "+str(i[1])+" "+str(hp), inline=True)
-        elif dueltype=="magic":
-            embed.add_field(name=str(i[0])[:-5], value= "\n"+str(rocktail)+": "+str(i[2]) +
+        elif dueltype == 'magic':
+            embed.add_field(name=str(i[0]), value= "\n"+str(rocktail)+": "+str(i[2]) +
                                                         "\nFrozen: "+str(i[3]) +
                                                         "\nHP Left: "+str(i[1])+" "+str(hp), inline=True)
     return embed
@@ -140,6 +165,63 @@ def isenough(amount, currency):
         return (False, words)
     else:
         return (True, ' ')
+
+def rocktail(user, player, bot, channel):
+    sentid = getvalue(player[1].id, 'messageid', 'duels')
+    sent = player[1].fetch_message(sentid)
+    rocktail = get(client.emojis, name='rocktail')
+    if user[2] < 1:
+        warn = await channel.send('You are out of ' + str(rocktail) + '. Please use `!dds` or `!whip`.')
+        await asyncio.sleep(3)
+        await warn.delete()
+    else:
+        healing = random.randint(22, 29)
+        user[2] -= 1
+        user[1] += healing
+        if user[1] > 99:
+            user[1] = 99
+        words = str(user[0]) + ' eats a ' + str(rocktail) + ' and heals **' + str(healing) + '** hp.'
+        await sent.edit(embed=hpupdate(player, bot, 'mele', words))
+    return None
+
+def dds(user, opponent, player, bot, channel):
+    sentid = getvalue(player[1].id, 'messageid', 'duels')
+    sent = player[1].fetch_message(sentid)
+    dds = get(client.emojis, name='dds')
+    if user[3] < 25:
+        warn = await channel.send('You are out of ' + str(dds) + ' specs. Please use `!rocktail` or `!whip`.')
+        await asyncio.sleep(3)
+        await warn.delete()
+    else:
+        user[3] -= 1
+        hit = random.randint(0, 20) + random.randint(0, 20)
+        opponent[1] -= hit
+        if opponent[1] < 0:
+            opponent[1] = 0
+        words = str(user[0]) + ' uses a ' + str(dds) + ' and deals **' + str(hit) + '** damage.'
+        await sent.edit(embed=hpupdate(player, bot, 'mele', words))
+        if opponent[1] < 1:
+            return user
+        elif random.randint(1, 4) == 4:
+            opponent[4] = True
+            await asyncio.sleep(2)
+            words = str(opponent[0]) + ' has been poisoned by the ' + str(dds) + '!'
+            await sent.edit(embed=hpupdate(player, bot, 'mele', words))
+    return None
+
+def whip(user, opponent, player, bot, channel):
+    sentid = getvalue(player[1].id, 'messageid', 'duels')
+    sent = player[1].fetch_message(sentid)
+    whip = get(client.emojis, name='whip')
+    hit = random.randint(0, 27)
+    opponent[1] -= hit
+    words = str(user[0]) + ' has hit ' + str(opponent[0]) + ' with their ' + str(whip) + ' and dealt ' + str(hit) + ' damage.'
+    await sent.edit(embed=hpupdate(player, bot, 'mele', words))
+    if opponent[1] < 1:
+        return user
+    else:
+        return None
+            
 ##############################################################################################################
 
 #Predefined Variables
@@ -150,8 +232,8 @@ meleduel = False
 magicduel = False
 
 class currencies():
-    osrs, ikov, spawnpk, runewild, zenyte, roatzpk = [0, 'osrs'], [0, 'ikov'], [0, 'spawnpk'], [0, 'runewild'], [0, 'zenyte'], [0, 'roatzpk']
-    currencies = [osrs, ikov, spawnpk, runewild, zenyte, roatzpk]
+    osrs, ikov, spawnpk, runewild, zenyte, roatzpk, dreamscape, pkhonor, vitality, rs3, alora, simplicity = [0, 'osrs'], [0, 'ikov'], [0, 'spawnpk'], [0, 'runewild'], [0, 'zenyte'], [0, 'roatzpk'], [0, 'dreamscape'], [0, 'pkhonor'], [0, 'vitality'], [0, 'rs3'], [0, 'alora'], [0, 'simplicity']
+    currencies = [osrs, ikov, spawnpk, runewild, zenyte, roatzpk, dreamscape, pkhonor, vitality, rs3, alora, simplicity]
 
 async def my_background_task():
     await client.wait_until_ready()
@@ -173,12 +255,12 @@ async def on_raw_reaction_add(payload):
     for channel in category1.channels + category2.channels:
         channelids.append(channel.id)
     if channel.id in channelids and payload.emoji.id == 676988116451590226 and user.id != 479862852895899649:
-        openchannel = getvalue(user.id, 'openchannel')
-        if openchannel == 0:
+        channels = getvalue(user.id, 'channels', 'rsmoney')
+        if openchannel < 10:
             category = (client.get_channel(698306053590351872)).category
             newChannel = await channel.guild.create_text_channel(channel.name + ' ' + str(user)[:-5], category=category)
             await newChannel.set_permissions(user, read_messages=True, send_messages=True, read_message_history=True)
-            c.execute("UPDATE rsmoney SET openchannel={} WHERE id={}".format(newChannel.id, user.id))
+            c.execute("UPDATE rsmoney SET channels={} WHERE id={}".format(channels + 1, user.id))
             embed = discord.Embed(description='<@' + str(user.id) + '>, this is your temporary private channel. You or a staff member can use `!close` when you are done to delete the channel.', color=11854069)
             embed.set_author(name='Private Channel Info', icon_url=channel.guild.icon_url)
             embed.set_footer(text='Channel Opened On: ' + str(datetime.datetime.now())[:-7])
@@ -280,7 +362,7 @@ async def on_message(message):
     #######################################
     elif (message.content == '!wallet') or (message.content == '!w') or (message.content == '!$'):
         for i in currencies.currencies:
-            i[0] = getvalue(message.author.id, i[1])
+            i[0] = getvalue(message.author.id, i[1], 'rsmoney')
 
         if any(x[0] >= 1_000_000 for x in currencies.currencies):
             sidecolor = 2693614
@@ -311,7 +393,7 @@ async def on_message(message):
             member = message.guild.get_member(int((message.content).split(' ')[1][3:-1]))
         
         for i in currencies.currencies:
-            i[0] = getvalue(member.id, i[1])
+            i[0] = getvalue(member.id, i[1], 'rsmoney')
 
         if any(x[0] >= 1_000_000 for x in currencies.currencies):
             sidecolor = 2693614
@@ -407,7 +489,7 @@ async def on_message(message):
         try:
             transfered = formatok(str(message.content).split(' ')[2])
             currency = (message.content).split(' ')[3]
-            current = getvalue(message.author.id, currency)
+            current = getvalue(message.author.id, currency, 'rsmoney')
             if transfered >= 1:
                 if current >= transfered:
                     try:
@@ -415,7 +497,7 @@ async def on_message(message):
                         member = message.guild.get_member(int((message.content).split(' ')[1][2:-1]))
                     except:
                         member = message.guild.get_member(int((message.content).split(' ')[1][3:-1]))
-                    taker = getvalue(member.id, currency)
+                    taker = getvalue(member.id, currency, 'rsmoney')
                     c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, current - transfered, message.author.id))
                     c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(currency, taker + transfered, member.id))
                     await message.channel.send('<@' + str(message.author.id) + '> has transfered **' + formatfromk(transfered) + ' ' + currency.title() + '** to <@' + str(member.id) + ">'s wallet.")
@@ -428,8 +510,12 @@ async def on_message(message):
     #######################################
     elif message.content == '!close':
         if message.channel.category.id == 698305020617031742:
-            c.execute("UPDATE rsmoney SET openchannel={} WHERE openchannel={}".format(0, message.channel.id))
-            await message.channel.delete()
+            if message.author.id != 550020715265392650:
+                channels = getvalue(message.author.id, 'channels', 'rsmoney')
+                c.execute("UPDATE rsmoney SET channels={} WHERE id={}".format(channels - 1, message.author.id))
+                await message.channel.delete()
+            else:
+                await message.channel.send('The creator of the ticket must be the one to close this channel.')
     #######################################
     elif message.content.startswith('message'):
         channel = client.get_channel(int((message.content).split(' ')[1]))
@@ -443,7 +529,7 @@ async def on_message(message):
             #try:
             currency = str(message.content).split(' ')[2]
             bet = formatok(str(message.content).split(' ')[1])
-            current = getvalue(message.author.id, currency)
+            current = getvalue(message.author.id, currency, 'rsmoney')
             
             if isenough(bet, currency)[0]:
                 if message.content.startswith('!53x2') or message.content.startswith('!53'):
@@ -545,145 +631,97 @@ async def on_message(message):
     #     except:
     #         await message.channel.send('An **error** has occurred. Make sure you use `!flower (Amount) (hot, cold, red, orange, yellow, green, blue, or purple)`.')
     #######################################
-    elif message.content.startswith('!ddsstake'):
-        if meleduel:
-            await message.channel.send('There is a mele duel already going on. Please wait until that one finishes.')
-        else:
-            melecurrency = (message.content).split(' ')[2]
-            melecurrent = getvalue(message.author.id, melecurrency)
-            melebet = formatok(message.content.split(' ')[1])
-
-            if isenough(melebet, melecurrency):
-                if melecurrent >= melebet:
-                    meleduel = True
-                    update_money(message.author.id, melecurrency, melebet * -1)
-                    await message.channel.send('<@' + str(message.author.id) + '> wants to duel for **' + formatfromk(melebet) + ' ' + melecurrency + '**. Use `!call` to accept the duel.')
-                    while True:
-                        try:
-                            def check(m):
-                                return m.content == '!call' and m.channel == message.channel
-                            call = await client.wait_for('message', timeout=60, check=check)
-                        except asyncio.TimeoutError:
-                            await message.channel.send('<@' + str(message.author.id) + ">'s duel request has timed out.")
-                            update_money(message.author.id, melecurrency, melebet)
-                            meleduel = False
-                            break
-
-                        melecaller = call.author
-
-                        if str(melecaller.id) == str(message.author.id):
-                            await message.channel.send('As exciting as it may sound, you cannot duel yourself ._.')
-                            continue
-
-                        meleCallerCurrent = getvalue(melecaller.id, melecurrency)
-
-                        if meleCallerCurrent < melebet:
-                            await message.channel.send("You don't have enough money to call that duel.")
-                            continue
-                        else:
-                            update_money(melecaller.id, melecurrency, melebet * -1)
-                            break
-
-                    if meleduel:
-                        melegambler = [message.author, 99, 5, 4, False, 0, 4, 0]
-                        melecaller = [melecaller, 99, 5, 4, False, 0, 4, 0]
-                        meleplayers = [melegambler, melecaller]
-                        melewinner = None
-                        while True:
-                            if melewinner == None:
-                                melesent = await message.channel.send(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
-                                for i in meleplayers:
-                                    if melewinner != None:
-                                        break
-                                    else:
-                                        meleopponent = meleplayers[int(meleplayers.index(i)) - 1]
-                                        if i[3] < 4:
-                                            i[7] += 1
-                                            if (i[7] % 4) == 0:
-                                                i[3] += 1
-                                                await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
-                                        if i[4]:
-                                            i[5] += 1
-                                            if (i[5] % 4) == 0:
-                                                i[1] -= i[6]
-                                                await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
-                                                await message.channel.send(str(i[0]) + ' took ' + str(i[6]) + ' damage from poison.')
-                                        await message.channel.send(str(i[0]) + ', it is your turn. Use `!rocktail`, `!dds` or `!whip`.')
-                                        while True:
-                                            try:
-                                                move = await client.wait_for('message', timeout=20)
-                                            except asyncio.TimeoutError:
-                                                whip = get(client.emojis, name='whip')
-                                                await message.channel.send('Took too long. Automatically used ' + str(whip) + '.')
-                                                hit = random.randint(0, 27)
-                                                meleopponent[1] -= hit
-                                                if meleopponent[1] < 0:
-                                                    meleopponent[1] = 0
-                                                await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
-                                                await message.channel.send(str(i[0]) + ' has hit ' + str(meleopponent[0]) + ' with their ' + str(whip) + ' and dealt ' + str(hit) + ' damage.')
-                                                if meleopponent[1] < 1:
-                                                    melewinner = i
-                                                break
-                                            if str(move.content).lower() == '!rocktail':
-                                                rocktail = get(client.emojis, name='rocktail')
-                                                if i[2] < 1:
-                                                    await message.channel.send('You are out of ' + str(rocktail) + '. Please use `!dds` or `!whip`.')
-                                                    continue
-                                                else:
-                                                    healing = random.randint(22, 29)
-                                                    i[2] -= 1
-                                                    i[1] += healing
-                                                    if i[1] > 99:
-                                                        i[1] = 99
-                                                    await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
-                                                    await message.channel.send(str(i[0]) + ' eats a ' + str(rocktail) + ' and heals ' + str(healing) + ' hp.')
-                                                    break
-                                            elif str(move.content).lower() == '!dds':
-                                                dds = get(client.emojis, name='dds')
-                                                if i[3] < 1:
-                                                    await message.channel.send('You are out of ' + str(dds) + ' specs. Please use `!rocktail` or `!whip`.')
-                                                    continue
-                                                else:
-                                                    i[3] -= 1
-                                                    hit = random.randint(0, 20) + random.randint(0, 20)
-                                                    meleopponent[1] -= hit
-                                                    if meleopponent[1] < 0:
-                                                        meleopponent[1] = 0
-                                                    await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
-                                                    await message.channel.send(str(i[0]) + ' has used a ' + str(dds) + ' on ' + str(meleopponent[0]) + ' and dealt ' + str(hit) + ' damage.')
-                                                    if meleopponent[1] < 1:
-                                                        winner = i
-                                                    elif random.randint(1, 4) == 4:
-                                                        meleopponent[4] = True
-                                                        meleopponent[6] = 4
-                                                        await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
-                                                        await message.channel.send(str(meleopponent[0]) + ' has been poisoned by the ' + str(dds) + '!')
-                                                    break
-                                            elif str(move.content).lower() == '!whip':
-                                                hit = random.randint(0, 27)
-                                                meleopponent[1] -= hit
-                                                await melesent.edit(embed=hpupdate(meleplayers, str(message.guild.icon_url), 'mele'))
-                                                whip = get(client.emojis, name='whip')
-                                                await message.channel.send(str(i[0]) + ' has hit ' + str(meleopponent[0]) + ' with their ' + str(whip) + ' and dealt ' + str(hit) + ' damage.')
-                                                if meleopponent[1] < 1:
-                                                    melewinner = i
-                                                break
-                                            else:
-                                                await message.channel.send('An **error** has occured. Make sure to use `!rocktail` `!dds` or `!whip`.')
-                                                continue
-                            else:
-                                winnert = getvalue(int(winner[0].id), melecurrency)
-                                c.execute('UPDATE rsmoney SET {}={} WHERE id={}'.format(melecurrency, winnert + (melebet * 2), winner[0].id))
-                                await message.channel.send('<@' + str(melewinner[0].id) + '> Has won the duel and gained **' + formatfromk(melebet * 2) + ' ' + melecurrency + '**!')
-                                meleduel = False
-                                melewinner = None
-                                break
+    elif message.content.startswith('!meleduel'):
+        try:
+            currency = (message.content).split(' ')[2]
+            current = getvalue(message.author.id, melecurrency, 'rsmoney')
+            bet = formatok(message.content.split(' ')[1])
+            if isenough(bet, currency):
+                if current >= bet:
+                    try:
+                        c.execute('SELECT playerscore FROM bj WHERE id={}'.format(message.author.id))
+                        tester = int(c.fetchone()[0])
+                        await message.channel.send('You are already in a duel! Use `!rocktail`, `!dds`, or `!whip` to continue the game!')
+                    except:
+                        update_money(message.author.id, currency, bet * -1)
+                        #player=[0               1     2           3        4                 5                 6]
+                        #player=[member object, hp, rocktails, speical, poisoned, turns since poisoned, turns since speced]
+                        sent = await message.channel.send(embed=hpupdate([str(message.author)[:-5], 99, 5, 100, False, 0, 0], ['CryptoScape Bot', 99, 5, 100, False, 0, 0], 'mele', 'New Game'))
+                        c.execute('INSERT INTO duels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (userid, currency, bet, 'mele', 99, False, 5, 100, sent.id, message.channel.id))
                 else:
                     await message.channel.send("You don't have that much money!")
             else:
-                await message.channel.send(isenough(bet, melecurrency)[1])
+                await message.channel.send(isenough(bet, currency)[1])
+        except:
+            await message.channel.send('An **error** has occured. Make sure you use `!meleduel (AMOUNT) (CURRENCY)`')
+
+                                    
+
+
+
+
+
+    else message.content == '!rocktail' or message.content == '!dds' or message.content == '!whip':
+        player = getvalue(message.author.id, ['Php', 'Procktails', 'Pspecial', 'Ppoisoned', 'Ppoisonturns', 'Pspecturns'], 'duels')
+        player.insert(0, message.author.id)
+        bot = getvalue(message.author.id, ['Bhp', 'Brocktails', 'Bspecial', 'Bpoisoned', 'Bpoisonturns', 'Bspecturns'], 'duels')
+        bot.insert(0, 'CryptoScape Bot')
+        channelid = getvalue(message.author.id, 'channelid', 'duels')
+        channel = client.get_channel(channelid)
+        if player[3] < 100:
+            player[6] += 1
+            if (player[6] % 4) == 0:
+                player[3] += 25
+                await sent.edit(embed=hpupdate(player, bot, 'mele', 'You regain **25%** special attack.'))
+                await asyncio.sleep(2)
+        if player[4]:
+            player[5] += 1
+            if (player[5] % 4) == 0:
+                player[1] -= 6
+                await sent.edit(embed=hpupdate(player, bot, 'mele', 'You take **6** damage from poison.'))
+                await asyncio.sleep(2)
+
+        if message.content == '!rocktail':
+            winner = rocktail(player, player, bot, channel)
+        
+        elif message.content == '!dds':
+            winner = dds(player, bot, player, bot, channel)
+        
+        else:
+            winner = whip(player, bot, player, bot, channel)
+
+        if winner == None:
+            if bot[1] < 40 and bot[2] > 0:
+                winner = rocktail(bot, player, bot, channel)
+            elif bot[3] >= 25:
+                winner = dds(bot, player, player, bot, channel)
+            else:
+                winner = whip(bot, player, player, bot, channel)
+
+        if winner == None:
+            if bot[3] < 100:
+                bot[6] += 1
+                if (bot[6] % 4) == 0:
+                    bot[3] += 25
+                    await sent.edit(embed=hpupdate(player, bot, 'mele', 'You regain **25%** special attack.'))
+                    await asyncio.sleep(2)
+            if bot[4]:
+                bot[5] += 1
+                if (bot[5] % 4) == 0:
+                    bot[1] -= 6
+                    await sent.edit(embed=hpupdate(player, bot, 'mele', 'You take **6** damage from poison.'))
+                    await asyncio.sleep(2)
+        else:
+            if winner[1] == 'CryptoScape Bot':
+                await message.channel.send('CryptoScape Bot won the duel.')
+            else:
+                currency = getvalue(winner[1], 'currency', 'duels')
+                bet = getvalue(winner[1], 'bet', 'duels')
+                update_money(winner[1], currency, bet * 2)
+                await message.channel.send('<@' + str(winner[0].id) + '> won the duel and gained **' + formatfromk(bet * 2) + ' ' + currency + '**!')
     #######################################
     # elif message.content.startswith('!magebox'):
+    #player=[member object, hp, sharks, frozen]
     #     #try:
     #     if magicduel:
     #         await message.channel.send('There is a magic duel already going on. Please wait until that one finishes.')
