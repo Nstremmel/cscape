@@ -50,7 +50,8 @@ c.execute("""CREATE TABLE duels (
               Bspecturns integer,
               Brocktails integer,
               Bspecial integer,
-              messageid bigint
+              messageid bigint,
+              channelid bigint
               )""")
 conn.commit()
 
@@ -654,7 +655,7 @@ async def on_message(message):
                     #player=[0               1     2           3        4                 5                 6]
                     #player=[member object, hp, rocktails, speical, poisoned, turns since poisoned, turns since speced]
                     sent = await message.channel.send(embed=hpupdate(['CryptoScape Bot', 99, 5, 100, False, 0, 0], [message.author, 99, 5, 100, False, 0, 0], 'mele', 'New Game. Use `!rocktail`, `!dds`, or `!whip`.'))
-                    c.execute('INSERT INTO duels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, 'mele', 99, False, 0, 0, 5, 100, 99, False, 0, 0, 5, 100, sent.id))
+                    c.execute('INSERT INTO duels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, 'mele', 99, False, 0, 0, 5, 100, 99, False, 0, 0, 5, 100, sent.id, message.channel.id))
             else:
                 await message.channel.send("You don't have that much money!")
         else:
