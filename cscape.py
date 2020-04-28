@@ -190,7 +190,7 @@ async def rocktail(user, player, bot, channel):
             user[1] = 99
         words = str(user[0]) + ' eats a ' + str(rocktail) + ' and heals **' + str(healing) + '** hp.'
         await sent.edit(embed=hpupdate(bot, player, 'mele', words))
-        await asyncio.sleep(3)
+        await asyncio.sleep(2.5)
     updateDuel(user, player[0].id)
     return None
 
@@ -208,7 +208,7 @@ async def dds(user, opponent, player, bot, channel):
             opponent[1] = 0
         words = str(user[0]) + ' uses a ' + str(dds) + ' and deals **' + str(hit) + '** damage.'
         await sent.edit(embed=hpupdate(bot, player, 'mele', words))
-        await asyncio.sleep(3)
+        await asyncio.sleep(2.5)
         if opponent[1] < 1:
             updateDuel(user, player[0].id)
             updateDuel(opponent, player[0].id)
@@ -218,7 +218,7 @@ async def dds(user, opponent, player, bot, channel):
                 opponent[4] = True
                 words = str(opponent[0]) + ' has been poisoned by the ' + str(dds) + '!'
                 await sent.edit(embed=hpupdate(bot, player, 'mele', words))
-            await asyncio.sleep(3)
+            await asyncio.sleep(2.5)
     updateDuel(user, player[0].id)
     updateDuel(opponent, player[0].id)
     return None
@@ -233,7 +233,7 @@ async def whip(user, opponent, player, bot, channel):
         opponent[1] = 0
     words = str(user[0]) + ' has hit ' + str(opponent[0]) + ' with their ' + str(whip) + ' and dealt ' + str(hit) + ' damage.'
     await sent.edit(embed=hpupdate(bot, player, 'mele', words))
-    await asyncio.sleep(3)
+    await asyncio.sleep(2.5)
     updateDuel(user, player[0].id)
     updateDuel(opponent, player[0].id)
     if opponent[1] < 1:
@@ -685,13 +685,13 @@ async def on_message(message):
             if (player[6] % 4) == 0:
                 player[3] += 25
                 await sent.edit(embed=hpupdate(bot, player, 'mele', 'You regain **25%** special attack.'))
-                await asyncio.sleep(3)
+                await asyncio.sleep(2.5)
         if player[4]:
             player[5] += 1
             if (player[5] % 4) == 0:
                 player[1] -= 6
                 await sent.edit(embed=hpupdate(bot, player, 'mele', 'You take **6** damage from poison.'))
-                await asyncio.sleep(3)
+                await asyncio.sleep(2.5)
 
         if message.content == '!rocktail':
             winner = await rocktail(player, player, bot, channel)
@@ -716,13 +716,13 @@ async def on_message(message):
                 if (bot[6] % 4) == 0:
                     bot[3] += 25
                     await sent.edit(embed=hpupdate(bot, player, 'mele', 'CryptoScape Bot regains **25%** special attack.'))
-                    await asyncio.sleep(3)
+                    await asyncio.sleep(2.5)
             if bot[4]:
                 bot[5] += 1
                 if (bot[5] % 4) == 0:
                     bot[1] -= 6
                     await sent.edit(embed=hpupdate(bot, player, 'mele', 'CryptoScape Bot takes **6** damage from poison.'))
-                    await asyncio.sleep(3)
+                    await asyncio.sleep(2.5)
 
             await sent.edit(embed=hpupdate(bot, player, 'mele', 'It is your turn! Use `!rocktail`, `!dds`, or `!whip`.'))
 
@@ -730,9 +730,9 @@ async def on_message(message):
             if winner[1] == 'CryptoScape Bot':
                 await message.channel.send('CryptoScape Bot won the duel.')
             else:
-                currency = getvalue(winner[0], 'currency', 'duels')
-                bet = getvalue(winner[0], 'bet', 'duels')
-                update_money(winner[0], currency, bet * 2)
+                currency = getvalue(winner[0].id, 'currency', 'duels')
+                bet = getvalue(winner[0].id, 'bet', 'duels')
+                update_money(winner[0].id, currency, bet * 2)
                 await message.channel.send('<@' + str(winner[0].id) + '> won the duel and gained **' + formatfromk(bet * 2) + ' ' + currency + '**!')
                 c.execute('DELETE FROM duels WHERE id={}'.format(winner[0].id))
 
