@@ -193,6 +193,7 @@ async def rocktail(user, player, bot, channel):
     return None
 
 async def dds(user, opponent, player, bot, channel):
+    print(player[0])
     sentid = getvalue(player[0].id, 'messageid', 'duels')
     sent = await channel.fetch_message(sentid)
     dds = get(client.emojis, name='dds')
@@ -215,7 +216,9 @@ async def dds(user, opponent, player, bot, channel):
             await asyncio.sleep(2)
             words = str(opponent[0]) + ' has been poisoned by the ' + str(dds) + '!'
             await sent.edit(embed=hpupdate(bot, player, 'mele', words))
+    print(player[0])
     updateDuel(user, player[0].id)
+    print(player[0])
     updateDuel(opponent, player[0].id)
     return None
 
