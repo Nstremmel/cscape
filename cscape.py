@@ -727,7 +727,7 @@ async def on_message(message):
             await sent.edit(embed=hpupdate(bot, player, 'mele', 'It is your turn! Use `!rocktail`, `!dds`, or `!whip`.'))
 
         else:
-            if winner[1] == 'CryptoScape Bot':
+            if winner[0] == 'CryptoScape Bot':
                 await message.channel.send('CryptoScape Bot won the duel.')
             else:
                 currency = getvalue(winner[0].id, 'currency', 'duels')
