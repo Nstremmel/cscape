@@ -715,13 +715,16 @@ async def on_message(message):
                 if (bot[6] % 4) == 0:
                     bot[3] += 25
                     await sent.edit(embed=hpupdate(bot, player, 'mele', 'CryptoScape Bot regains **25%** special attack.'))
-                    await asyncio.sleep(3)
+                    await asyncio.sleep(2)
             if bot[4]:
                 bot[5] += 1
                 if (bot[5] % 4) == 0:
                     bot[1] -= 6
                     await sent.edit(embed=hpupdate(bot, player, 'mele', 'CryptoScape Bot takes **6** damage from poison.'))
-                    await asyncio.sleep(3)
+                    await asyncio.sleep(2)
+                    
+            await sent.edit(embed=hpupdate(bot, player, 'mele', 'It is your turn! Use `!rocktail`, `!dds`, or `!whip`.'))
+
         else:
             if winner[1] == 'CryptoScape Bot':
                 await message.channel.send('CryptoScape Bot won the duel.')
@@ -731,6 +734,8 @@ async def on_message(message):
                 update_money(winner[1], currency, bet * 2)
                 await message.channel.send('<@' + str(winner[0].id) + '> won the duel and gained **' + formatfromk(bet * 2) + ' ' + currency + '**!')
                 c.execute('DELETE FROM duels WHERE id={}'.format(winner[1].id))
+
+        await message.delete()
     #######################################
     # elif message.content.startswith('!magebox'):
     #player=[member object, hp, sharks, frozen]
