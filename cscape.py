@@ -730,11 +730,11 @@ async def on_message(message):
             if winner[1] == 'CryptoScape Bot':
                 await message.channel.send('CryptoScape Bot won the duel.')
             else:
-                currency = getvalue(winner[1], 'currency', 'duels')
-                bet = getvalue(winner[1], 'bet', 'duels')
-                update_money(winner[1], currency, bet * 2)
+                currency = getvalue(winner[0], 'currency', 'duels')
+                bet = getvalue(winner[0], 'bet', 'duels')
+                update_money(winner[0], currency, bet * 2)
                 await message.channel.send('<@' + str(winner[0].id) + '> won the duel and gained **' + formatfromk(bet * 2) + ' ' + currency + '**!')
-                c.execute('DELETE FROM duels WHERE id={}'.format(winner[1].id))
+                c.execute('DELETE FROM duels WHERE id={}'.format(winner[0].id))
 
         await message.delete()
     #######################################
