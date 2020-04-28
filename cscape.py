@@ -174,6 +174,7 @@ def updateDuel(updater, userid):
         else:
             columns = ['Php', 'Procktails', 'Pspecial', 'Ppoisoned', 'Ppoisonturns', 'Pspecturns']
         c.execute("UPDATE duels SET {}={} WHERE id={}".format(columns[counter], i, userid))
+    updater.insert(0, user)
 
 async def rocktail(user, player, bot, channel):
     sentid = getvalue(player[0].id, 'messageid', 'duels')
