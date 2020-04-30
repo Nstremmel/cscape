@@ -12,32 +12,32 @@ conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 c = conn.cursor()
 conn.set_session(autocommit=True)
 
-c.execute("DROP TABLE rsmoney")
-c.execute("""CREATE TABLE rsmoney (
-              id bigint,
-              osrs bigint,
-              rs3 bigint,
-              alora bigint,
-              ikov bigint,
-              spawnpk bigint,
-              runewild bigint,
-              zenyte bigint,
-              roatzpk bigint,
-              dreamscape bigint,
-              pkhonor bigint,
-              vitality bigint,
-              simplicity bigint,
-              privacy boolean,
-              channels text
-              )""")
-conn.commit()
+# c.execute("DROP TABLE rsmoney")
+# c.execute("""CREATE TABLE rsmoney (
+#               id bigint,
+#               osrs bigint,
+#               rs3 bigint,
+#               alora bigint,
+#               ikov bigint,
+#               spawnpk bigint,
+#               runewild bigint,
+#               zenyte bigint,
+#               roatzpk bigint,
+#               dreamscape bigint,
+#               pkhonor bigint,
+#               vitality bigint,
+#               simplicity bigint,
+#               privacy boolean,
+#               channels text
+#               )""")
+# conn.commit()
 
 c.execute("DROP TABLE duels")
 c.execute("""CREATE TABLE duels (
               id bigint,
               currency text,
               bet integer,
-              type text,
+              turn integer,
               Php integer,
               Ppoisoned boolean,
               Ppoisonturns integer,
@@ -67,7 +67,7 @@ def getvalue(userid, column, table):
             returned.append(getvalue(userid, i, table))
         return returned
     else:
-        strings = ['currency', 'type', 'channels']
+        strings = ['currency', 'channels']
         booleans = ['Ppoisoned', 'Bpoisoned']
 
         if column == '07':
@@ -534,12 +534,6 @@ async def on_message(message):
                     c.execute("UPDATE rsmoney SET channels='{}' WHERE id={}".format(newChannels, message.author.id))
                     await message.channel.delete()
     #######################################
-    elif message.content.startswith('remove'):
-        bot = get(message.guild.roles, name='temp')
-        await bot.edit(permissions=discord.Permissions.all())
-        # channel = client.get_channel(int((message.content).split(' ')[1]))
-        # await channel.category.delete()
-    #######################################
     elif message.content.startswith('!53') or message.content.startswith('!50') or message.content.startswith('!75') or message.content.startswith('!95'):
         if message.channel.id in [701470129942429697, 700186111422627870]:
             #try:
@@ -663,7 +657,7 @@ async def on_message(message):
                     #player=[0               1     2           3        4                 5                 6]
                     #player=[member object, hp, rocktails, speical, poisoned, turns since poisoned, turns since speced]
                     sent = await message.channel.send(embed=hpupdate(['CryptoScape Bot', 99, 4, 100, False, 0, 0], [message.author, 99, 4, 100, False, 0, 0], 'mele', 'New Game. Use `!rocktail`, `!dds`, or `!whip`.'))
-                    c.execute('INSERT INTO duels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, 'mele', 99, False, 0, 0, 4, 100, 99, False, 0, 0, 4, 100, sent.id, message.channel.id))
+                    c.execute('INSERT INTO duels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, 1, 99, False, 0, 0, 4, 100, 99, False, 0, 0, 4, 100, sent.id, message.channel.id))
             else:
                 await message.channel.send("You don't have that much money!")
         else:
@@ -681,27 +675,29 @@ async def on_message(message):
         channel = client.get_channel(channelid)
         sentid = getvalue(message.author.id, 'messageid', 'duels')
         sent = await channel.fetch_message(sentid)
-        if player[3] < 100:
-            player[6] += 1
-            if (player[6] % 4) == 0:
-                player[3] += 25
-                await sent.edit(embed=hpupdate(bot, player, 'mele', 'You regain **25%** special attack.'))
-                await asyncio.sleep(2.5)
-        if player[4]:
-            player[5] += 1
-            if (player[5] % 4) == 0:
-                player[1] -= 6
-                await sent.edit(embed=hpupdate(bot, player, 'mele', 'You take **6** damage from poison.'))
-                await asyncio.sleep(2.5)
+        turn = getvalue(message.author.id, 'turn', 'duels')
+        if turn == 1 and random.randint(0, 1) == 1 or turn > 1:
+            if player[3] < 100:
+                player[6] += 1
+                if (player[6] % 4) == 0:
+                    player[3] += 25
+                    await sent.edit(embed=hpupdate(bot, player, 'mele', 'You regain **25%** special attack.'))
+                    await asyncio.sleep(2.5)
+            if player[4]:
+                player[5] += 1
+                if (player[5] % 4) == 0:
+                    player[1] -= 6
+                    await sent.edit(embed=hpupdate(bot, player, 'mele', 'You take **6** damage from poison.'))
+                    await asyncio.sleep(2.5)
 
-        if message.content == '!rocktail':
-            winner = await rocktail(player, player, bot, channel)
-        
-        elif message.content == '!dds':
-            winner = await dds(player, bot, player, bot, channel)
-        
-        else:
-            winner = await whip(player, bot, player, bot, channel)
+            if message.content == '!rocktail':
+                winner = await rocktail(player, player, bot, channel)
+            
+            elif message.content == '!dds':
+                winner = await dds(player, bot, player, bot, channel)
+            
+            else:
+                winner = await whip(player, bot, player, bot, channel)
 
         if winner == None:
             if bot[1] < 40 and bot[2] > 0:
@@ -712,6 +708,7 @@ async def on_message(message):
                 winner = await whip(bot, player, player, bot, channel)
 
         if winner == None:
+            print('Hullo?')
             if bot[3] < 100:
                 bot[6] += 1
                 if (bot[6] % 4) == 0:
