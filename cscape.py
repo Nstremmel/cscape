@@ -528,7 +528,7 @@ async def on_message(message):
             channels = getvalue(message.author.id, 'channels', 'rsmoney')
             for i in channels.split('|'):
                 if int(i) == message.channel.id:
-                    newChannels = ((channels.split('|')).remove(i)).join('|')
+                    newChannels = '|'.join((channels.split('|')).remove(i))
                     c.execute("UPDATE rsmoney SET channels={} WHERE id={}".format(newChannels, message.author.id))
                     await message.channel.delete()
     #######################################
