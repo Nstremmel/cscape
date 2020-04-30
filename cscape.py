@@ -529,7 +529,7 @@ async def on_message(message):
             for i in channels.split('|'):
                 if int(i) == message.channel.id:
                     newChannels = (channels.split('|')).remove(str(i))
-                    print channels.split('|')
+                    print (channels.split('|'))
                     print(newChannels)
                     newChannels = '|'.join(newChannels)
                     c.execute("UPDATE rsmoney SET channels={} WHERE id={}".format(newChannels, message.author.id))
