@@ -12,25 +12,25 @@ conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 c = conn.cursor()
 conn.set_session(autocommit=True)
 
-# c.execute("DROP TABLE rsmoney")
-# c.execute("""CREATE TABLE rsmoney (
-#               id bigint,
-#               osrs bigint,
-#               rs3 bigint,
-#               alora bigint,
-#               ikov bigint,
-#               spawnpk bigint,
-#               runewild bigint,
-#               zenyte bigint,
-#               roatzpk bigint,
-#               dreamscape bigint,
-#               pkhonor bigint,
-#               vitality bigint,
-#               simplicity bigint,
-#               privacy boolean,
-#               channels text
-#               )""")
-# conn.commit()
+c.execute("DROP TABLE rsmoney")
+c.execute("""CREATE TABLE rsmoney (
+              id bigint,
+              osrs bigint,
+              rs3 bigint,
+              alora bigint,
+              ikov bigint,
+              spawnpk bigint,
+              runewild bigint,
+              zenyte bigint,
+              roatzpk bigint,
+              dreamscape bigint,
+              pkhonor bigint,
+              vitality bigint,
+              simplicity bigint,
+              privacy boolean,
+              channels text
+              )""")
+conn.commit()
 
 c.execute("DROP TABLE duels")
 c.execute("""CREATE TABLE duels (
@@ -277,7 +277,7 @@ async def on_raw_reaction_add(payload):
             category = (client.get_channel(698306053590351872)).category
             newChannel = await channel.guild.create_text_channel(channel.name + ' ' + str(user)[:-5], category=category)
             await newChannel.set_permissions(user, read_messages=True, send_messages=True, read_message_history=True)
-            c.execute("UPDATE rsmoney SET channels={} WHERE id={}".format(channels + str(newChannel.id) + '|', user.id))
+            c.execute("UPDATE rsmoney SET channels={} WHERE id={}".format(str(channels + str(newChannel.id) + '|'), user.id))
             embed = discord.Embed(description='<@' + str(user.id) + '>, this is your temporary private channel. You or a staff member can use `!close` when you are done to delete the channel.', color=11854069)
             embed.set_author(name='Private Channel Info', icon_url=channel.guild.icon_url)
             embed.set_footer(text='Channel Opened On: ' + str(datetime.datetime.now())[:-7])
