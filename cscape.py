@@ -269,8 +269,8 @@ async def on_raw_reaction_add(payload):
     category1 = get(channel.guild.categories, name = '🛒 rs services 🛒')
     category2 = get(channel.guild.categories, name = '💰 RSPS Trade 💰')
     channelids = []
-    for channel in category1.channels + category2.channels:
-        channelids.append(channel.id)
+    for channel1 in category1.channels + category2.channels:
+        channelids.append(channel1.id)
     if channel.id in channelids and payload.emoji.id == 676988116451590226 and user.id != 479862852895899649:
         channels = str(getvalue(user.id, 'channels', 'rsmoney'))
         if len(channels.split('|')) - 1 < 10:
@@ -527,7 +527,7 @@ async def on_message(message):
         if message.channel.category.id == 705273543239401523:
             channels = getvalue(message.author.id, 'channels', 'rsmoney')
             for i in channels.split('|'):
-                if int(i) == message.channel.id:
+                if i == str(message.channel.id):
                     newChannels = (channels.split('|'))
                     newChannels.remove(str(i))
                     newChannels = '|'.join(newChannels)
