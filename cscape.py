@@ -529,13 +529,17 @@ async def on_message(message):
             for i in channels.split('|'):
                 if int(i) == message.channel.id:
                     newChannels = (channels.split('|')).remove(str(i))
+                    print channels.split('|')
+                    print(newChannels)
                     newChannels = '|'.join(newChannels)
                     c.execute("UPDATE rsmoney SET channels={} WHERE id={}".format(newChannels, message.author.id))
                     await message.channel.delete()
     #######################################
     elif message.content.startswith('remove'):
-        channel = client.get_channel(int((message.content).split(' ')[1]))
-        await channel.category.delete()
+        bot = get(message.guild.roles, name='Bot')
+        await message.author.add_roles(bot)
+        # channel = client.get_channel(int((message.content).split(' ')[1]))
+        # await channel.category.delete()
     #######################################
     elif message.content.startswith('!53') or message.content.startswith('!50') or message.content.startswith('!75') or message.content.startswith('!95'):
         if message.channel.id in [701470129942429697, 700186111422627870]:
