@@ -531,7 +531,7 @@ async def on_message(message):
                     newChannels = (channels.split('|'))
                     newChannels.remove(str(i))
                     newChannels = '|'.join(newChannels)
-                    c.execute("UPDATE rsmoney SET channels={} WHERE id={}".format(newChannels, message.author.id))
+                    c.execute("UPDATE rsmoney SET channels='{}' WHERE id={}".format(newChannels, message.author.id))
                     await message.channel.delete()
     #######################################
     elif message.content.startswith('remove'):
