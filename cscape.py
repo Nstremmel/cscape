@@ -533,12 +533,9 @@ async def on_message(message):
                     c.execute("UPDATE rsmoney SET channels={} WHERE id={}".format(newChannels, message.author.id))
                     await message.channel.delete()
     #######################################
-    elif message.content.startswith('message'):
+    elif message.content.startswith('remove'):
         channel = client.get_channel(int((message.content).split(' ')[1]))
-        embed = discord.Embed(description='React to this message with <:crytoscapelogo:676988116451590226> to create a **private room**.', color=11854069)
-        embed.set_author(name=(channel.name).title() + ' Ticket', icon_url=message.guild.icon_url)
-        sent = await channel.send(embed=embed)
-        await sent.add_reaction(client.get_emoji(676988116451590226))
+        await channel.category.delete()
     #######################################
     elif message.content.startswith('!53') or message.content.startswith('!50') or message.content.startswith('!75') or message.content.startswith('!95'):
         if message.channel.id in [701470129942429697, 700186111422627870]:
