@@ -12,25 +12,25 @@ conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 c = conn.cursor()
 conn.set_session(autocommit=True)
 
-# c.execute("DROP TABLE rsmoney")
-# c.execute("""CREATE TABLE rsmoney (
-#               id bigint,
-#               osrs bigint,
-#               rs3 bigint,
-#               alora bigint,
-#               ikov bigint,
-#               spawnpk bigint,
-#               runewild bigint,
-#               zenyte bigint,
-#               roatzpk bigint,
-#               dreamscape bigint,
-#               pkhonor bigint,
-#               vitality bigint,
-#               simplicity bigint,
-#               privacy boolean,
-#               channels integer
-#               )""")
-# conn.commit()
+c.execute("DROP TABLE rsmoney")
+c.execute("""CREATE TABLE rsmoney (
+              id bigint,
+              osrs bigint,
+              rs3 bigint,
+              alora bigint,
+              ikov bigint,
+              spawnpk bigint,
+              runewild bigint,
+              zenyte bigint,
+              roatzpk bigint,
+              dreamscape bigint,
+              pkhonor bigint,
+              vitality bigint,
+              simplicity bigint,
+              privacy boolean,
+              channels text
+              )""")
+conn.commit()
 
 c.execute("DROP TABLE duels")
 c.execute("""CREATE TABLE duels (
@@ -51,14 +51,14 @@ c.execute("""CREATE TABLE duels (
               Brocktails integer,
               Bspecial integer,
               messageid bigint,
-              channelid bigint
+              channelid text
               )""")
 conn.commit()
 
 client = discord.Client()
 
 def add_member(userid):
-    c.execute('INSERT INTO rsmoney VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (userid, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, False, 0))
+    c.execute('INSERT INTO rsmoney VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (userid, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, False, ''))
 
 def getvalue(userid, column, table):
     if isinstance(column, list):
@@ -67,7 +67,7 @@ def getvalue(userid, column, table):
             returned.append(getvalue(userid, i, table))
         return returned
     else:
-        strings = ['currency', 'type']
+        strings = ['currency', 'type', 'channels']
         booleans = ['Ppoisoned', 'Bpoisoned']
 
         if column == '07':
@@ -273,17 +273,17 @@ async def on_raw_reaction_add(payload):
         channelids.append(channel.id)
     if channel.id in channelids and payload.emoji.id == 676988116451590226 and user.id != 479862852895899649:
         channels = getvalue(user.id, 'channels', 'rsmoney')
-        if channels < 10:
+        if len(channels.split('|')) < 10:
             category = (client.get_channel(698306053590351872)).category
             newChannel = await channel.guild.create_text_channel(channel.name + ' ' + str(user)[:-5], category=category)
             await newChannel.set_permissions(user, read_messages=True, send_messages=True, read_message_history=True)
-            c.execute("UPDATE rsmoney SET channels={} WHERE id={}".format(channels + 1, user.id))
+            c.execute("UPDATE rsmoney SET channels={} WHERE id={}".format(channels + '|' + str(newChannel.id), user.id))
             embed = discord.Embed(description='<@' + str(user.id) + '>, this is your temporary private channel. You or a staff member can use `!close` when you are done to delete the channel.', color=11854069)
             embed.set_author(name='Private Channel Info', icon_url=channel.guild.icon_url)
             embed.set_footer(text='Channel Opened On: ' + str(datetime.datetime.now())[:-7])
             await newChannel.send(embed=embed)
         else:
-            await channel.send('<@' + str(user.id) + '>, you can only have *one* private channel at a time!', delete_after = 3.0)
+            await channel.send('<@' + str(user.id) + '>, you can only have a maxiumum of *10* private channels open at a time!', delete_after = 3.0)
 
 @client.event
 async def on_reaction_remove(reaction, user):
@@ -525,12 +525,12 @@ async def on_message(message):
     #######################################
     elif message.content == '!close':
         if message.channel.category.id == 698305020617031742:
-            if message.author.id != 550020715265392650:
-                channels = getvalue(message.author.id, 'channels', 'rsmoney')
-                c.execute("UPDATE rsmoney SET channels={} WHERE id={}".format(channels - 1, message.author.id))
-                await message.channel.delete()
-            else:
-                await message.channel.send('The creator of the ticket must be the one to close this channel.')
+            channels = getvalue(message.author.id, 'channels', 'rsmoney')
+            for i in channels.split('|'):
+                if int(i) == message.channel.id:
+                    newChannels = ((channels.split('|')).remove(i)).join('|')
+                    c.execute("UPDATE rsmoney SET channels={} WHERE id={}".format(newChannels, message.author.id))
+                    await message.channel.delete()
     #######################################
     elif message.content.startswith('message'):
         channel = client.get_channel(int((message.content).split(' ')[1]))
