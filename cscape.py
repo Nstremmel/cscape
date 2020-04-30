@@ -528,6 +528,8 @@ async def on_message(message):
             channels = getvalue(message.author.id, 'channels', 'rsmoney')
             for i in channels.split('|'):
                 if int(i) == message.channel.id:
+                    print(i)
+                    print(str(i))
                     newChannels = (channels.split('|')).remove(str(i))
                     print (channels.split('|'))
                     print(newChannels)
