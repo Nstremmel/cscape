@@ -12,25 +12,25 @@ conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 c = conn.cursor()
 conn.set_session(autocommit=True)
 
-c.execute("DROP TABLE rsmoney")
-c.execute("""CREATE TABLE rsmoney (
-              id bigint,
-              osrs bigint,
-              rs3 bigint,
-              alora bigint,
-              ikov bigint,
-              spawnpk bigint,
-              runewild bigint,
-              zenyte bigint,
-              roatzpk bigint,
-              dreamscape bigint,
-              pkhonor bigint,
-              vitality bigint,
-              simplicity bigint,
-              privacy boolean,
-              channels text
-              )""")
-conn.commit()
+# c.execute("DROP TABLE rsmoney")
+# c.execute("""CREATE TABLE rsmoney (
+#               id bigint,
+#               osrs bigint,
+#               rs3 bigint,
+#               alora bigint,
+#               ikov bigint,
+#               spawnpk bigint,
+#               runewild bigint,
+#               zenyte bigint,
+#               roatzpk bigint,
+#               dreamscape bigint,
+#               pkhonor bigint,
+#               vitality bigint,
+#               simplicity bigint,
+#               privacy boolean,
+#               channels text
+#               )""")
+# conn.commit()
 
 c.execute("DROP TABLE duels")
 c.execute("""CREATE TABLE duels (
@@ -272,7 +272,7 @@ async def on_raw_reaction_add(payload):
     for channel in category1.channels + category2.channels:
         channelids.append(channel.id)
     if channel.id in channelids and payload.emoji.id == 676988116451590226 and user.id != 479862852895899649:
-        channels = getvalue(user.id, 'channels', 'rsmoney')
+        channels = str(getvalue(user.id, 'channels', 'rsmoney'))
         if len(channels.split('|')) < 10:
             category = (client.get_channel(698306053590351872)).category
             newChannel = await channel.guild.create_text_channel(channel.name + ' ' + str(user)[:-5], category=category)
