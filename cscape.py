@@ -698,6 +698,8 @@ async def on_message(message):
             
             else:
                 winner = await whip(player, bot, player, bot, channel)
+        else:
+            winner = None
 
         if winner == None:
             if bot[1] < 40 and bot[2] > 0:
