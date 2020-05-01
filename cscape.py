@@ -526,9 +526,10 @@ async def on_message(message):
     elif message.content == '!close':
         if message.channel.category.id == 705273543239401523:
             c.execute("SELECT id, channels FROM rsmoney")
-            print(c.fetchall())
             userid = None
             for i in c.fetchall():
+                print(str(message.channel.id))
+                print(str(i[1]))
                 if str(message.channel.id) in str(i[1]):
                     userid = i[0]
             channels = getvalue(userid, 'channels', 'rsmoney')
