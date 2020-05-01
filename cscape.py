@@ -525,13 +525,15 @@ async def on_message(message):
     #######################################
     elif message.content == '!close':
         if message.channel.category.id == 705273543239401523:
-            channels = getvalue(message.author.id, 'channels', 'rsmoney')
+            c.execute("SELECT id FROM rsmoney WHERE '{}' IN channels".format(str(message.channel.id)))
+            userid = int(c.fetchone()[0])
+            channels = getvalue(userid, 'channels', 'rsmoney')
             for i in channels.split('|'):
                 if i == str(message.channel.id):
                     newChannels = (channels.split('|'))
                     newChannels.remove(str(i))
                     newChannels = '|'.join(newChannels)
-                    c.execute("UPDATE rsmoney SET channels='{}' WHERE channels='{}'".format(newChannels, channels))
+                    c.execute("UPDATE rsmoney SET channels='{}' WHERE id={}".format(newChannels, userid))
                     await message.channel.delete()
     #######################################
     elif message.content.startswith('!53') or message.content.startswith('!50') or message.content.startswith('!75') or message.content.startswith('!95'):
