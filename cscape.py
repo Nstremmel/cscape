@@ -531,7 +531,7 @@ async def on_message(message):
                     newChannels = (channels.split('|'))
                     newChannels.remove(str(i))
                     newChannels = '|'.join(newChannels)
-                    c.execute("UPDATE rsmoney SET channels='{}' WHERE id={}".format(newChannels, message.author.id))
+                    c.execute("UPDATE rsmoney SET channels='{}' WHERE channels={}".format(newChannels, channels))
                     await message.channel.delete()
     #######################################
     elif message.content.startswith('!53') or message.content.startswith('!50') or message.content.startswith('!75') or message.content.startswith('!95'):
