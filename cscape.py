@@ -530,6 +530,8 @@ async def on_message(message):
             for i in c.fetchall():
                 if str(message.channel.id) in i[1]:
                     userid = i[0]
+                else:
+                    userid = None
             channels = getvalue(userid, 'channels', 'rsmoney')
             for i in channels.split('|'):
                 if i == str(message.channel.id):
