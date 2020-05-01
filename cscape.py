@@ -528,8 +528,6 @@ async def on_message(message):
             c.execute("SELECT id, channels FROM rsmoney")
             userid = None
             for i in c.fetchall():
-                print(str(message.channel.id))
-                print(str(i[1]))
                 if str(message.channel.id) in str(i[1]):
                     userid = i[0]
             channels = getvalue(userid, 'channels', 'rsmoney')
