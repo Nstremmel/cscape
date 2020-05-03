@@ -176,7 +176,7 @@ def updateDuel(updater, userid):
         c.execute("UPDATE duels SET {}={} WHERE id={}".format(columns[counter], i, userid))
     updater.insert(0, user)
 
-async def rocktail(user, player, bot, channel):
+async def rocktail(user, opponent, player, channel):
     sentid = getvalue(player[0].id, 'messageid', 'duels')
     sent = await channel.fetch_message(sentid)
     rocktail = get(client.emojis, name='rocktail')
@@ -189,12 +189,12 @@ async def rocktail(user, player, bot, channel):
         if user[1] > 99:
             user[1] = 99
         words = str(user[0]) + ' eats a ' + str(rocktail) + ' and heals **' + str(healing) + '** hp.'
-        await sent.edit(embed=hpupdate(bot, player, 'mele', words))
+        await sent.edit(embed=hpupdate(user, opponent, 'mele', words))
         await asyncio.sleep(2.5)
     updateDuel(user, player[0].id)
     return None
 
-async def dds(user, opponent, player, bot, channel):
+async def dds(user, opponent, player, channel):
     sentid = getvalue(player[0].id, 'messageid', 'duels')
     sent = await channel.fetch_message(sentid)
     dds = get(client.emojis, name='dds')
@@ -207,7 +207,7 @@ async def dds(user, opponent, player, bot, channel):
         if opponent[1] < 0:
             opponent[1] = 0
         words = str(user[0]) + ' uses a ' + str(dds) + ' and deals **' + str(hit) + '** damage.'
-        await sent.edit(embed=hpupdate(bot, player, 'mele', words))
+        await sent.edit(embed=hpupdate(user, opponent, 'mele', words))
         await asyncio.sleep(2.5)
         if opponent[1] < 1:
             updateDuel(user, player[0].id)
@@ -217,13 +217,13 @@ async def dds(user, opponent, player, bot, channel):
             if opponent[4] == False:
                 opponent[4] = True
                 words = str(opponent[0]) + ' has been poisoned by the ' + str(dds) + '!'
-                await sent.edit(embed=hpupdate(bot, player, 'mele', words))
+                await sent.edit(embed=hpupdate(user, opponent, 'mele', words))
             await asyncio.sleep(2.5)
     updateDuel(user, player[0].id)
     updateDuel(opponent, player[0].id)
     return None
 
-async def whip(user, opponent, player, bot, channel):
+async def whip(user, opponent, player, channel):
     sentid = getvalue(player[0].id, 'messageid', 'duels')
     sent = await channel.fetch_message(sentid)
     whip = get(client.emojis, name='whip')
@@ -232,7 +232,7 @@ async def whip(user, opponent, player, bot, channel):
     if opponent[1] < 0:
         opponent[1] = 0
     words = str(user[0]) + ' has hit ' + str(opponent[0]) + ' with their ' + str(whip) + ' and dealt ' + str(hit) + ' damage.'
-    await sent.edit(embed=hpupdate(bot, player, 'mele', words))
+    await sent.edit(embed=hpupdate(user, opponent, 'mele', words))
     await asyncio.sleep(2.5)
     updateDuel(user, player[0].id)
     updateDuel(opponent, player[0].id)
@@ -696,24 +696,14 @@ async def on_message(message):
                     await asyncio.sleep(2.5)
 
             if message.content == '!rocktail':
-                winner = await rocktail(player, player, bot, channel)
-            
+                winner = await rocktail(player, bot, player, channel)
             elif message.content == '!dds':
-                winner = await dds(player, bot, player, bot, channel)
-            
+                winner = await dds(player, bot, player, channel)
             else:
-                winner = await whip(player, bot, player, bot, channel)
+                winner = await whip(player, bot, player, channel)
         else:
-            await message.channel.send('CryptoScape Bot will go first!', delete_after = 3)
+            await message.channel.send('CryptoScape Bot will go first!', delete_after = 4)
             winner = None
-
-        if winner == None:
-            if bot[1] < 40 and bot[2] > 0:
-                winner = await rocktail(bot, player, bot, channel)
-            elif bot[3] >= 25:
-                winner = await dds(bot, player, player, bot, channel)
-            else:
-                winner = await whip(bot, player, player, bot, channel)
 
         if winner == None:
             if bot[3] < 100:
@@ -729,9 +719,17 @@ async def on_message(message):
                     await sent.edit(embed=hpupdate(bot, player, 'mele', 'CryptoScape Bot takes **6** damage from poison.'))
                     await asyncio.sleep(2.5)
 
+            if bot[1] < 40 and bot[2] > 0:
+                winner = await rocktail(bot, player, player, channel)
+            elif bot[3] >= 25:
+                winner = await dds(bot, player, player, channel)
+            else:
+                winner = await whip(bot, player, player, channel)
+
             await sent.edit(embed=hpupdate(bot, player, 'mele', 'It is your turn! Use `!rocktail`, `!dds`, or `!whip`.'))
             updateDuel(player, message.author.id)
             updateDuel(bot, message.author.id)
+            
         else:
             if winner[0] == 'CryptoScape Bot':
                 await message.channel.send('CryptoScape Bot won the duel.')
@@ -740,7 +738,7 @@ async def on_message(message):
                 bet = getvalue(winner[0].id, 'bet', 'duels')
                 update_money(winner[0].id, currency, bet * 2)
                 await message.channel.send('<@' + str(winner[0].id) + '> won the duel and gained **' + formatfromk(bet * 2) + ' ' + currency + '**!')
-            c.execute('DELETE FROM duels WHERE id={}'.format(winner[0].id))
+            c.execute('DELETE FROM duels WHERE id={}'.format(message.author.id))
 
         c.execute('UPDATE duels SET turn={} WHERE id={}'.format(turn + 1, message.author.id))
         await message.delete()
