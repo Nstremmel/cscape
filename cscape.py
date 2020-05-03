@@ -704,6 +704,7 @@ async def on_message(message):
             else:
                 winner = await whip(player, bot, player, bot, channel)
         else:
+            await message.channel.send('CryptoScape Bot will go first!', delete_after = 3)
             winner = None
 
         if winner == None:
@@ -741,6 +742,7 @@ async def on_message(message):
                 await message.channel.send('<@' + str(winner[0].id) + '> won the duel and gained **' + formatfromk(bet * 2) + ' ' + currency + '**!')
             c.execute('DELETE FROM duels WHERE id={}'.format(winner[0].id))
 
+        c.execute('UPDATE duels SET turn={} WHERE id={}'.format(turn + 1, message.author.id))
         await message.delete()
     #######################################
     # elif message.content.startswith('!magebox'):
