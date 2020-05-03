@@ -681,7 +681,7 @@ async def on_message(message):
         sentid = getvalue(message.author.id, 'messageid', 'duels')
         sent = await channel.fetch_message(sentid)
         turn = getvalue(message.author.id, 'turn', 'duels')
-        if turn == 1 and random.randint(0, 1) == 1 or turn > 1:
+        if (turn == 1 and random.randint(0, 1) == 1) or turn > 1:
             if player[3] < 100:
                 player[6] += 1
                 if (player[6] % 4) == 0:
@@ -714,9 +714,7 @@ async def on_message(message):
             else:
                 winner = await whip(bot, player, player, bot, channel)
 
-        print(winner)
         if winner == None:
-            print('Hullo?')
             if bot[3] < 100:
                 bot[6] += 1
                 if (bot[6] % 4) == 0:
@@ -731,7 +729,8 @@ async def on_message(message):
                     await asyncio.sleep(2.5)
 
             await sent.edit(embed=hpupdate(bot, player, 'mele', 'It is your turn! Use `!rocktail`, `!dds`, or `!whip`.'))
-
+            updateDuel(player, message.author.id)
+            updateDuel(bot, message.author.id)
         else:
             if winner[0] == 'CryptoScape Bot':
                 await message.channel.send('CryptoScape Bot won the duel.')
@@ -740,7 +739,7 @@ async def on_message(message):
                 bet = getvalue(winner[0].id, 'bet', 'duels')
                 update_money(winner[0].id, currency, bet * 2)
                 await message.channel.send('<@' + str(winner[0].id) + '> won the duel and gained **' + formatfromk(bet * 2) + ' ' + currency + '**!')
-                c.execute('DELETE FROM duels WHERE id={}'.format(winner[0].id))
+            c.execute('DELETE FROM duels WHERE id={}'.format(winner[0].id))
 
         await message.delete()
     #######################################
