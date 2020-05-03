@@ -714,6 +714,7 @@ async def on_message(message):
             else:
                 winner = await whip(bot, player, player, bot, channel)
 
+        print(winner)
         if winner == None:
             print('Hullo?')
             if bot[3] < 100:
