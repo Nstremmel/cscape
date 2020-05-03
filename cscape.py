@@ -131,11 +131,17 @@ def formatfromk(amount):
         return str(amount)+"k"
 
 
-def hpupdate(bot, player, dueltype, words):
+def hpupdate(user, opponent, dueltype, words):
     url = str(player[0].guild.icon_url)
     embed = discord.Embed(description = words, color = 16766463)
     embed.set_author(name='Fight to the Death!', icon_url=url)
-    for i in [bot, player]:
+    
+    if user[0] == 'CryptoScape Bot':
+        pair = [user, opponent]
+    else:
+        pair = [opponent, user]
+
+    for i in pair:
         hp = int(i[1])
         if hp in range(76, 100):
             hp = get(client.emojis, name='hpbar100')
@@ -729,7 +735,7 @@ async def on_message(message):
             await sent.edit(embed=hpupdate(bot, player, 'mele', 'It is your turn! Use `!rocktail`, `!dds`, or `!whip`.'))
             updateDuel(player, message.author.id)
             updateDuel(bot, message.author.id)
-            
+
         else:
             if winner[0] == 'CryptoScape Bot':
                 await message.channel.send('CryptoScape Bot won the duel.')
