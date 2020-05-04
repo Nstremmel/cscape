@@ -132,14 +132,15 @@ def formatfromk(amount):
 
 
 def hpupdate(user, opponent, dueltype, words):
-    url = str(player[0].guild.icon_url)
-    embed = discord.Embed(description = words, color = 16766463)
-    embed.set_author(name='Fight to the Death!', icon_url=url)
-    
     if user[0] == 'CryptoScape Bot':
+        url = str(opponent[0].guild.icon_url)
         pair = [user, opponent]
     else:
+        url = str(user[0].guild.icon_url)
         pair = [opponent, user]
+
+    embed = discord.Embed(description = words, color = 16766463)
+    embed.set_author(name='Fight to the Death!', icon_url=url)
 
     for i in pair:
         hp = int(i[1])
