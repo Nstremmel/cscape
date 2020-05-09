@@ -219,7 +219,7 @@ async def dds(user, opponent, player, channel):
         if opponent[1] < 1:
             updateDuel(user, player[0].id)
             updateDuel(opponent, player[0].id)
-            return user
+            return user[0]
         elif random.randint(1, 4) == 4:
             if opponent[4] == False:
                 opponent[4] = True
@@ -244,7 +244,7 @@ async def whip(user, opponent, player, channel):
     updateDuel(user, player[0].id)
     updateDuel(opponent, player[0].id)
     if opponent[1] < 1:
-        return user
+        return user[0]
     else:
         return None
             
