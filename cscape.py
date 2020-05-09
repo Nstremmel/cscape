@@ -702,7 +702,7 @@ async def on_message(message):
                     player[1] -= 6
                     if player[1] < 0:
                         player[1] == 0
-                    winner = bot[0]
+                        winner = bot[0]
                     await sent.edit(embed=hpupdate(bot, player, 'mele', 'You take **6** damage from poison.'))
                     await asyncio.sleep(2.5)
 
@@ -729,7 +729,7 @@ async def on_message(message):
                     bot[1] -= 6
                     if bot[1] < 0:
                         bot[1] == 0
-                    winner = player[0]
+                        winner = player[0]
                     await sent.edit(embed=hpupdate(bot, player, 'mele', 'CryptoScape Bot takes **6** damage from poison.'))
                     await asyncio.sleep(2.5)
 
