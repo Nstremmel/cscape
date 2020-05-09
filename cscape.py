@@ -752,9 +752,11 @@ async def on_message(message):
                 else:
                     winner = await whip(bot, player, player, channel)
                 await sent.edit(embed=hpupdate(bot, player, 'mele', 'It is your turn! Use `!rocktail`, `!dds`, or `!whip`.'))
-                
+
                 if winner != None:
                     win(winner)
+            else:
+                win(winner)
         else:
             win(winner)
 
