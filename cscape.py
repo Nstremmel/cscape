@@ -692,12 +692,12 @@ async def on_message(message):
 
         def win(winner):
             if winner == 'CryptoScape Bot':
-                await message.channel.send('CryptoScape Bot won the duel.')
+                return 'CryptoScape Bot won the duel.'
             else:
                 currency = getvalue(winner.id, 'currency', 'duels')
                 bet = getvalue(winner.id, 'bet', 'duels')
                 update_money(winner.id, currency, bet * 2)
-                await message.channel.send('<@' + str(winner.id) + '> won the duel and gained **' + formatfromk(bet * 2) + ' ' + currency + '**!')
+                return '<@' + str(winner.id) + '> won the duel and gained **' + formatfromk(bet * 2) + ' ' + currency + '**!'
             c.execute('DELETE FROM duels WHERE id={}'.format(message.author.id))
 
         if (turn == 1 and random.randint(0, 1) == 1) or turn > 1:
@@ -754,11 +754,11 @@ async def on_message(message):
                 await sent.edit(embed=hpupdate(bot, player, 'mele', 'It is your turn! Use `!rocktail`, `!dds`, or `!whip`.'))
 
                 if winner != None:
-                    win(winner)
+                    await channel.send(win(winner))
             else:
-                win(winner)
+                await channel.send(win(winner))
         else:
-            win(winner)
+            await channel.send(win(winner))
 
         updateDuel(player, message.author.id)
         updateDuel(bot, message.author.id)
