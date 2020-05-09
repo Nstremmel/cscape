@@ -236,7 +236,7 @@ async def whip(user, opponent, player, channel):
     whip = get(client.emojis, name='whip')
     hit = random.randint(0, 27)
     opponent[1] -= hit
-    if opponent[1] < 0:
+    if opponent[1] < 1:
         opponent[1] = 0
     words = str(user[0]) + ' has hit ' + str(opponent[0]) + ' with their ' + str(whip) + ' and dealt ' + str(hit) + ' damage.'
     await sent.edit(embed=hpupdate(user, opponent, 'mele', words))
@@ -689,6 +689,17 @@ async def on_message(message):
         sent = await channel.fetch_message(sentid)
         turn = getvalue(message.author.id, 'turn', 'duels')
         winner = None
+
+        def win(winner):
+            if winner == 'CryptoScape Bot':
+                await message.channel.send('CryptoScape Bot won the duel.')
+            else:
+                currency = getvalue(winner.id, 'currency', 'duels')
+                bet = getvalue(winner.id, 'bet', 'duels')
+                update_money(winner.id, currency, bet * 2)
+                await message.channel.send('<@' + str(winner.id) + '> won the duel and gained **' + formatfromk(bet * 2) + ' ' + currency + '**!')
+            c.execute('DELETE FROM duels WHERE id={}'.format(message.author.id))
+
         if (turn == 1 and random.randint(0, 1) == 1) or turn > 1:
             if player[3] < 100:
                 player[6] += 1
@@ -741,16 +752,11 @@ async def on_message(message):
                 else:
                     winner = await whip(bot, player, player, channel)
                 await sent.edit(embed=hpupdate(bot, player, 'mele', 'It is your turn! Use `!rocktail`, `!dds`, or `!whip`.'))
-
+                
+                if winner != None:
+                    win(winner)
         else:
-            if winner[0] == 'CryptoScape Bot':
-                await message.channel.send('CryptoScape Bot won the duel.')
-            else:
-                currency = getvalue(winner[0].id, 'currency', 'duels')
-                bet = getvalue(winner[0].id, 'bet', 'duels')
-                update_money(winner[0].id, currency, bet * 2)
-                await message.channel.send('<@' + str(winner[0].id) + '> won the duel and gained **' + formatfromk(bet * 2) + ' ' + currency + '**!')
-            c.execute('DELETE FROM duels WHERE id={}'.format(message.author.id))
+            win(winner)
 
         updateDuel(player, message.author.id)
         updateDuel(bot, message.author.id)
