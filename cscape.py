@@ -882,8 +882,8 @@ async def on_message(message):
             else:
                 await channel.send(win(winner))
         
-        updateDuel(player, message.author.id, duelType + 'duels')
-        updateDuel(bot, message.author.id, duelType + 'duels')
+        updateDuel(player, message.author.id, duelType)
+        updateDuel(bot, message.author.id, duelType)
         c.execute('UPDATE {} SET turn={} WHERE id={}'.format(duelType + 'duels', turn + 1, message.author.id))
         await message.delete()
     #######################################
