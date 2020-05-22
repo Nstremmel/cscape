@@ -847,10 +847,10 @@ async def on_message(message):
                             winner = await dds(bot, player, player, channel)
                         else:
                             winner = await whip(bot, player, player, channel)
-                        await sent.edit(embed=hpupdate(bot, player, 'mele', 'It is your turn! Use `!rocktail`, `!dds`, or `!whip`.'))
 
                         if winner != None:
                             await channel.send(win(winner, duelType))
+                        await sent.edit(embed=hpupdate(bot, player, 'mele', 'It is your turn! Use `!rocktail`, `!dds`, or `!whip`.'))
                     else:
                         await channel.send(win(winner, duelType))
                 else:
@@ -877,7 +877,8 @@ async def on_message(message):
 
                 if winner == None:
                     if bot[3]:
-                        await sent.edit(embed=hpupdate(bot, player, 'mage', 'You are frozen and cannot do anything this turn.'))
+                        await sent.edit(embed=hpupdate(bot, player, 'mage', 'CryptoScape Bot is frozen and cannot do anything this turn.'))
+                        await asyncio.sleep(2.5)
                     else:
                         if bot[1] < 30 and bot[2] > 0:
                             winner = await rocktail(bot, player, player, channel, 'mage')
@@ -889,6 +890,7 @@ async def on_message(message):
 
                     if winner != None:
                         await channel.send(win(winner, duelType))
+                    await sent.edit(embed=hpupdate(bot, player, 'mele', 'It is your turn! Use `!rocktail`, `!dds`, or `!whip`.'))
                 else:
                     await channel.send(win(winner, duelType))
             
