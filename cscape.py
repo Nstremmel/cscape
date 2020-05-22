@@ -200,7 +200,7 @@ def updateDuel(updater, userid, duelType):
             if user == 'CryptoScape Bot':
                 columns = ['Bhp', 'Brocktails', 'Bfrozen']
             else:
-                columsn = ['Php', 'Procktails', 'Pfrozen']
+                columns = ['Php', 'Procktails', 'Pfrozen']
         c.execute("UPDATE {} SET {}={} WHERE id={}".format(duelType + 'duels', columns[counter], i, userid))
     updater.insert(0, user)
 
