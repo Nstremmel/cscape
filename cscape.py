@@ -32,7 +32,7 @@ conn.set_session(autocommit=True)
 #               )""")
 # conn.commit()
 
-c.execute("DROP TABLE meleduels")
+# c.execute("DROP TABLE meleduels")
 c.execute("""CREATE TABLE meleduels (
               id bigint,
               currency text,
