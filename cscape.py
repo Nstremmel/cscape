@@ -284,6 +284,7 @@ async def ice(user, opponent, player, channel):
     if opponent[1] < 0:
         opponent[1] = 0
     words = str(user[0]) + ' has hit ' + str(opponent[0]) + ' with ' + str(ice) + ' and dealt **' + str(hit) + '** damage.'
+    await channel.send(file=discord.File('ice.gif', filename='ice.gif'), delete_after = 2.5)
     await sent.edit(embed=hpupdate(user, opponent, 'mage', words))
     await asyncio.sleep(2.5)
     if opponent[1] < 1:
@@ -312,6 +313,7 @@ async def blood(user, opponent, player, channel):
     if user[1] > 99:
         user[1] = 99
     words = (str(user[0]) + ' has hit ' + str(opponent[0]) + ' with ' + str(ice) + ", dealt **" + str(hit) + "** damage, and was healed for **" + str(healed) + "** HP.")
+    await channel.send(file=discord.File('blood.gif', filename='blood.gif'), delete_after = 2.5)
     await sent.edit(embed=hpupdate(user, opponent, 'mage', words))
     await asyncio.sleep(2.5)
     updateDuel(user, player[0].id, 'mage')
