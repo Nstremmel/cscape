@@ -758,7 +758,7 @@ async def on_message(message):
             c.execute('SELECT Php FROM meleduels WHERE id={}'.format(message.author.id))
             tester = int(c.fetchone()[0])
             duelType = 'mele'
-        else:
+        except:
             duelType = 'mage'
 
         channelid = getvalue(message.author.id, 'channelid', duelType + 'duels')
