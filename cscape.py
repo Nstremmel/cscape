@@ -770,15 +770,16 @@ async def on_message(message):
         turn = getvalue(message.author.id, 'turn', duelType + 'duels')
         winner = None
 
-        def win(winner):
+        def win(winner, duelType):
             if winner == 'CryptoScape Bot':
-                return 'CryptoScape Bot won the duel.'
+                words = 'CryptoScape Bot won the duel.'
             else:
                 currency = getvalue(winner.id, 'currency', duelType + 'duels')
                 bet = getvalue(winner.id, 'bet', duelType + 'duels')
                 update_money(winner.id, currency, bet * 2)
-                return '<@' + str(winner.id) + '> won the duel and gained **' + formatfromk(bet * 2) + ' ' + currency + '**!'
+                words = '<@' + str(winner.id) + '> won the duel and gained **' + formatfromk(bet * 2) + ' ' + currency + '**!'
             c.execute('DELETE FROM {} WHERE id={}'.format(duelType + 'duels', message.author.id))
+            return words
 
         if duelType == 'mele':
             player = getvalue(message.author.id, ['Php', 'Procktails', 'Pspecial', 'Ppoisoned', 'Ppoisonturns', 'Pspecturns'], 'meleduels')
@@ -840,11 +841,11 @@ async def on_message(message):
                     await sent.edit(embed=hpupdate(bot, player, 'mele', 'It is your turn! Use `!rocktail`, `!dds`, or `!whip`.'))
 
                     if winner != None:
-                        await channel.send(win(winner))
+                        await channel.send(win(winner, duelType))
                 else:
-                    await channel.send(win(winner))
+                    await channel.send(win(winner, duelType))
             else:
-                await channel.send(win(winner))
+                await channel.send(win(winner, duelType))
 
         elif duelType == 'mage':
             player = getvalue(message.author.id, ['Php', 'Procktails', 'Pfrozen'], 'mageduels')
@@ -878,9 +879,9 @@ async def on_message(message):
                     await sent.edit(embed=hpupdate(bot, player, 'mage', 'It is your turn! Use `!rocktail`, `!ice`, or `!blood`.'))
 
                 if winner != None:
-                    await channel.send(win(winner))
+                    await channel.send(win(winner, duelType))
             else:
-                await channel.send(win(winner))
+                await channel.send(win(winner, duelType))
         
         updateDuel(player, message.author.id, duelType)
         updateDuel(bot, message.author.id, duelType)
