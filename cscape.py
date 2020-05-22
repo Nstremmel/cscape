@@ -895,7 +895,7 @@ async def on_message(message):
 
                     if winner != None:
                         await channel.send(win(winner, duelType))
-                    await sent.edit(embed=hpupdate(bot, player, 'mele', 'It is your turn! Use `!rocktail`, `!dds`, or `!whip`.'))
+                    await sent.edit(embed=hpupdate(bot, player, 'mage', 'It is your turn! Use `!rocktail`, `!dds`, or `!whip`.'))
                 else:
                     await channel.send(win(winner, duelType))
             
