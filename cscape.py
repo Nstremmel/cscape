@@ -234,11 +234,12 @@ async def dds(user, opponent, player, channel):
         await channel.send('You are out of ' + str(dds) + ' specs. Please use `!rocktail` or `!whip`.', delete_after = 3.0)
     else:
         user[3] -= 25
-        hit = random.randint(0, 20) + random.randint(0, 20)
-        opponent[1] -= hit
+        hit1, hit2 = random.randint(0, 20), random.randint(0, 20)
+        opponent[1] -= hit1 + hit2
         if opponent[1] < 0:
             opponent[1] = 0
-        words = str(user[0]) + ' uses a ' + str(dds) + ' and deals **' + str(hit) + '** damage.'
+        words = str(user[0]) + ' uses a ' + str(dds) + ' and deals **' + str(hit1) + ' + ' + str(hit2) +'** damage.'
+        await channel.send(file=discord.File('https://vignette.wikia.nocookie.net/2007scape/images/7/72/Puncture.gif/revision/latest?cb=20160218234534', filename='dds'), delete_after = 2.5)
         await sent.edit(embed=hpupdate(user, opponent, 'mele', words))
         await asyncio.sleep(2.5)
         if opponent[1] < 1:
