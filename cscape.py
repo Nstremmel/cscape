@@ -56,21 +56,21 @@ conn.set_session(autocommit=True)
 # conn.commit()
 
 #c.execute("DROP TABLE mageduels")
-c.execute("""CREATE TABLE mageduels (
-                id bigint,
-                currency text,
-                bet integer,
-                turn integer,
-                Php integer,
-                Procktails integer,
-                Pfrozen boolean,
-                Bhp integer,
-                Brocktails integer,
-                Bfrozen boolean,
-                messageid bigint,
-                channelid text
-                )""")
-conn.commit()
+# c.execute("""CREATE TABLE mageduels (
+#                 id bigint,
+#                 currency text,
+#                 bet integer,
+#                 turn integer,
+#                 Php integer,
+#                 Procktails integer,
+#                 Pfrozen boolean,
+#                 Bhp integer,
+#                 Brocktails integer,
+#                 Bfrozen boolean,
+#                 messageid bigint,
+#                 channelid text
+#                 )""")
+# conn.commit()
 
 client = discord.Client()
 
@@ -880,8 +880,8 @@ async def on_message(message):
             else:
                 await channel.send(win(winner))
         
-        updateDuel(player, message.author.id)
-        updateDuel(bot, message.author.id)
+        updateDuel(player, message.author.id, duelType + 'duels')
+        updateDuel(bot, message.author.id, duelType + 'duels')
         c.execute('UPDATE {} SET turn={} WHERE id={}'.format(duelType + 'duels', turn + 1, message.author.id))
         await message.delete()
     #######################################
