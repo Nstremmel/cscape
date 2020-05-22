@@ -865,6 +865,8 @@ async def on_message(message):
                 if (turn == 1 and random.randint(0, 1) == 1) or turn > 1:
                     if player[3]:
                         await sent.edit(embed=hpupdate(bot, player, 'mage', 'You are frozen and cannot do anything this turn.'))
+                        await asyncio.sleep(2.5)
+                        player[3] = False
                     else:
                         if message.content == '!rocktail':
                             winner = await rocktail(player, bot, player, channel, 'mage')
@@ -879,6 +881,7 @@ async def on_message(message):
                     if bot[3]:
                         await sent.edit(embed=hpupdate(bot, player, 'mage', 'CryptoScape Bot is frozen and cannot do anything this turn.'))
                         await asyncio.sleep(2.5)
+                        bot[3] = False
                     else:
                         if bot[1] < 30 and bot[2] > 0:
                             winner = await rocktail(bot, player, player, channel, 'mage')
