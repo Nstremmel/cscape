@@ -32,45 +32,45 @@ conn.set_session(autocommit=True)
 #               )""")
 # conn.commit()
 
-# c.execute("DROP TABLE meleduels")
-# c.execute("""CREATE TABLE meleduels (
-#               id bigint,
-#               currency text,
-#               bet integer,
-#               turn integer,
-#               Php integer,
-#               Ppoisoned boolean,
-#               Ppoisonturns integer,
-#               Pspecturns integer,
-#               Procktails integer,
-#               Pspecial integer,
-#               Bhp integer,
-#               Bpoisoned boolean,
-#               Bpoisonturns integer,
-#               Bspecturns integer,
-#               Brocktails integer,
-#               Bspecial integer,
-#               messageid bigint,
-#               channelid text
-#               )""")
-# conn.commit()
+c.execute("DROP TABLE meleduels")
+c.execute("""CREATE TABLE meleduels (
+              id bigint,
+              currency text,
+              bet integer,
+              turn integer,
+              Php integer,
+              Ppoisoned boolean,
+              Ppoisonturns integer,
+              Pspecturns integer,
+              Procktails integer,
+              Pspecial integer,
+              Bhp integer,
+              Bpoisoned boolean,
+              Bpoisonturns integer,
+              Bspecturns integer,
+              Brocktails integer,
+              Bspecial integer,
+              messageid bigint,
+              channelid text
+              )""")
+conn.commit()
 
-#c.execute("DROP TABLE mageduels")
-# c.execute("""CREATE TABLE mageduels (
-#                 id bigint,
-#                 currency text,
-#                 bet integer,
-#                 turn integer,
-#                 Php integer,
-#                 Procktails integer,
-#                 Pfrozen boolean,
-#                 Bhp integer,
-#                 Brocktails integer,
-#                 Bfrozen boolean,
-#                 messageid bigint,
-#                 channelid text
-#                 )""")
-# conn.commit()
+c.execute("DROP TABLE mageduels")
+c.execute("""CREATE TABLE mageduels (
+                id bigint,
+                currency text,
+                bet integer,
+                turn integer,
+                Php integer,
+                Procktails integer,
+                Pfrozen boolean,
+                Bhp integer,
+                Brocktails integer,
+                Bfrozen boolean,
+                messageid bigint,
+                channelid text
+                )""")
+conn.commit()
 
 client = discord.Client()
 
