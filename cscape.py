@@ -727,168 +727,177 @@ async def on_message(message):
     #         await message.channel.send('An **error** has occurred. Make sure you use `!flower (Amount) (hot, cold, red, orange, yellow, green, blue, or purple)`.')
     #######################################
     elif message.content.startswith('!meleduel') or message.content.startswith('!mageduel'):
-        #try:
-        duelType = (message.content).split(' ')[0][1:-4]
-        currency = (message.content).split(' ')[2]
-        current = getvalue(message.author.id, currency, 'rsmoney')
-        bet = formatok(message.content.split(' ')[1])
-        if isenough(bet, currency):
-            if current >= bet:
-                try:
-                    c.execute('SELECT Php FROM {} WHERE id={}'.format(duelType + 'duels', message.author.id))
-                    tester = int(c.fetchone()[0])
-                    await message.channel.send('You are already in a duel!')
-                except:
-                    update_money(message.author.id, currency, bet * -1)
-                    #player=[0               1     2           3        4                 5                 6]
-                    #player=[member object, hp, rocktails, speical, poisoned, turns since poisoned, turns since speced]
-                    if duelType == 'mele':
-                        sent = await message.channel.send(embed=hpupdate(['CryptoScape Bot', 99, 4, 100, False, 0, 0], [message.author, 99, 4, 100, False, 0, 0], 'mele', 'New Game. Use `!rocktail`, `!dds`, or `!whip`.'))
-                        c.execute('INSERT INTO meleduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, 1, 99, False, 0, 0, 4, 100, 99, False, 0, 0, 4, 100, sent.id, message.channel.id))
-                    elif duelType == 'mage':
-                        sent = await message.channel.send(embed=hpupdate(['CryptoScape Bot', 99, 4, False], [message.author, 99, 4, False], 'mage', 'New Game. Use `!rocktail`, `!ice`, or `!blood`.'))
-                        c.execute('INSERT INTO mageduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, 1, 99, 4, False, 99, 4, False, sent.id, message.channel.id))
-                    elif duelType == 'range':
-                        None
+        try:
+            duelType = (message.content).split(' ')[0][1:-4]
+            currency = (message.content).split(' ')[2]
+            current = getvalue(message.author.id, currency, 'rsmoney')
+            bet = formatok(message.content.split(' ')[1])
+            if isenough(bet, currency):
+                if current >= bet:
+                    try:
+                        c.execute('SELECT Php FROM {} WHERE id={}'.format(duelType + 'duels', message.author.id))
+                        tester = int(c.fetchone()[0])
+                        await message.channel.send('You are already in a duel!')
+                    except:
+                        update_money(message.author.id, currency, bet * -1)
+                        #player=[0               1     2           3        4                 5                 6]
+                        #player=[member object, hp, rocktails, speical, poisoned, turns since poisoned, turns since speced]
+                        if duelType == 'mele':
+                            sent = await message.channel.send(embed=hpupdate(['CryptoScape Bot', 99, 4, 100, False, 0, 0], [message.author, 99, 4, 100, False, 0, 0], 'mele', 'New Game. Use `!rocktail`, `!dds`, or `!whip`.'))
+                            c.execute('INSERT INTO meleduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, 1, 99, False, 0, 0, 4, 100, 99, False, 0, 0, 4, 100, sent.id, message.channel.id))
+                        elif duelType == 'mage':
+                            sent = await message.channel.send(embed=hpupdate(['CryptoScape Bot', 99, 4, False], [message.author, 99, 4, False], 'mage', 'New Game. Use `!rocktail`, `!ice`, or `!blood`.'))
+                            c.execute('INSERT INTO mageduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, 1, 99, 4, False, 99, 4, False, sent.id, message.channel.id))
+                        elif duelType == 'range':
+                            None
+                else:
+                    await message.channel.send("You don't have that much money!")
             else:
-                await message.channel.send("You don't have that much money!")
-        else:
-            await message.channel.send(isenough(bet, currency)[1])
-        #except:
-        #    await message.channel.send('An **error** has occured. Make sure you use `!meleduel (AMOUNT) (CURRENCY)`')
+                await message.channel.send(isenough(bet, currency)[1])
+        except:
+            await message.channel.send('An **error** has occured. Make sure you use `!meleduel (AMOUNT) (CURRENCY)`')
 
     elif message.content in moves:
+        inDuel = True
         try:
             c.execute('SELECT Php FROM meleduels WHERE id={}'.format(message.author.id))
             tester = int(c.fetchone()[0])
             duelType = 'mele'
         except:
-            duelType = 'mage'
+            try:
+                c.execute('SELECT Php FROM mageduels WHERE id={}'.format(message.author.id))
+                tester = int(c.fetchone()[0])
+                duelType = 'mage'
+            except:
+                inDuel = False
 
-        channelid = getvalue(message.author.id, 'channelid', duelType + 'duels')
-        channel = client.get_channel(channelid)
-        sentid = getvalue(message.author.id, 'messageid', duelType + 'duels')
-        sent = await channel.fetch_message(sentid)
-        turn = getvalue(message.author.id, 'turn', duelType + 'duels')
-        winner = None
+        if inDuel:
+            channelid = getvalue(message.author.id, 'channelid', duelType + 'duels')
+            channel = client.get_channel(channelid)
+            sentid = getvalue(message.author.id, 'messageid', duelType + 'duels')
+            sent = await channel.fetch_message(sentid)
+            turn = getvalue(message.author.id, 'turn', duelType + 'duels')
+            winner = None
 
-        def win(winner, duelType):
-            if winner == 'CryptoScape Bot':
-                words = 'CryptoScape Bot won the duel.'
-            else:
-                currency = getvalue(winner.id, 'currency', duelType + 'duels')
-                bet = getvalue(winner.id, 'bet', duelType + 'duels')
-                update_money(winner.id, currency, bet * 2)
-                words = '<@' + str(winner.id) + '> won the duel and gained **' + formatfromk(bet * 2) + ' ' + currency + '**!'
-            c.execute('DELETE FROM {} WHERE id={}'.format(duelType + 'duels', message.author.id))
-            return words
+            def win(winner, duelType):
+                if winner == 'CryptoScape Bot':
+                    words = 'CryptoScape Bot won the duel.'
+                else:
+                    currency = getvalue(winner.id, 'currency', duelType + 'duels')
+                    bet = getvalue(winner.id, 'bet', duelType + 'duels')
+                    update_money(winner.id, currency, bet * 2)
+                    words = '<@' + str(winner.id) + '> won the duel and gained **' + formatfromk(bet * 2) + ' ' + currency + '**!'
+                c.execute('DELETE FROM {} WHERE id={}'.format(duelType + 'duels', message.author.id))
+                return words
 
-        if duelType == 'mele':
-            player = getvalue(message.author.id, ['Php', 'Procktails', 'Pspecial', 'Ppoisoned', 'Ppoisonturns', 'Pspecturns'], 'meleduels')
-            player.insert(0, message.author)
-            bot = getvalue(message.author.id, ['Bhp', 'Brocktails', 'Bspecial', 'Bpoisoned', 'Bpoisonturns', 'Bspecturns'], 'meleduels')
-            bot.insert(0, 'CryptoScape Bot')
+            if duelType == 'mele':
+                player = getvalue(message.author.id, ['Php', 'Procktails', 'Pspecial', 'Ppoisoned', 'Ppoisonturns', 'Pspecturns'], 'meleduels')
+                player.insert(0, message.author)
+                bot = getvalue(message.author.id, ['Bhp', 'Brocktails', 'Bspecial', 'Bpoisoned', 'Bpoisonturns', 'Bspecturns'], 'meleduels')
+                bot.insert(0, 'CryptoScape Bot')
 
-            if (turn == 1 and random.randint(0, 1) == 1) or turn > 1:
-                if player[3] < 100:
-                    player[6] += 1
-                    if (player[6] % 4) == 0:
-                        player[3] += 25
-                        await sent.edit(embed=hpupdate(bot, player, 'mele', 'You regain **25%** special attack.'))
-                        await asyncio.sleep(2.5)
-                if player[4]:
-                    player[5] += 1
-                    if (player[5] % 4) == 0:
-                        player[1] -= 6
-                        if player[1] < 0:
-                            player[1] == 0
-                            winner = bot[0]
-                        await sent.edit(embed=hpupdate(bot, player, 'mele', 'You take **6** damage from poison.'))
-                        await asyncio.sleep(2.5)
+                if (turn == 1 and random.randint(0, 1) == 1) or turn > 1:
+                    if player[3] < 100:
+                        player[6] += 1
+                        if (player[6] % 4) == 0:
+                            player[3] += 25
+                            await sent.edit(embed=hpupdate(bot, player, 'mele', 'You regain **25%** special attack.'))
+                            await asyncio.sleep(2.5)
+                    if player[4]:
+                        player[5] += 1
+                        if (player[5] % 4) == 0:
+                            player[1] -= 6
+                            if player[1] < 0:
+                                player[1] == 0
+                                winner = bot[0]
+                            await sent.edit(embed=hpupdate(bot, player, 'mele', 'You take **6** damage from poison.'))
+                            await asyncio.sleep(2.5)
 
-                if winner == None:
-                    if message.content == '!rocktail':
-                        winner = await rocktail(player, bot, player, channel, 'mele')
-                    elif message.content == '!dds':
-                        winner = await dds(player, bot, player, channel)
-                    else:
-                        winner = await whip(player, bot, player, channel)
-            else:
-                await message.channel.send('CryptoScape Bot will go first!', delete_after = 4)
-
-            if winner == None:
-                if bot[3] < 100:
-                    bot[6] += 1
-                    if (bot[6] % 4) == 0:
-                        bot[3] += 25
-                        await sent.edit(embed=hpupdate(bot, player, 'mele', 'CryptoScape Bot regains **25%** special attack.'))
-                        await asyncio.sleep(2.5)
-                if bot[4]:
-                    bot[5] += 1
-                    if (bot[5] % 4) == 0:
-                        bot[1] -= 6
-                        if bot[1] < 0:
-                            bot[1] == 0
-                            winner = player[0]
-                        await sent.edit(embed=hpupdate(bot, player, 'mele', 'CryptoScape Bot takes **6** damage from poison.'))
-                        await asyncio.sleep(2.5)
+                    if winner == None:
+                        if message.content == '!rocktail':
+                            winner = await rocktail(player, bot, player, channel, 'mele')
+                        elif message.content == '!dds':
+                            winner = await dds(player, bot, player, channel)
+                        else:
+                            winner = await whip(player, bot, player, channel)
+                else:
+                    await message.channel.send('CryptoScape Bot will go first!', delete_after = 4)
 
                 if winner == None:
-                    if bot[1] < 40 and bot[2] > 0:
-                        winner = await rocktail(bot, player, player, channel, 'mele')
-                    elif bot[3] >= 25:
-                        winner = await dds(bot, player, player, channel)
+                    if bot[3] < 100:
+                        bot[6] += 1
+                        if (bot[6] % 4) == 0:
+                            bot[3] += 25
+                            await sent.edit(embed=hpupdate(bot, player, 'mele', 'CryptoScape Bot regains **25%** special attack.'))
+                            await asyncio.sleep(2.5)
+                    if bot[4]:
+                        bot[5] += 1
+                        if (bot[5] % 4) == 0:
+                            bot[1] -= 6
+                            if bot[1] < 0:
+                                bot[1] == 0
+                                winner = player[0]
+                            await sent.edit(embed=hpupdate(bot, player, 'mele', 'CryptoScape Bot takes **6** damage from poison.'))
+                            await asyncio.sleep(2.5)
+
+                    if winner == None:
+                        if bot[1] < 40 and bot[2] > 0:
+                            winner = await rocktail(bot, player, player, channel, 'mele')
+                        elif bot[3] >= 25:
+                            winner = await dds(bot, player, player, channel)
+                        else:
+                            winner = await whip(bot, player, player, channel)
+                        await sent.edit(embed=hpupdate(bot, player, 'mele', 'It is your turn! Use `!rocktail`, `!dds`, or `!whip`.'))
+
+                        if winner != None:
+                            await channel.send(win(winner, duelType))
                     else:
-                        winner = await whip(bot, player, player, channel)
-                    await sent.edit(embed=hpupdate(bot, player, 'mele', 'It is your turn! Use `!rocktail`, `!dds`, or `!whip`.'))
+                        await channel.send(win(winner, duelType))
+                else:
+                    await channel.send(win(winner, duelType))
+
+            elif duelType == 'mage':
+                player = getvalue(message.author.id, ['Php', 'Procktails', 'Pfrozen'], 'mageduels')
+                player.insert(0, message.author)
+                bot = getvalue(message.author.id, ['Bhp', 'Brocktails', 'Bfrozen'], 'mageduels')
+                bot.insert(0, 'CryptoScape Bot')
+
+                if (turn == 1 and random.randint(0, 1) == 1) or turn > 1:
+                    if player[3]:
+                        await sent.edit(embed=hpupdate(bot, player, 'mage', 'You are frozen and cannot do anything this turn.'))
+                    else:
+                        if message.content == '!rocktail':
+                            winner = await rocktail(player, bot, player, channel, 'mage')
+                        elif message.content == '!ice':
+                            winner = await ice(player, bot, player, channel)
+                        else:
+                            winner = await blood(player, bot, player, channel)
+                else:
+                    await message.channel.send('CryptoScape Bot will go first!', delete_after = 4)
+
+                if winner == None:
+                    if bot[3]:
+                        await sent.edit(embed=hpupdate(bot, player, 'mage', 'You are frozen and cannot do anything this turn.'))
+                    else:
+                        if bot[1] < 30 and bot[2] > 0:
+                            winner = await rocktail(bot, player, player, channel, 'mage')
+                        elif bot[1] > 30 and bot[1] < 50:
+                            winner = await blood(bot, player, player, channel)
+                        else:
+                            winner = await ice(bot, player, player, channel)
+                        await sent.edit(embed=hpupdate(bot, player, 'mage', 'It is your turn! Use `!rocktail`, `!ice`, or `!blood`.'))
 
                     if winner != None:
                         await channel.send(win(winner, duelType))
                 else:
                     await channel.send(win(winner, duelType))
-            else:
-                await channel.send(win(winner, duelType))
-
-        elif duelType == 'mage':
-            player = getvalue(message.author.id, ['Php', 'Procktails', 'Pfrozen'], 'mageduels')
-            player.insert(0, message.author)
-            bot = getvalue(message.author.id, ['Bhp', 'Brocktails', 'Bfrozen'], 'mageduels')
-            bot.insert(0, 'CryptoScape Bot')
-
-            if (turn == 1 and random.randint(0, 1) == 1) or turn > 1:
-                if player[3]:
-                    await sent.edit(embed=hpupdate(bot, player, 'mage', 'You are frozen and cannot do anything this turn.'))
-                else:
-                    if message.content == '!rocktail':
-                        winner = await rocktail(player, bot, player, channel, 'mage')
-                    elif message.content == '!ice':
-                        winner = await ice(player, bot, player, channel)
-                    else:
-                        winner = await blood(player, bot, player, channel)
-            else:
-                await message.channel.send('CryptoScape Bot will go first!', delete_after = 4)
-
-            if winner == None:
-                if bot[3]:
-                    await sent.edit(embed=hpupdate(bot, player, 'mage', 'You are frozen and cannot do anything this turn.'))
-                else:
-                    if bot[1] < 30 and bot[2] > 0:
-                        winner = await rocktail(bot, player, player, channel, 'mage')
-                    elif bot[1] > 30 and bot[1] < 50:
-                        winner = await blood(bot, player, player, channel)
-                    else:
-                        winner = await ice(bot, player, player, channel)
-                    await sent.edit(embed=hpupdate(bot, player, 'mage', 'It is your turn! Use `!rocktail`, `!ice`, or `!blood`.'))
-
-                if winner != None:
-                    await channel.send(win(winner, duelType))
-            else:
-                await channel.send(win(winner, duelType))
-        
-        updateDuel(player, message.author.id, duelType)
-        updateDuel(bot, message.author.id, duelType)
-        c.execute('UPDATE {} SET turn={} WHERE id={}'.format(duelType + 'duels', turn + 1, message.author.id))
-        await message.delete()
+            
+            updateDuel(player, message.author.id, duelType)
+            updateDuel(bot, message.author.id, duelType)
+            c.execute('UPDATE {} SET turn={} WHERE id={}'.format(duelType + 'duels', turn + 1, message.author.id))
+            await message.delete()
+        else:
+            await message.channel.send('You are not in a duel right now. Use `!meleduel (AMOUNT) (CURRENCY)` or `!mageduel (AMOUNT) (CURRENCY)` to start one.')
     #######################################
 
 #website info
