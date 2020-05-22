@@ -239,7 +239,7 @@ async def dds(user, opponent, player, channel):
         if opponent[1] < 0:
             opponent[1] = 0
         words = str(user[0]) + ' uses a ' + str(dds) + ' and deals **' + str(hit1) + ' + ' + str(hit2) +'** damage.'
-        #await channel.send(file=discord.File('https://vignette.wikia.nocookie.net/2007scape/images/7/72/Puncture.gif/revision/latest?cb=20160218234534', filename='dds'), delete_after = 2.5)
+        await channel.send(file=discord.File('https://vignette.wikia.nocookie.net/2007scape/images/7/72/Puncture.gif/revision/latest?cb=20160218234534', filename='dds'), delete_after = 2.5)
         await sent.edit(embed=hpupdate(user, opponent, 'mele', words))
         await asyncio.sleep(2.5)
         if opponent[1] < 1:
