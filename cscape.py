@@ -307,7 +307,8 @@ async def blood(user, opponent, player, channel):
     user[1] += healed
     if user[1] > 99:
         user[1] = 99
-    words = (str(user[0]) + ' has hit ' + str(opponent[0]) + ' with ' + str(ice) + " dealt **" + str(hit) + "** damage, and was healed for **" + str(healed) "** HP.") 
+    words = (str(user[0]) + ' has hit ' + str(opponent[0]) + ' with ' + str(ice) + ", dealt **" + str(hit) + 
+            "** damage, and was healed for **" + str(healed) "** HP.")
     await sent.edit(embed=hpupdate(user, opponent, 'mage', words))
     await asyncio.sleep(2.5)
     updateDuel(user, player[0].id, 'mage')
