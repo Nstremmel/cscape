@@ -748,8 +748,8 @@ async def on_message(message):
                             sent = await message.channel.send(embed=hpupdate(['CryptoScape Bot', 99, 4, 100, False, 0, 0], [message.author, 99, 4, 100, False, 0, 0], 'mele', 'New Game. Use `!rocktail`, `!dds`, or `!whip`.'))
                             c.execute('INSERT INTO meleduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, 1, 99, False, 0, 0, 4, 100, 99, False, 0, 0, 4, 100, sent.id, message.channel.id))
                         elif duelType == 'mage':
-                            sent = await message.channel.send(embed=hpupdate(['CryptoScape Bot', 99, 4, False], [message.author, 99, 4, False], 'mage', 'New Game. Use `!rocktail`, `!ice`, or `!blood`.'))
-                            c.execute('INSERT INTO mageduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, 1, 99, 4, False, 99, 4, False, sent.id, message.channel.id))
+                            sent = await message.channel.send(embed=hpupdate(['CryptoScape Bot', 99, 2, False], [message.author, 99, 2, False], 'mage', 'New Game. Use `!rocktail`, `!ice`, or `!blood`.'))
+                            c.execute('INSERT INTO mageduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, 1, 99, 2, False, 99, 2, False, sent.id, message.channel.id))
                         elif duelType == 'range':
                             None
                 else:
@@ -820,10 +820,12 @@ async def on_message(message):
                             winner = await rocktail(player, bot, player, channel, 'mele')
                         elif message.content == '!dds':
                             winner = await dds(player, bot, player, channel)
-                        else:
+                        elif message.content == '!whip':
                             winner = await whip(player, bot, player, channel)
+                        else:
+                            await channel.send('That is not a valid move!', delete_after = 4)
                 else:
-                    await message.channel.send('CryptoScape Bot will go first!', delete_after = 4)
+                    await channel.send('CryptoScape Bot will go first!', delete_after = 4)
 
                 if winner == None:
                     if bot[3] < 100:
@@ -874,10 +876,12 @@ async def on_message(message):
                             winner = await rocktail(player, bot, player, channel, 'mage')
                         elif message.content == '!ice':
                             winner = await ice(player, bot, player, channel)
-                        else:
+                        elif message.content == '!blood':
                             winner = await blood(player, bot, player, channel)
+                        else:
+                            await channel.send('That is not a valid move!', delete_after = 4)
                 else:
-                    await message.channel.send('CryptoScape Bot will go first!', delete_after = 4)
+                    await channel.send('CryptoScape Bot will go first!', delete_after = 4)
 
                 if winner == None:
                     if bot[3]:
@@ -891,11 +895,10 @@ async def on_message(message):
                             winner = await blood(bot, player, player, channel)
                         else:
                             winner = await ice(bot, player, player, channel)
-                        await sent.edit(embed=hpupdate(bot, player, 'mage', 'It is your turn! Use `!rocktail`, `!ice`, or `!blood`.'))
 
                     if winner != None:
                         await channel.send(win(winner, duelType))
-                    await sent.edit(embed=hpupdate(bot, player, 'mage', 'It is your turn! Use `!rocktail`, `!dds`, or `!whip`.'))
+                    await sent.edit(embed=hpupdate(bot, player, 'mage', 'It is your turn! Use `!rocktail`, `!ice`, or `!blood`.'))
                 else:
                     await channel.send(win(winner, duelType))
             
