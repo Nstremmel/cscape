@@ -203,6 +203,8 @@ def updateDuel(updater, userid, duelType):
                 columns = ['Bhp', 'Brocktails', 'Bfrozen']
             else:
                 columns = ['Php', 'Procktails', 'Pfrozen']
+        else:
+            columns=[]
         c.execute("UPDATE {} SET {}={} WHERE id={}".format(duelType + 'duels', columns[counter], i, userid))
     updater.insert(0, user)
 
