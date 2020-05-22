@@ -177,7 +177,7 @@ def hpupdate(user, opponent, dueltype, words):
                                                         "\n"+str(rocktail)+": "+str(i[2]) +
                                                         "\nSpecial Attack: "+str(i[3])+"%" +
                                                         "\nHP Left: "+str(i[1])+" "+str(hp), inline=True)
-        elif dueltype == 'magic':
+        elif dueltype == 'mage':
             embed.add_field(name=str(i[0]), value= "\n"+str(rocktail)+": "+str(i[2]) +
                                                         "\nFrozen: "+str(i[3]) +
                                                         "\nHP Left: "+str(i[1])+" "+str(hp), inline=True)
