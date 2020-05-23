@@ -787,8 +787,8 @@ async def on_message(message):
                 else:
                     currency = getvalue(winner.id, 'currency', duelType + 'duels')
                     bet = getvalue(winner.id, 'bet', duelType + 'duels')
-                    update_money(winner.id, currency, bet * 2)
-                    words = '<@' + str(winner.id) + '> won the duel and gained **' + formatfromk(bet * 2) + ' ' + currency + '**!'
+                    update_money(winner.id, currency, bet * 1.8)
+                    words = '<@' + str(winner.id) + '> won the duel and gained **' + formatfromk(bet * 1.8) + ' ' + currency + '**!'
                 c.execute('DELETE FROM {} WHERE id={}'.format(duelType + 'duels', message.author.id))
                 return words
 
