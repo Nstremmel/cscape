@@ -620,6 +620,14 @@ async def on_message(message):
                     newChannels = '|'.join(newChannels)
                     c.execute("UPDATE rsmoney SET channels='{}' WHERE id={}".format(newChannels, userid))
                     await message.channel.delete()
+
+    elif message.content.startswith('!message'):
+        channelid = int(message.content.split(' ')[1])
+        channel = await client.get_channel(channelid)
+        logo = get(client.emojis, name='crytoscapelogo')
+        embed = discord.Embed(description='React to this message with ' + str(logo) + ' to create a **private room**.', color=1305146)
+        embed.set_author(name=str(channel.name), icon_url=str(message.guild.icon_url))
+        await channel.send(embed=embed)
     #######################################
     elif message.content.startswith('!53') or message.content.startswith('!50') or message.content.startswith('!75') or message.content.startswith('!95'):
         if message.channel.id in [701470129942429697, 700186111422627870]:
@@ -669,6 +677,7 @@ async def on_message(message):
             #    await message.channel.send('An **error** has occurred. Make sure you use `!(50, 53, 75, or 95) (BET) (CURRENCY)`.')
         else:
             await message.channel.send('This command can only be used in one of the dicing channels.')
+    ################################################
     # elif message.content.startswith('!flower'):
     #     try:
     #         enough = True
