@@ -623,7 +623,7 @@ async def on_message(message):
 
     elif message.content.startswith('!message'):
         channelid = int(message.content.split(' ')[1])
-        channel = await client.get_channel(channelid)
+        channel = client.get_channel(channelid)
         logo = get(client.emojis, name='crytoscapelogo')
         embed = discord.Embed(description='React to this message with ' + str(logo) + ' to create a **private room**.', color=1305146)
         embed.set_author(name=str(channel.name), icon_url=str(message.guild.icon_url))
