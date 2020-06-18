@@ -176,15 +176,29 @@ def hpupdate(user, opponent, duelType, words):
     embed = discord.Embed(description = words, color = 16766463)
     embed.set_author(name='Fight to the Death!', icon_url=url)
 
-    for i in pair:
+    for counter, i in enumerate(pair):
         hp = int(i[1])
-        if hp in range(int(hp * 0.75), hp):
+        if counter == 0:
+            if duelType == 'boss':
+                level = getvalue(pair[1][0].id, 'level', 'bossduels')
+                if level == 'easy':
+                    maxhp = 100
+                elif level == 'normal':
+                    maxhp = 250
+                else:
+                    maxhp = 500
+            else:
+                maxhp = 99
+        else:
+            maxhp = 99
+
+        if hp in range(int(maxhp * 0.75), maxhp):
             hp = get(client.emojis, name='hpbar100')
-        elif hp in range(int(hp * 0.5), int(hp* 0.75)):
+        elif hp in range(int(maxhp * 0.5), int(maxhp* 0.75)):
             hp = get(client.emojis, name='hpbar75')
-        elif hp in range(int(hp * 0.25), int(hp * 0.5)):
+        elif hp in range(int(maxhp * 0.25), int(maxhp * 0.5)):
             hp = get(client.emojis, name='hpbar50')
-        elif hp in range(1, int(hp * 0.25)):
+        elif hp in range(1, int(maxhp * 0.25)):
             hp = get(client.emojis, name='hpbar25')
         elif hp < 1:
             hp = get(client.emojis, name='hpbar0')
@@ -193,14 +207,14 @@ def hpupdate(user, opponent, duelType, words):
             embed.add_field(name=str(i[0]), value="Poisoned: "+str(i[4]) +
                                                         "\n"+str(rocktail)+": "+str(i[2]) +
                                                         "\nSpecial Attack: "+str(i[3])+"%" +
-                                                        "\nHP Left: "+str(i[1])+" "+str(hp), inline=True)
+                                                        "\nHP Left: "+str(i[1])+'/99 '+str(hp), inline=True)
         elif duelType == 'mage':
             embed.add_field(name=str(i[0]), value= "\n"+str(rocktail)+": "+str(i[2]) +
                                                         "\nFrozen: "+str(i[3]) +
-                                                        "\nHP Left: "+str(i[1])+" "+str(hp), inline=True)
+                                                        "\nHP Left: "+str(i[1])+'/99 '+str(hp), inline=True)
         elif duelType == 'boss':
             embed.add_field(name=str(i[0]), value= "\n"+str(rocktail)+": "+str(i[2]) +
-                                                        "\nHP Left: "+str(i[1])+" "+str(hp), inline=True)
+                                                        "\nHP Left: "+str(i[1])+'/'+str(maxhp)+' '+str(hp), inline=True)
     return embed
 
 def isenough(amount, currency):
