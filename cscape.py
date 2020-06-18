@@ -871,7 +871,7 @@ async def on_message(message):
                             bhp = 250
                         boss = random.choice(bosses)
                         c.execute('INSERT INTO bossduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, boss, level, False, 99, 3, bhp, 0, 0, message.channel.id))
-                        sent = await message.channel.send(embed=hpupdate([boss, 99, 2], [message.author, 99, 2], 'boss', boss + ' awaits. Use `!rocktail`, `!whip`, or `!blood`.'))
+                        sent = await message.channel.send(embed=hpupdate([boss, bhp, 2], [message.author, 99, 2], 'boss', boss + ' awaits. Use `!rocktail`, `!whip`, or `!blood`.'))
                         c.execute('UPDATE bossduels SET messageid={} WHERE id={}'.format(sent.id, message.author.id))
             else:
                 await message.channel.send("You don't have that much money!")
@@ -904,8 +904,9 @@ async def on_message(message):
             channel = client.get_channel(channelid)
             sentid = getvalue(message.author.id, 'messageid', duelType + 'duels')
             sent = await channel.fetch_message(sentid)
-            turn = getvalue(message.author.id, 'turn', duelType + 'duels')
             winner = None
+            if duelType != 'boss':
+                turn = getvalue(message.author.id, 'turn', duelType + 'duels')
 
             def win(winner, duelType):
                 if winner == 'CryptoScape Bot' or winner in ['Commander Zilyana', "K'ril Tsutsaroth", "Kree'arra", 'General Graardor', 'King Black Dragon']:
