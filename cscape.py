@@ -192,7 +192,7 @@ def hpupdate(user, opponent, duelType, words):
         else:
             maxhp = 99
 
-        if hp in range(int(maxhp * 0.75), maxhp):
+        if hp in range(int(maxhp * 0.75), maxhp + 1):
             hp = get(client.emojis, name='hpbar100')
         elif hp in range(int(maxhp * 0.5), int(maxhp* 0.75)):
             hp = get(client.emojis, name='hpbar75')
@@ -388,7 +388,7 @@ async def ice(user, opponent, player, channel):
     updateDuel(opponent, player[0].id, 'mage')
     return None
 
-async def blood(user, opponent, player, channel, reflect):
+async def blood(user, opponent, player, channel, duelType, reflect):
     sentid = getvalue(player[0].id, 'messageid', 'mageduels')
     sent = await channel.fetch_message(sentid)
     ice = get(client.emojis, name='blood')
@@ -402,7 +402,7 @@ async def blood(user, opponent, player, channel, reflect):
         user[1] = 99
     words = (str(user[0]) + ' has hit ' + str(opponent[0]) + ' with ' + str(ice) + ", dealt **" + str(hit) + "** damage, and was healed for **" + str(healed) + "** HP.")
     await channel.send(file=discord.File('blood.gif', filename='blood.gif'), delete_after = 2.5)
-    await sent.edit(embed=hpupdate(user, opponent, 'mage', words))
+    await sent.edit(embed=hpupdate(user, opponent, duelType, words))
     await asyncio.sleep(2.5)
     if reflect:
         user[1] -= int(hit/2)
@@ -411,8 +411,8 @@ async def blood(user, opponent, player, channel, reflect):
         words = opponent[0] + ' has reflected **' + str(int(hit/2)) + '** damage back at you!'
         await sent.edit(embed=hpupdate(user, opponent, duelType, words))
         await asyncio.sleep(2.5)
-    updateDuel(user, player[0].id, 'mage')
-    updateDuel(opponent, player[0].id, 'mage')
+    updateDuel(user, player[0].id, duelType)
+    updateDuel(opponent, player[0].id, duelType)
     if opponent[1] < 1:
         return user[0]
     elif user[1] < 1:
@@ -944,7 +944,7 @@ async def on_message(message):
                         elif message.content == '!dds':
                             winner = await dds(player, bot, player, channel)
                         elif message.content == '!whip':
-                            winner = await whip(player, bot, player, channel)
+                            winner = await whip(player, bot, player, channel, 'mele', False)
                         else:
                             await channel.send('That is not a valid move!', delete_after = 4)
                 else:
@@ -973,7 +973,7 @@ async def on_message(message):
                         elif bot[3] >= 25:
                             winner = await dds(bot, player, player, channel)
                         else:
-                            winner = await whip(bot, player, player, channel)
+                            winner = await whip(bot, player, player, channel, 'mele', False)
 
                         if winner != None:
                             await channel.send(win(winner, duelType))
@@ -1000,7 +1000,7 @@ async def on_message(message):
                         elif message.content == '!ice':
                             winner = await ice(player, bot, player, channel)
                         elif message.content == '!blood':
-                            winner = await blood(player, bot, player, channel)
+                            winner = await blood(player, bot, player, channel, 'mage', False)
                         else:
                             await channel.send('That is not a valid move!', delete_after = 4)
                 else:
@@ -1015,7 +1015,7 @@ async def on_message(message):
                         if bot[1] < 30 and bot[2] > 0:
                             winner = await rocktail(bot, player, player, channel, 'mage')
                         elif bot[1] > 30 and bot[1] < 50:
-                            winner = await blood(bot, player, player, channel)
+                            winner = await blood(bot, player, player, channel, 'mage', False)
                         else:
                             winner = await ice(bot, player, player, channel)
 
