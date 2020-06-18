@@ -1044,7 +1044,7 @@ async def on_message(message):
                 player.insert(0, message.author)
                 bot = getvalue(message.author.id, ['boss', 'Bhp', 'Brocktails'], 'bossduels')
                 level = getvalue(message.author.id, 'level', 'bossduels')
-                reflect = getvalue(messge.author.id, 'reflect', 'bossduels')
+                reflect = getvalue(message.author.id, 'reflect', 'bossduels')
 
                 if message.content == '!rocktail':
                     winner = await rocktail(player, bot, player, channel, 'boss')
