@@ -874,8 +874,8 @@ async def on_message(message):
                         else:
                             bhp = 250
                         boss = random.choice(bosses)
-                        sent = await message.channel.send(embed=hpupdate([boss, 99, 2], [message.author, 99, 2], 'boss', boss + ' awaits. Use `!rocktail`, `!whip`, or `!blood`.'))
                         c.execute('INSERT INTO bossduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, boss, level, False, 99, 3, bhp, 0, sent.id, message.channel.id))
+                        sent = await message.channel.send(embed=hpupdate([boss, 99, 2], [message.author, 99, 2], 'boss', boss + ' awaits. Use `!rocktail`, `!whip`, or `!blood`.'))
             else:
                 await message.channel.send("You don't have that much money!")
         else:
