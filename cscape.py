@@ -169,11 +169,9 @@ def hpupdate(user, opponent, duelType, words):
     if user[0] == 'CryptoScape Bot' or user[0] in ['Commander Zilyana', "K'ril Tsutsaroth", "Kree'arra", 'General Graardor', 'King Black Dragon']:
         url = str(opponent[0].guild.icon_url)
         pair = [user, opponent]
-        player = opponent[0]
     else:
         url = str(user[0].guild.icon_url)
         pair = [opponent, user]
-        player = user[0]
 
     embed = discord.Embed(description = words, color = 16766463)
     embed.set_author(name='Fight to the Death!', icon_url=url)
@@ -182,9 +180,7 @@ def hpupdate(user, opponent, duelType, words):
         hp = int(i[1])
         if counter == 0:
             if duelType == 'boss':
-                print(player)
-                print(player.id)
-                level = getvalue(player.id, 'level', 'bossduels')
+                level = getvalue(pair[1][0], 'level', 'bossduels')
                 if level == 'easy':
                     maxhp = 100
                 elif level == 'normal':
@@ -874,8 +870,9 @@ async def on_message(message):
                         else:
                             bhp = 250
                         boss = random.choice(bosses)
-                        c.execute('INSERT INTO bossduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, boss, level, False, 99, 3, bhp, 0, sent.id, message.channel.id))
+                        c.execute('INSERT INTO bossduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, boss, level, False, 99, 3, bhp, 0, 0, message.channel.id))
                         sent = await message.channel.send(embed=hpupdate([boss, 99, 2], [message.author, 99, 2], 'boss', boss + ' awaits. Use `!rocktail`, `!whip`, or `!blood`.'))
+                        c.execute('UPDATE bossduels SET messageid={} WHERE id={}'.format(sent.id, message.author.id))
             else:
                 await message.channel.send("You don't have that much money!")
         else:
