@@ -296,7 +296,7 @@ async def dds(user, opponent, player, channel):
     return None
 
 async def attack(boss, player, maxDamage, channel):
-    sentid = getvalue(player[0].id, 'messageid', 'meleduels')
+    sentid = getvalue(player[0].id, 'messageid', 'bossduels')
     sent = await channel.fetch_message(sentid)
     hit = random.randint(0, maxDamage)
     player[1] -= hit
@@ -311,7 +311,7 @@ async def attack(boss, player, maxDamage, channel):
         return None
 
 async def leach(boss, player, maxDamage, percentHeal, channel):
-    sentid = getvalue(player[0].id, 'messageid', 'meleduels')
+    sentid = getvalue(player[0].id, 'messageid', 'bossduels')
     sent = await channel.fetch_message(sentid)
     hit = random.randint(0, maxDamage)
     heal = int(hit * percentHeal)
@@ -328,7 +328,7 @@ async def leach(boss, player, maxDamage, percentHeal, channel):
         return None
 
 async def reflect(boss, player, channel):
-    sentid = getvalue(player[0].id, 'messageid', 'meleduels')
+    sentid = getvalue(player[0].id, 'messageid', 'bossduels')
     sent = await channel.fetch_message(sentid)
     c.execute('UPDATE bossduels SET reflect={} WHERE id={}'.format(True, player[0].id))
     words = bot[0] + ' uses its reflect ability. It will reflect **50%** of damage taken back at you for 1 turn.'
@@ -336,7 +336,7 @@ async def reflect(boss, player, channel):
     await asyncio.sleep(2.5)
 
 async def whip(user, opponent, player, channel, duelType, reflect):
-    sentid = getvalue(player[0].id, 'messageid', 'meleduels')
+    sentid = getvalue(player[0].id, 'messageid', duelType + 'duels')
     sent = await channel.fetch_message(sentid)
     whip = get(client.emojis, name='whip')
     hit = random.randint(0, 27)
@@ -389,7 +389,7 @@ async def ice(user, opponent, player, channel):
     return None
 
 async def blood(user, opponent, player, channel, duelType, reflect):
-    sentid = getvalue(player[0].id, 'messageid', 'mageduels')
+    sentid = getvalue(player[0].id, 'messageid', duelType + 'duels')
     sent = await channel.fetch_message(sentid)
     ice = get(client.emojis, name='blood')
     hit = random.randint(0, 24)
