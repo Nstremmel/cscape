@@ -169,9 +169,11 @@ def hpupdate(user, opponent, duelType, words):
     if user[0] == 'CryptoScape Bot' or user[0] in ['Commander Zilyana', "K'ril Tsutsaroth", "Kree'arra", 'General Graardor', 'King Black Dragon']:
         url = str(opponent[0].guild.icon_url)
         pair = [user, opponent]
+        player = opponent
     else:
         url = str(user[0].guild.icon_url)
         pair = [opponent, user]
+        player = user
 
     embed = discord.Embed(description = words, color = 16766463)
     embed.set_author(name='Fight to the Death!', icon_url=url)
@@ -180,7 +182,7 @@ def hpupdate(user, opponent, duelType, words):
         hp = int(i[1])
         if counter == 0:
             if duelType == 'boss':
-                level = getvalue(pair[1][0].id, 'level', 'bossduels')
+                level = getvalue(player[0].id, 'level', 'bossduels')
                 if level == 'easy':
                     maxhp = 100
                 elif level == 'normal':
