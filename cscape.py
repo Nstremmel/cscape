@@ -302,8 +302,8 @@ async def attack(boss, player, maxDamage, channel):
     player[1] -= hit
     if player[1] < 0:
         player[1] = 0
-    words = bot[0] + ' attacks you and deals **' + str(hit) + '** damage.'
-    await sent.edit(embed=hpupdate(player, bot, 'boss', words))
+    words = boss[0] + ' attacks you and deals **' + str(hit) + '** damage.'
+    await sent.edit(embed=hpupdate(player, boss, 'boss', words))
     await asyncio.sleep(2.5)
     if player[1] < 1:
         return boss[0]
@@ -319,8 +319,8 @@ async def leach(boss, player, maxDamage, percentHeal, channel):
     if player[1] < 0:
         player[1] = 0
     boss[1] += heal
-    words = bot[0] + ' uses its leach ability, dealing **' + str(hit) + '** damage and healing **' + str(heal) + '** HP.'
-    await sent.edit(embed=hpupdate(player, bot, 'boss', words))
+    words = boss[0] + ' uses its leach ability, dealing **' + str(hit) + '** damage and healing **' + str(heal) + '** HP.'
+    await sent.edit(embed=hpupdate(player, boss, 'boss', words))
     await asyncio.sleep(2.5)
     if player[1] < 1:
         return boss[0]
@@ -331,8 +331,8 @@ async def reflect(boss, player, channel):
     sentid = getvalue(player[0].id, 'messageid', 'bossduels')
     sent = await channel.fetch_message(sentid)
     c.execute('UPDATE bossduels SET reflect={} WHERE id={}'.format(True, player[0].id))
-    words = bot[0] + ' uses its reflect ability. It will reflect **50%** of damage taken back at you for 1 turn.'
-    await sent.edit(embed=hpupdate(player, bot, 'boss', words))
+    words = boss[0] + ' uses its reflect ability. It will reflect **50%** of damage taken back at you for 1 turn.'
+    await sent.edit(embed=hpupdate(player, boss, 'boss', words))
     await asyncio.sleep(2.5)
 
 async def whip(user, opponent, player, channel, duelType, reflect):
@@ -1055,9 +1055,10 @@ async def on_message(message):
                 else:
                     await channel.send('That is not a valid move!', delete_after = 4)
 
-                c.execute('UPDATE bossduels SET reflect={} WHERE id={}'.format(False, message.author.id))
-                await message.channel.send(bot[0] + ' is no longer reflecting damage back at you', delete_after=2.5)
-                await asyncio.sleep(2.5)
+                if reflect:
+                    c.execute('UPDATE bossduels SET reflect={} WHERE id={}'.format(False, message.author.id))
+                    await message.channel.send(bot[0] + ' is no longer reflecting damage back at you', delete_after=2.5)
+                    await asyncio.sleep(2.5)
 
                 if winner == None:
                     if level == 'easy':
