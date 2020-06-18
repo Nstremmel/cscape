@@ -72,6 +72,23 @@ c.execute("""CREATE TABLE mageduels (
                 )""")
 conn.commit()
 
+c.execute("DROP TABLE bossduels")
+c.execute("""CREATE TABLE bossduels (
+                id bigint,
+                currency text,
+                bet integer,
+                boss text,
+                level text,
+                reflect boolean,
+                Php integer,
+                Procktails integer,
+                Bhp integer,
+                Brocktails integer,
+                messageid bigint,
+                channelid text
+                )""")
+conn.commit()
+
 client = discord.Client()
 
 def add_member(userid):
@@ -84,8 +101,8 @@ def getvalue(userid, column, table):
             returned.append(getvalue(userid, i, table))
         return returned
     else:
-        strings = ['currency', 'channels']
-        booleans = ['Ppoisoned', 'Bpoisoned', 'Pfrozen', 'Bfrozen']
+        strings = ['currency', 'channels', 'boss', 'level']
+        booleans = ['Ppoisoned', 'Bpoisoned', 'Pfrozen', 'Bfrozen', 'reflect']
 
         if column == '07':
             column = 'osrs'
@@ -148,8 +165,8 @@ def formatfromk(amount):
         return str(amount)+"k"
 
 
-def hpupdate(user, opponent, dueltype, words):
-    if user[0] == 'CryptoScape Bot':
+def hpupdate(user, opponent, duelType, words):
+    if user[0] == 'CryptoScape Bot' or user[0] in ['Commander Zilyana', "K'ril Tsutsaroth", "Kree'arra", 'General Graardor', 'King Black Dragon']:
         url = str(opponent[0].guild.icon_url)
         pair = [user, opponent]
     else:
@@ -161,25 +178,28 @@ def hpupdate(user, opponent, dueltype, words):
 
     for i in pair:
         hp = int(i[1])
-        if hp in range(76, 100):
+        if hp in range(int(hp * 0.75), hp):
             hp = get(client.emojis, name='hpbar100')
-        elif hp in range(51, 76):
+        elif hp in range(int(hp * 0.5), int(hp* 0.75)):
             hp = get(client.emojis, name='hpbar75')
-        elif hp in range(26, 51):
+        elif hp in range(int(hp * 0.25), int(hp * 0.5)):
             hp = get(client.emojis, name='hpbar50')
-        elif hp in range(1, 26):
+        elif hp in range(1, int(hp * 0.25)):
             hp = get(client.emojis, name='hpbar25')
         elif hp < 1:
             hp = get(client.emojis, name='hpbar0')
         rocktail = get(client.emojis, name='rocktail')
-        if dueltype == 'mele':
+        if duelType == 'mele':
             embed.add_field(name=str(i[0]), value="Poisoned: "+str(i[4]) +
                                                         "\n"+str(rocktail)+": "+str(i[2]) +
                                                         "\nSpecial Attack: "+str(i[3])+"%" +
                                                         "\nHP Left: "+str(i[1])+" "+str(hp), inline=True)
-        elif dueltype == 'mage':
+        elif duelType == 'mage':
             embed.add_field(name=str(i[0]), value= "\n"+str(rocktail)+": "+str(i[2]) +
                                                         "\nFrozen: "+str(i[3]) +
+                                                        "\nHP Left: "+str(i[1])+" "+str(hp), inline=True)
+        elif duelType == 'boss':
+            embed.add_field(name=str(i[0]), value= "\n"+str(rocktail)+": "+str(i[2]) +
                                                         "\nHP Left: "+str(i[1])+" "+str(hp), inline=True)
     return embed
 
@@ -203,6 +223,11 @@ def updateDuel(updater, userid, duelType):
                 columns = ['Bhp', 'Brocktails', 'Bfrozen']
             else:
                 columns = ['Php', 'Procktails', 'Pfrozen']
+        elif duelType == 'boss':
+            if user in ['Commander Zilyana', "K'ril Tsutsaroth", "Kree'arra", 'General Graardor', 'King Black Dragon']:
+                columns = ['Bhp', 'Brocktails']
+            else:
+                columns = ['Php', 'Procktails']
         else:
             columns=[]
         c.execute("UPDATE {} SET {}={} WHERE id={}".format(duelType + 'duels', columns[counter], i, userid))
@@ -256,7 +281,47 @@ async def dds(user, opponent, player, channel):
     updateDuel(opponent, player[0].id, 'mele')
     return None
 
-async def whip(user, opponent, player, channel):
+async def attack(boss, player, maxDamage, channel):
+    sentid = getvalue(player[0].id, 'messageid', 'meleduels')
+    sent = await channel.fetch_message(sentid)
+    hit = random.randint(0, maxDamage)
+    player[1] -= hit
+    if player[1] < 0:
+        player[1] = 0
+    words = bot[0] + ' attacks you and deals **' + str(hit) + '** damage.'
+    await sent.edit(embed=hpupdate(player, bot, 'boss', words))
+    await asyncio.sleep(2.5)
+    if player[1] < 1:
+        return boss[0]
+    else:
+        return None
+
+async def leach(boss, player, maxDamage, percentHeal, channel):
+    sentid = getvalue(player[0].id, 'messageid', 'meleduels')
+    sent = await channel.fetch_message(sentid)
+    hit = random.randint(0, maxDamage)
+    heal = int(hit * percentHeal)
+    player[1] -= hit
+    if player[1] < 0:
+        player[1] = 0
+    boss[1] += heal
+    words = bot[0] + ' uses its leach ability, dealing **' + str(hit) + '** damage and healing **' + str(heal) + '** HP.'
+    await sent.edit(embed=hpupdate(player, bot, 'boss', words))
+    await asyncio.sleep(2.5)
+    if player[1] < 1:
+        return boss[0]
+    else:
+        return None
+
+async def reflect(boss, player, channel):
+    sentid = getvalue(player[0].id, 'messageid', 'meleduels')
+    sent = await channel.fetch_message(sentid)
+    c.execute('UPDATE bossduels SET reflect={} WHERE id={}'.format(True, player[0].id))
+    words = bot[0] + ' uses its reflect ability. It will reflect **50%** of damage taken back at you for 1 turn.'
+    await sent.edit(embed=hpupdate(player, bot, 'boss', words))
+    await asyncio.sleep(2.5)
+
+async def whip(user, opponent, player, channel, duelType, reflect):
     sentid = getvalue(player[0].id, 'messageid', 'meleduels')
     sent = await channel.fetch_message(sentid)
     whip = get(client.emojis, name='whip')
@@ -266,12 +331,21 @@ async def whip(user, opponent, player, channel):
         opponent[1] = 0
     words = str(user[0]) + ' has hit ' + str(opponent[0]) + ' with their ' + str(whip) + ' and dealt **' + str(hit) + '** damage.'
     await channel.send(file=discord.File('whip.gif', filename='whip.gif'), delete_after = 2.5)
-    await sent.edit(embed=hpupdate(user, opponent, 'mele', words))
+    await sent.edit(embed=hpupdate(user, opponent, duelType, words))
     await asyncio.sleep(2.5)
-    updateDuel(user, player[0].id, 'mele')
-    updateDuel(opponent, player[0].id, 'mele')
+    if reflect:
+        user[1] -= int(hit/2)
+        if user[1] < 0:
+            user[1] = 0
+        words = opponent[0] + ' has reflected **' + str(int(hit/2)) + '** damage back at you!'
+        await sent.edit(embed=hpupdate(user, opponent, duelType, words))
+        await asyncio.sleep(2.5)
+    updateDuel(user, player[0].id, duelType)
+    updateDuel(opponent, player[0].id, duelType)
     if opponent[1] < 1:
         return user[0]
+    elif user[1] < 1:
+        return opponent[0]
     else:
         return None
 
@@ -300,7 +374,7 @@ async def ice(user, opponent, player, channel):
     updateDuel(opponent, player[0].id, 'mage')
     return None
 
-async def blood(user, opponent, player, channel):
+async def blood(user, opponent, player, channel, reflect):
     sentid = getvalue(player[0].id, 'messageid', 'mageduels')
     sent = await channel.fetch_message(sentid)
     ice = get(client.emojis, name='blood')
@@ -316,10 +390,19 @@ async def blood(user, opponent, player, channel):
     await channel.send(file=discord.File('blood.gif', filename='blood.gif'), delete_after = 2.5)
     await sent.edit(embed=hpupdate(user, opponent, 'mage', words))
     await asyncio.sleep(2.5)
+    if reflect:
+        user[1] -= int(hit/2)
+        if user[1] < 0:
+            user[1] = 0
+        words = opponent[0] + ' has reflected **' + str(int(hit/2)) + '** damage back at you!'
+        await sent.edit(embed=hpupdate(user, opponent, duelType, words))
+        await asyncio.sleep(2.5)
     updateDuel(user, player[0].id, 'mage')
     updateDuel(opponent, player[0].id, 'mage')
     if opponent[1] < 1:
         return user[0]
+    elif user[1] < 1:
+        return opponent[0]
     else:
         return None
 ##############################################################################################################
@@ -737,12 +820,13 @@ async def on_message(message):
     #     except:
     #         await message.channel.send('An **error** has occurred. Make sure you use `!flower (Amount) (hot, cold, red, orange, yellow, green, blue, or purple)`.')
     #######################################
-    elif message.content.startswith('!meleduel') or message.content.startswith('!mageduel'):
+    elif message.content.startswith('!meleduel') or message.content.startswith('!mageduel') or message.content.startswith('!boss'):
         try:
             duelType = (message.content).split(' ')[0][1:-4]
             currency = (message.content).split(' ')[2]
             current = getvalue(message.author.id, currency, 'rsmoney')
             bet = formatok(message.content.split(' ')[1])
+            bosses = ['Commander Zilyana', "K'ril Tsutsaroth", "Kree'arra", 'General Graardor', 'King Black Dragon']
             if isenough(bet, currency):
                 if current >= bet:
                     try:
@@ -752,7 +836,7 @@ async def on_message(message):
                     except:
                         update_money(message.author.id, currency, bet * -1)
                         #player=[0               1     2           3        4                 5                 6]
-                        #player=[member object, hp, rocktails, speical, poisoned, turns since poisoned, turns since speced]
+                        #player=[member object, hp, rocktails, special, poisoned, turns since poisoned, turns since speced]
                         if duelType == 'mele':
                             sent = await message.channel.send(embed=hpupdate(['CryptoScape Bot', 99, 4, 100, False, 0, 0], [message.author, 99, 4, 100, False, 0, 0], 'mele', 'New Game. Use `!rocktail`, `!dds`, or `!whip`.'))
                             c.execute('INSERT INTO meleduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, 1, 99, False, 0, 0, 4, 100, 99, False, 0, 0, 4, 100, sent.id, message.channel.id))
@@ -761,6 +845,17 @@ async def on_message(message):
                             c.execute('INSERT INTO mageduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, 1, 99, 2, False, 99, 2, False, sent.id, message.channel.id))
                         elif duelType == 'range':
                             None
+                        elif duelType == 'boss':
+                            level = message.content.split(' ')[3]
+                            if level == 'easy':
+                                bhp = 100
+                            elif level == 'normal':
+                                bhp = 250
+                            elif level == 'hard':
+                                bhp = 500
+                            boss = random.choice(bosses)
+                            sent = await message.channel.send(embed=hpupdate([boss, 99, 2], [message.author, 99, 2], 'boss', boss + ' awaits. Use `!rocktail`, `!whip`, or `!blood`.'))
+                            c.execute('INSERT INTO bossduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, boss, level, False, 99, 3, bhp, 0, sent.id, message.channel.id))
                 else:
                     await message.channel.send("You don't have that much money!")
             else:
@@ -780,7 +875,12 @@ async def on_message(message):
                 tester = int(c.fetchone()[0])
                 duelType = 'mage'
             except:
-                inDuel = False
+                try:
+                    c.execute('SELECT Php FROM bossduels WHERE id={}'.format(message.author.id))
+                    tester = int(c.fetchone()[0])
+                    duelType = 'boss'
+                except:
+                    inDuel = False
 
         if inDuel:
             channelid = getvalue(message.author.id, 'channelid', duelType + 'duels')
@@ -910,14 +1010,72 @@ async def on_message(message):
                     await sent.edit(embed=hpupdate(bot, player, 'mage', 'It is your turn! Use `!rocktail`, `!ice`, or `!blood`.'))
                 else:
                     await channel.send(win(winner, duelType))
-            
+
+            elif duelType == 'boss':
+                player = getvalue(message.author.id, ['Php', 'Procktails'], 'bossduels')
+                player.insert(0, message.author)
+                bot = getvalue(message.author.id, ['boss', 'Bhp', 'Brocktails'], 'bossduels')
+                level = getvalue(message.author.id, 'level', 'bossduels')
+                reflect = getvalue(messge.author.id, 'reflect', 'bossduels')
+
+                if message.content == '!rocktail':
+                    winner = await rocktail(player, bot, player, channel, 'boss')
+                elif message.content == '!whip':
+                    winner = await whip(player, bot, player, channel, 'boss', reflect)
+                elif message.content == '!blood':
+                    winner = await blood(player, bot, player, channel, 'boss', reflect)
+                else:
+                    await channel.send('That is not a valid move!', delete_after = 4)
+
+                c.execute('UPDATE bossduels SET reflect={} WHERE id={}'.format(False, message.author.id))
+                await message.channel.send(bot[0] + ' is no longer reflecting damage back at you', delete_after=2.5)
+                await asyncio.sleep(2.5)
+
+                if winner == None:
+                    if level == 'easy':
+                        await attack(bot, player, 20, channel)
+                    elif level == 'normal':
+                        if bot[1] > 100:
+                            if random.randint(1, 3) == 1:
+                                await leach(bot, player, 15, 0.3, channel)
+                            else:
+                                await attack(bot, player, 30, channel)
+                        else:
+                            if random.randint(1, 3) == 1:
+                                await attack(bot, player, 25, channel)
+                            else:
+                                await leach(bot, player, 20, 0.5, channel)
+                    else:
+                        if bot[1] > 300:
+                            if random.randint(1, 2) == 1:
+                                await reflect(bot, player, channel)
+                            else:
+                                await attack(bot, player, 40, channel)
+                        else:
+                            if random.randint(1, 3) == 1:
+                                await attack(bot, player, 25, channel)
+                            else:
+                                await leach(bot, player, 15, 2, channel)
+    
+                    if winner != None:
+                        await channel.send(win(winner, duelType))
+                    else:
+                        await sent.edit(embed=hpupdate(bot, player, 'mele', 'It is your turn! Use `!rocktail`, `!dds`, or `!whip`.'))
+                else:
+                    await channel.send(win(winner, duelType))
+
+
             updateDuel(player, message.author.id, duelType)
             updateDuel(bot, message.author.id, duelType)
-            c.execute('UPDATE {} SET turn={} WHERE id={}'.format(duelType + 'duels', turn + 1, message.author.id))
+            if duelType != 'boss':
+                c.execute('UPDATE {} SET turn={} WHERE id={}'.format(duelType + 'duels', turn + 1, message.author.id))
             await message.delete()
         else:
-            await message.channel.send('You are not in a duel right now. Use `!meleduel (AMOUNT) (CURRENCY)` or `!mageduel (AMOUNT) (CURRENCY)` to start one.')
+            await message.channel.send('You are not in a duel right now. Use `!(mageduel, meleduel, or boss) (AMOUNT) (CURRENCY)` to start one.')
     #######################################
+
+
+
 
 #website info
 #total wallet
