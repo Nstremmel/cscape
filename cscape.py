@@ -871,7 +871,7 @@ async def on_message(message):
                             bhp = 250
                         boss = random.choice(bosses)
                         c.execute('INSERT INTO bossduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, boss, level, False, 99, 3, bhp, 0, 0, message.channel.id))
-                        sent = await message.channel.send(embed=hpupdate([boss, bhp, 2], [message.author, 99, 2], 'boss', boss + ' awaits. Use `!rocktail`, `!whip`, or `!blood`.'))
+                        sent = await message.channel.send(embed=hpupdate([boss, bhp, 0], [message.author, 99, 3], 'boss', boss + ' awaits. Use `!rocktail`, `!whip`, or `!blood`.'))
                         c.execute('UPDATE bossduels SET messageid={} WHERE id={}'.format(sent.id, message.author.id))
             else:
                 await message.channel.send("You don't have that much money!")
@@ -1089,7 +1089,7 @@ async def on_message(message):
                     if winner != None:
                         await channel.send(win(winner, duelType))
                     else:
-                        await sent.edit(embed=hpupdate(bot, player, 'mele', 'It is your turn! Use `!rocktail`, `!dds`, or `!whip`.'))
+                        await sent.edit(embed=hpupdate(bot, player, 'boss', 'It is your turn! Use `!rocktail`, `!dds`, or `!whip`.'))
                 else:
                     await channel.send(win(winner, duelType))
 
