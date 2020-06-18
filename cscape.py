@@ -835,49 +835,49 @@ async def on_message(message):
     #         await message.channel.send('An **error** has occurred. Make sure you use `!flower (Amount) (hot, cold, red, orange, yellow, green, blue, or purple)`.')
     #######################################
     elif message.content.startswith('!meleduel') or message.content.startswith('!mageduel') or message.content.startswith('!boss'):
-        try:
-            duelType = (message.content).split(' ')[0][1:-4]
-            if duelType == '':
-                duelType = 'boss'
-            currency = (message.content).split(' ')[2]
-            current = getvalue(message.author.id, currency, 'rsmoney')
-            bet = formatok(message.content.split(' ')[1])
-            bosses = ['Commander Zilyana', "K'ril Tsutsaroth", "Kree'arra", 'General Graardor', 'King Black Dragon']
-            if isenough(bet, currency):
-                if current >= bet:
-                    try:
-                        c.execute('SELECT Php FROM {} WHERE id={}'.format(duelType + 'duels', message.author.id))
-                        tester = int(c.fetchone()[0])
-                        await message.channel.send('You are already in a duel!')
-                    except:
-                        update_money(message.author.id, currency, bet * -1)
-                        #player=[0               1     2           3        4                 5                 6]
-                        #player=[member object, hp, rocktails, special, poisoned, turns since poisoned, turns since speced]
-                        if duelType == 'mele':
-                            sent = await message.channel.send(embed=hpupdate(['CryptoScape Bot', 99, 4, 100, False, 0, 0], [message.author, 99, 4, 100, False, 0, 0], 'mele', 'New Game. Use `!rocktail`, `!dds`, or `!whip`.'))
-                            c.execute('INSERT INTO meleduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, 1, 99, False, 0, 0, 4, 100, 99, False, 0, 0, 4, 100, sent.id, message.channel.id))
-                        elif duelType == 'mage':
-                            sent = await message.channel.send(embed=hpupdate(['CryptoScape Bot', 99, 2, False], [message.author, 99, 2, False], 'mage', 'New Game. Use `!rocktail`, `!ice`, or `!blood`.'))
-                            c.execute('INSERT INTO mageduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, 1, 99, 2, False, 99, 2, False, sent.id, message.channel.id))
-                        elif duelType == 'range':
-                            None
-                        elif duelType == 'boss':
-                            level = message.content.split(' ')[3]
-                            if level == 'easy':
-                                bhp = 100
-                            elif level == 'normal':
-                                bhp = 250
-                            elif level == 'hard':
-                                bhp = 500
-                            boss = random.choice(bosses)
-                            sent = await message.channel.send(embed=hpupdate([boss, 99, 2], [message.author, 99, 2], 'boss', boss + ' awaits. Use `!rocktail`, `!whip`, or `!blood`.'))
-                            c.execute('INSERT INTO bossduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, boss, level, False, 99, 3, bhp, 0, sent.id, message.channel.id))
-                else:
-                    await message.channel.send("You don't have that much money!")
+        #try:
+        duelType = (message.content).split(' ')[0][1:-4]
+        if duelType == '':
+            duelType = 'boss'
+        currency = (message.content).split(' ')[2]
+        current = getvalue(message.author.id, currency, 'rsmoney')
+        bet = formatok(message.content.split(' ')[1])
+        bosses = ['Commander Zilyana', "K'ril Tsutsaroth", "Kree'arra", 'General Graardor', 'King Black Dragon']
+        if isenough(bet, currency):
+            if current >= bet:
+                try:
+                    c.execute('SELECT Php FROM {} WHERE id={}'.format(duelType + 'duels', message.author.id))
+                    tester = int(c.fetchone()[0])
+                    await message.channel.send('You are already in a duel!')
+                except:
+                    update_money(message.author.id, currency, bet * -1)
+                    #player=[0               1     2           3        4                 5                 6]
+                    #player=[member object, hp, rocktails, special, poisoned, turns since poisoned, turns since speced]
+                    if duelType == 'mele':
+                        sent = await message.channel.send(embed=hpupdate(['CryptoScape Bot', 99, 4, 100, False, 0, 0], [message.author, 99, 4, 100, False, 0, 0], 'mele', 'New Game. Use `!rocktail`, `!dds`, or `!whip`.'))
+                        c.execute('INSERT INTO meleduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, 1, 99, False, 0, 0, 4, 100, 99, False, 0, 0, 4, 100, sent.id, message.channel.id))
+                    elif duelType == 'mage':
+                        sent = await message.channel.send(embed=hpupdate(['CryptoScape Bot', 99, 2, False], [message.author, 99, 2, False], 'mage', 'New Game. Use `!rocktail`, `!ice`, or `!blood`.'))
+                        c.execute('INSERT INTO mageduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, 1, 99, 2, False, 99, 2, False, sent.id, message.channel.id))
+                    elif duelType == 'range':
+                        None
+                    elif duelType == 'boss':
+                        level = message.content.split(' ')[3]
+                        if level == 'easy':
+                            bhp = 100
+                        elif level == 'hard':
+                            bhp = 500
+                        else:
+                            bhp = 250
+                        boss = random.choice(bosses)
+                        sent = await message.channel.send(embed=hpupdate([boss, 99, 2], [message.author, 99, 2], 'boss', boss + ' awaits. Use `!rocktail`, `!whip`, or `!blood`.'))
+                        c.execute('INSERT INTO bossduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, boss, level, False, 99, 3, bhp, 0, sent.id, message.channel.id))
             else:
-                await message.channel.send(isenough(bet, currency)[1])
-        except:
-            await message.channel.send('An **error** has occured. Make sure you use `!(mageduel or meleduel) (AMOUNT) (CURRENCY)` or `!(boss) (AMOUNT) (CURRENCY) (easy, normal, hard)`')
+                await message.channel.send("You don't have that much money!")
+        else:
+            await message.channel.send(isenough(bet, currency)[1])
+        #except:
+        #    await message.channel.send('An **error** has occured. Make sure you use `!(mageduel or meleduel) (AMOUNT) (CURRENCY)` or `!(boss) (AMOUNT) (CURRENCY) (easy, normal, hard)`')
 
     elif message.content in moves:
         inDuel = True
