@@ -837,6 +837,8 @@ async def on_message(message):
     elif message.content.startswith('!meleduel') or message.content.startswith('!mageduel') or message.content.startswith('!boss'):
         try:
             duelType = (message.content).split(' ')[0][1:-4]
+            if duelType == '':
+                duelType = 'boss'
             currency = (message.content).split(' ')[2]
             current = getvalue(message.author.id, currency, 'rsmoney')
             bet = formatok(message.content.split(' ')[1])
@@ -875,7 +877,7 @@ async def on_message(message):
             else:
                 await message.channel.send(isenough(bet, currency)[1])
         except:
-            await message.channel.send('An **error** has occured. Make sure you use `!meleduel (AMOUNT) (CURRENCY)`')
+            await message.channel.send('An **error** has occured. Make sure you use `!(mageduel or meleduel) (AMOUNT) (CURRENCY)` or `!(boss) (AMOUNT) (CURRENCY) (easy, normal, hard)`')
 
     elif message.content in moves:
         inDuel = True
@@ -905,13 +907,23 @@ async def on_message(message):
             winner = None
 
             def win(winner, duelType):
-                if winner == 'CryptoScape Bot':
-                    words = 'CryptoScape Bot won the duel.'
+                if winner == 'CryptoScape Bot' or winner in ['Commander Zilyana', "K'ril Tsutsaroth", "Kree'arra", 'General Graardor', 'King Black Dragon']:
+                    words = winner + ' won the duel.'
                 else:
+                    if duelType == 'boss':
+                        level = getvalue(winner.id, 'level', 'bossduels')
+                        if level == 'easy':
+                            multiplier = 1.3
+                        elif level == 'hard':
+                            multiplier = 3
+                        else:
+                            multiplier = 2
+                    else:
+                        multiplier = 1.8
                     currency = getvalue(winner.id, 'currency', duelType + 'duels')
                     bet = getvalue(winner.id, 'bet', duelType + 'duels')
-                    update_money(winner.id, currency, bet * 1.8)
-                    words = '<@' + str(winner.id) + '> won the duel and gained **' + formatfromk(bet * 1.8) + ' ' + currency + '**!'
+                    update_money(winner.id, currency, bet * multiplier)
+                    words = '<@' + str(winner.id) + '> won the duel and gained **' + formatfromk(bet * multiplier) + ' ' + currency + '**!'
                 c.execute('DELETE FROM {} WHERE id={}'.format(duelType + 'duels', message.author.id))
                 return words
 
