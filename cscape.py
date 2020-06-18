@@ -180,7 +180,7 @@ def hpupdate(user, opponent, duelType, words):
         hp = int(i[1])
         if counter == 0:
             if duelType == 'boss':
-                level = getvalue(pair[1][0], 'level', 'bossduels')
+                level = getvalue(pair[1][0].id, 'level', 'bossduels')
                 if level == 'easy':
                     maxhp = 100
                 elif level == 'normal':
