@@ -1044,18 +1044,18 @@ async def on_message(message):
                 player.insert(0, message.author)
                 bot = getvalue(message.author.id, ['boss', 'Bhp', 'Brocktails'], 'bossduels')
                 level = getvalue(message.author.id, 'level', 'bossduels')
-                reflect = getvalue(message.author.id, 'reflect', 'bossduels')
+                reflected = getvalue(message.author.id, 'reflect', 'bossduels')
 
                 if message.content == '!rocktail':
                     winner = await rocktail(player, bot, player, channel, 'boss')
                 elif message.content == '!whip':
-                    winner = await whip(player, bot, player, channel, 'boss', reflect)
+                    winner = await whip(player, bot, player, channel, 'boss', reflected)
                 elif message.content == '!blood':
-                    winner = await blood(player, bot, player, channel, 'boss', reflect)
+                    winner = await blood(player, bot, player, channel, 'boss', reflected)
                 else:
                     await channel.send('That is not a valid move!', delete_after = 4)
 
-                if reflect:
+                if reflected:
                     c.execute('UPDATE bossduels SET reflect={} WHERE id={}'.format(False, message.author.id))
                     await message.channel.send(bot[0] + ' is no longer reflecting damage back at you', delete_after=2.5)
                     await asyncio.sleep(2.5)
@@ -1077,7 +1077,7 @@ async def on_message(message):
                     else:
                         if bot[1] > 300:
                             if random.randint(1, 2) == 1:
-                                winner = await reflect(bot, player, channel)
+                                await reflect(bot, player, channel)
                             else:
                                 winner = await attack(bot, player, 40, channel)
                         else:
