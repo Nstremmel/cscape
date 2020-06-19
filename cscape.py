@@ -166,7 +166,7 @@ def formatfromk(amount):
 
 
 def hpupdate(user, opponent, duelType, words):
-    if user[0] == 'CryptoScape Bot' or user[0] in ['Commander Zilyana', "K'ril Tsutsaroth", "Kree'arra", 'General Graardor', 'King Black Dragon']:
+    if user[0] == 'CryptoScape Bot' or user[0] in ['Commander Zilyana', "K'ril Tsutsaroth", "Kree'arra", 'General Graardor', 'The King Black Dragon']:
         url = str(opponent[0].guild.icon_url)
         pair = [user, opponent]
     else:
@@ -238,7 +238,7 @@ def updateDuel(updater, userid, duelType):
             else:
                 columns = ['Php', 'Procktails', 'Pfrozen']
         elif duelType == 'boss':
-            if user in ['Commander Zilyana', "K'ril Tsutsaroth", "Kree'arra", 'General Graardor', 'King Black Dragon']:
+            if user in ['Commander Zilyana', "K'ril Tsutsaroth", "Kree'arra", 'General Graardor', 'The King Black Dragon']:
                 columns = ['Bhp', 'Brocktails']
             else:
                 columns = ['Php', 'Procktails']
@@ -842,7 +842,7 @@ async def on_message(message):
         currency = (message.content).split(' ')[2]
         current = getvalue(message.author.id, currency, 'rsmoney')
         bet = formatok(message.content.split(' ')[1])
-        bosses = ['Commander Zilyana', "K'ril Tsutsaroth", "Kree'arra", 'General Graardor', 'King Black Dragon']
+        bosses = ['Commander Zilyana', "K'ril Tsutsaroth", "Kree'arra", 'General Graardor', 'The King Black Dragon']
         if isenough(bet, currency):
             if current >= bet:
                 try:
@@ -909,7 +909,7 @@ async def on_message(message):
                 turn = getvalue(message.author.id, 'turn', duelType + 'duels')
 
             def win(winner, duelType):
-                if winner == 'CryptoScape Bot' or winner in ['Commander Zilyana', "K'ril Tsutsaroth", "Kree'arra", 'General Graardor', 'King Black Dragon']:
+                if winner == 'CryptoScape Bot' or winner in ['Commander Zilyana', "K'ril Tsutsaroth", "Kree'arra", 'General Graardor', 'The King Black Dragon']:
                     words = winner + ' won the duel.'
                 else:
                     if duelType == 'boss':
@@ -1066,30 +1066,30 @@ async def on_message(message):
                     elif level == 'normal':
                         if bot[1] > 100:
                             if random.randint(1, 3) == 1:
-                                await leach(bot, player, 15, 0.3, channel)
+                                winner = await leach(bot, player, 15, 0.3, channel)
                             else:
-                                await attack(bot, player, 30, channel)
+                                winner = await attack(bot, player, 25, channel)
                         else:
                             if random.randint(1, 3) == 1:
-                                await attack(bot, player, 25, channel)
+                                winner = await attack(bot, player, 20, channel)
                             else:
-                                await leach(bot, player, 20, 0.5, channel)
+                                winner = await leach(bot, player, 20, 0.5, channel)
                     else:
                         if bot[1] > 300:
                             if random.randint(1, 2) == 1:
-                                await reflect(bot, player, channel)
+                                winner = await reflect(bot, player, channel)
                             else:
-                                await attack(bot, player, 40, channel)
+                                winner = await attack(bot, player, 40, channel)
                         else:
                             if random.randint(1, 3) == 1:
-                                await attack(bot, player, 25, channel)
+                                winner = await attack(bot, player, 25, channel)
                             else:
-                                await leach(bot, player, 15, 2, channel)
+                                winner = await leach(bot, player, 15, 2, channel)
     
                     if winner != None:
                         await channel.send(win(winner, duelType))
                     else:
-                        await sent.edit(embed=hpupdate(bot, player, 'boss', 'It is your turn! Use `!rocktail`, `!dds`, or `!whip`.'))
+                        await sent.edit(embed=hpupdate(bot, player, 'boss', 'It is your turn! Use `!rocktail`, `!whip`, or `!blood`.'))
                 else:
                     await channel.send(win(winner, duelType))
 
