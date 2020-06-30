@@ -723,7 +723,7 @@ async def on_message(message):
         channel = client.get_channel(channelid)
         logo = get(client.emojis, name='crytoscapelogo')
         embed = discord.Embed(description='React to this message with ' + str(logo) + ' to create a **private room**.', color=1305146)
-        embed.set_author(name=str(channel.name), icon_url=str(message.guild.icon_url))
+        embed.set_author(name=str(channel.name).title(), icon_url=str(message.guild.icon_url))
         await channel.send(embed=embed)
     #######################################
     elif message.content.startswith('!53') or message.content.startswith('!50') or message.content.startswith('!75') or message.content.startswith('!95'):
