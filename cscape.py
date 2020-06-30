@@ -447,7 +447,7 @@ async def on_raw_reaction_add(payload):
     channel = client.get_channel(payload.channel_id)
     channelids = []
     for i in channel.guild.categories:
-        if i.id in [727294344633254002, 550703277117931521, 727294625559216168, 676872820772569119]:
+        if i.id in [727294344633254002, 550703277117931521, 727294625559216168, 676872820772569119, 701468989041279037]:
             for x in i.channels:
                 channelids.append(x.id)
     if channel.id in channelids and payload.emoji.id == 676988116451590226 and user.id != 479862852895899649:
