@@ -445,11 +445,11 @@ async def on_ready():
 async def on_raw_reaction_add(payload):
     user = client.get_user(payload.user_id)
     channel = client.get_channel(payload.channel_id)
-    category1 = get(channel.guild.categories, name = '🛒 rs services 🛒')
-    category2 = get(channel.guild.categories, name = '💰 RSPS Trade 💰')
     channelids = []
-    for channel1 in category1.channels + category2.channels:
-        channelids.append(channel1.id)
+    for i in channel.guild.categories:
+        if i.id in [727294344633254002, 550703277117931521, 727294625559216168, 676872820772569119]:
+            for x in i.channels:
+                channelids.append(x.id)
     if channel.id in channelids and payload.emoji.id == 676988116451590226 and user.id != 479862852895899649:
         channels = str(getvalue(user.id, 'channels', 'rsmoney'))
         if len(channels.split('|')) - 1 < 10:
