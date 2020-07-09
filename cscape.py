@@ -454,7 +454,7 @@ async def on_raw_reaction_add(payload):
         channels = str(getvalue(user.id, 'channels', 'rsmoney'))
         if len(channels.split('|')) - 1 < 10:
             category = get(channel.guild.categories, name = 'Tickets')
-            newChannel = await channel.guild.create_text_channel(channel.name + ' ' + str(user)[:-5], category=category)
+            newChannel = await channel.guild.create_text_channel(channel.name + ' ' + str(user)[:-5], overwrites=None, category=category)
             await newChannel.set_permissions(user, read_messages=True, send_messages=True, read_message_history=True)
             c.execute("UPDATE rsmoney SET channels='{}' WHERE id={}".format(channels + str(newChannel.id) + '|', user.id))
             embed = discord.Embed(description='<@' + str(user.id) + '>, this is your temporary private channel. You or a staff member can use `!close` when you are done to delete the channel.', color=11854069)
