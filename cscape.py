@@ -258,7 +258,7 @@ def updateDuel(updater, userid, duelType):
                 columns = ['Bhp', 'Brocktails', 'Bfrozen']
             else:
                 columns = ['Php', 'Procktails', 'Pfrozen']
-        elif duelType == 'range:'
+        elif duelType == 'range':
             if user == 'CryptoScape Bot':
                 columns = ['Bhp', 'Brocktails', 'Bknives']
             else:
