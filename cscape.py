@@ -72,7 +72,7 @@ c.execute("""CREATE TABLE mageduels (
                 )""")
 conn.commit()
 
-#c.execute("DROP TABLE rangeduels")
+c.execute("DROP TABLE rangeduels")
 c.execute("""CREATE TABLE rangeduels (
                 id bigint,
                 currency text,
@@ -918,6 +918,7 @@ async def on_message(message):
                         sent = await message.channel.send(embed=hpupdate(['CryptoScape Bot', 99, 2, False], [message.author, 99, 2, False], 'mage', 'New Game. Use `!rocktail`, `!ice`, or `!blood`.'))
                         c.execute('INSERT INTO mageduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, 1, 99, 2, False, 99, 2, False, sent.id, message.channel.id))
                     elif duelType == 'range':
+                        sent = await message.channel.send(embed=hpupdate(['CryptoScape Bot', 99, 3, 4], [message.author, 99, 3, 4], 'range', 'New Game. Use `!rocktail`, `!bow`, or `!knife`.'))
                         c.execute('INSERT INTO rangeduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, 1, 99, 3, 4, 99, 3, 4, sent.id, message.channel.id))
                     elif duelType == 'boss':
                         level = message.content.split(' ')[3]
