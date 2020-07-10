@@ -229,6 +229,10 @@ def hpupdate(user, opponent, duelType, words):
             embed.add_field(name=str(i[0]), value= "\n"+str(rocktail)+": "+str(i[2]) +
                                                         "\nFrozen: "+str(i[3]) +
                                                         "\nHP Left: "+str(i[1])+'/99 '+str(hp), inline=True)
+         elif duelType == 'range':
+            embed.add_field(name=str(i[0]), value= "\n"+str(rocktail)+": "+str(i[2]) +
+                                                        "\nKnives Left: "+str(i[3]) +
+                                                        "\nHP Left: "+str(i[1])+'/99 '+str(hp), inline=True)
         elif duelType == 'boss':
             embed.add_field(name=str(i[0]), value= "\n"+str(rocktail)+": "+str(i[2]) +
                                                         "\nHP Left: "+str(i[1])+'/'+str(maxhp)+' '+str(hp), inline=True)
@@ -254,6 +258,11 @@ def updateDuel(updater, userid, duelType):
                 columns = ['Bhp', 'Brocktails', 'Bfrozen']
             else:
                 columns = ['Php', 'Procktails', 'Pfrozen']
+        elif duelType == 'range:'
+            if user == 'CryptoScape Bot':
+                columns = ['Bhp', 'Brocktails', 'Bknives']
+            else:
+                columns = ['Php', 'Procktails', 'Pknives']
         elif duelType == 'boss':
             if user in ['Commander Zilyana', "K'ril Tsutsaroth", "Kree'arra", 'General Graardor', 'The King Black Dragon']:
                 columns = ['Bhp', 'Brocktails']
