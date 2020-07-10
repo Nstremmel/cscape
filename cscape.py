@@ -72,7 +72,7 @@ c.execute("""CREATE TABLE mageduels (
                 )""")
 conn.commit()
 
-c.execute("DROP TABLE rangeduels")
+#c.execute("DROP TABLE rangeduels")
 c.execute("""CREATE TABLE rangeduels (
                 id bigint,
                 currency text,
