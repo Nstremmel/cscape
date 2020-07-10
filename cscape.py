@@ -229,7 +229,7 @@ def hpupdate(user, opponent, duelType, words):
             embed.add_field(name=str(i[0]), value= "\n"+str(rocktail)+": "+str(i[2]) +
                                                         "\nFrozen: "+str(i[3]) +
                                                         "\nHP Left: "+str(i[1])+'/99 '+str(hp), inline=True)
-         elif duelType == 'range':
+        elif duelType == 'range':
             embed.add_field(name=str(i[0]), value= "\n"+str(rocktail)+": "+str(i[2]) +
                                                         "\nKnives Left: "+str(i[3]) +
                                                         "\nHP Left: "+str(i[1])+'/99 '+str(hp), inline=True)
