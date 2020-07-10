@@ -72,22 +72,39 @@ c.execute("""CREATE TABLE mageduels (
                 )""")
 conn.commit()
 
-c.execute("DROP TABLE bossduels")
-c.execute("""CREATE TABLE bossduels (
+c.execute("DROP TABLE rangeduels")
+c.execute("""CREATE TABLE rangeduels (
                 id bigint,
                 currency text,
                 bet integer,
-                boss text,
-                level text,
-                reflect boolean,
+                turn integer,
                 Php integer,
                 Procktails integer,
+                Pknives integer,
                 Bhp integer,
                 Brocktails integer,
+                Bknives integer,
                 messageid bigint,
                 channelid text
                 )""")
 conn.commit()
+
+# c.execute("DROP TABLE bossduels")
+# c.execute("""CREATE TABLE bossduels (
+#                 id bigint,
+#                 currency text,
+#                 bet integer,
+#                 boss text,
+#                 level text,
+#                 reflect boolean,
+#                 Php integer,
+#                 Procktails integer,
+#                 Bhp integer,
+#                 Brocktails integer,
+#                 messageid bigint,
+#                 channelid text
+#                 )""")
+# conn.commit()
 
 client = discord.Client()
 
@@ -417,6 +434,47 @@ async def blood(user, opponent, player, channel, duelType, reflect):
         return user[0]
     elif user[1] < 1:
         return opponent[0]
+    else:
+        return None
+
+async def bow(user, opponent, player, channel):
+    sentid = getvalue(player[0].id, 'messageid', 'rangeduels')
+    sent = await channel.fetch_message(sentid)
+    bow = get(client.emojis, name='bow')
+    hit = random.randint(0, 20)
+    opponent[1] -= hit
+    if opponent[1] < 0:
+        opponent[1] = 0
+    words = str(user[0]) + ' has hit ' + str(opponent[0]) + ' with ' + str(bow) + ' and dealt **' + str(hit) + '** damage.'
+    await channel.send(file=discord.File('bow.gif', filename='bow.gif'), delete_after = 2.5)
+    await sent.edit(embed=hpupdate(user, opponent, 'range', words))
+    await asyncio.sleep(2.5)
+    updateDuel(opponent, player[0].id, 'range')
+    if opponent[1] < 1:
+        return user[0]
+    else:
+        return None
+
+async def knife(user, opponent, player, channel):
+    sentid = getvalue(player[0].id, 'messageid', 'rangeduels')
+    sent = await channel.fetch_message(sentid)
+    knife = get(client.emojis, name='knife')
+    if user[2] < 1:
+        await channel.send('You are out of ' + str(knife) + '. Please use a different move.', delete_after = 3.0)
+    else:
+        user[3] -= 1
+        hit = random.randint(5, 25)
+        opponent[1] -= hit
+        if opponent[1] < 0:
+            opponent[1] = 0
+        words = str(user[0]) + ' has hit ' + str(opponent[0]) + ' with ' + str(knife) + ' and dealt **' + str(hit) + '** damage.'
+        await channel.send(file=discord.File('knife.gif', filename='knife.gif'), delete_after = 2.5)
+        await sent.edit(embed=hpupdate(user, opponent, 'range', words))
+        await asyncio.sleep(2.5)
+        updateDuel(user, player[0].id, 'range')
+        updateDuel(opponent, player[0].id, 'range')
+    if opponent[1] < 1:
+        return user[0]
     else:
         return None
 ##############################################################################################################
@@ -834,7 +892,7 @@ async def on_message(message):
     #     except:
     #         await message.channel.send('An **error** has occurred. Make sure you use `!flower (Amount) (hot, cold, red, orange, yellow, green, blue, or purple)`.')
     #######################################
-    elif message.content.startswith('!meleduel') or message.content.startswith('!mageduel') or message.content.startswith('!boss'):
+    elif message.content.startswith('!meleduel') or message.content.startswith('!mageduel') or message.content.startswith('!rangeduel'):# or message.content.startswith('!boss'):
         #try:
         duelType = (message.content).split(' ')[0][1:-4]
         if duelType == '':
@@ -860,7 +918,7 @@ async def on_message(message):
                         sent = await message.channel.send(embed=hpupdate(['CryptoScape Bot', 99, 2, False], [message.author, 99, 2, False], 'mage', 'New Game. Use `!rocktail`, `!ice`, or `!blood`.'))
                         c.execute('INSERT INTO mageduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, 1, 99, 2, False, 99, 2, False, sent.id, message.channel.id))
                     elif duelType == 'range':
-                        None
+                        c.execute('INSERT INTO rangeduels VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (message.author.id, currency, bet, 1, 99, 3, 4, 99, 3, 4, sent.id, message.channel.id))
                     elif duelType == 'boss':
                         level = message.content.split(' ')[3]
                         if level == 'easy':
@@ -893,11 +951,16 @@ async def on_message(message):
                 duelType = 'mage'
             except:
                 try:
-                    c.execute('SELECT Php FROM bossduels WHERE id={}'.format(message.author.id))
+                    c.execute('SELECT Php FROM rangeduels WHERE id={}'.format(message.author.id))
                     tester = int(c.fetchone()[0])
-                    duelType = 'boss'
+                    duelType = 'range'
                 except:
-                    inDuel = False
+                    try:
+                        c.execute('SELECT Php FROM bossduels WHERE id={}'.format(message.author.id))
+                        tester = int(c.fetchone()[0])
+                        duelType = 'boss'
+                    except:
+                        inDuel = False
 
         if inDuel:
             channelid = getvalue(message.author.id, 'channelid', duelType + 'duels')
@@ -1036,6 +1099,38 @@ async def on_message(message):
                     if winner != None:
                         await channel.send(win(winner, duelType))
                     await sent.edit(embed=hpupdate(bot, player, 'mage', 'It is your turn! Use `!rocktail`, `!ice`, or `!blood`.'))
+                else:
+                    await channel.send(win(winner, duelType))
+
+            elif duelType == 'range':
+                player = getvalue(message.author.id, ['Php', 'Procktails', 'Pknives'], 'rangeduels')
+                player.insert(0, message.author)
+                bot = getvalue(message.author.id, ['Bhp', 'Brocktails', 'Bknives'], 'rangeduels')
+                bot.insert(0, 'CryptoScape Bot')
+
+                if (turn == 1 and random.randint(0, 1) == 1) or turn > 1:
+                    if message.content == '!rocktail':
+                        winner = await rocktail(player, bot, player, channel, 'range')
+                    elif message.content == '!bow':
+                        winner = await bow(player, bot, player, channel)
+                    elif message.content == '!knife':
+                        winner = await knife(player, bot, player, channel)
+                    else:
+                        await channel.send('That is not a valid move!', delete_after = 4)
+                else:
+                    await channel.send('CryptoScape Bot will go first!', delete_after = 4)
+
+                if winner == None:
+                    if bot[1] < 30 and bot[2] > 0:
+                        winner = await rocktail(bot, player, player, channel, 'range')
+                    elif bot[3] > 0:
+                        winner = await knife(bot, player, player, channel)
+                    else:
+                        winner = await bow(bot, player, player, channel)
+
+                    if winner != None:
+                        await channel.send(win(winner, duelType))
+                    await sent.edit(embed=hpupdate(bot, player, 'range', 'It is your turn! Use `!rocktail`, `!bow`, or `!knife`.'))
                 else:
                     await channel.send(win(winner, duelType))
 
